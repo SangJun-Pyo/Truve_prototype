@@ -1,0 +1,86 @@
+[
+  {
+    "id": "fnd_green-earth",
+    "name": "그린어스 얼라이언스",
+    "category": "climate",
+    "region": "KR",
+    "description": "도심 숲 조성과 탄소 저감 프로젝트를 운영하는 환경 재단입니다.",
+    "tags": ["탄소중립", "숲", "도시환경"],
+    "trustMetrics": {
+      "auditedAt": "2026-01-15",
+      "proofCoveragePct": 92,
+      "updateCadenceDays": 14,
+      "verificationLevel": "verified"
+    }
+  },
+  {
+    "id": "fnd_blue-ocean",
+    "name": "블루오션 레스큐",
+    "category": "climate",
+    "region": "APAC",
+    "description": "해양 플라스틱 수거와 해양 생태 복원을 지원하는 단체입니다.",
+    "tags": ["해양", "플라스틱", "정화"],
+    "trustMetrics": {
+      "auditedAt": "2025-12-20",
+      "proofCoveragePct": 88,
+      "updateCadenceDays": 21,
+      "verificationLevel": "verified"
+    }
+  },
+  {
+    "id": "fnd_next-class",
+    "name": "넥스트클래스 재단",
+    "category": "education",
+    "region": "KR",
+    "description": "교육 격차 해소를 위해 멘토링과 장학 프로그램을 운영합니다.",
+    "tags": ["교육", "장학", "멘토링"],
+    "trustMetrics": {
+      "auditedAt": "2026-02-01",
+      "proofCoveragePct": 95,
+      "updateCadenceDays": 7,
+      "verificationLevel": "premium"
+    }
+  },
+  {
+    "id": "fnd_open-health",
+    "name": "오픈헬스 파트너스",
+    "category": "health",
+    "region": "Global",
+    "description": "의료 접근이 어려운 지역에 이동 진료와 필수 의약품을 지원합니다.",
+    "tags": ["의료", "진료", "보건"],
+    "trustMetrics": {
+      "auditedAt": "2025-11-03",
+      "proofCoveragePct": 84,
+      "updateCadenceDays": 30,
+      "verificationLevel": "basic"
+    }
+  },
+  {
+    "id": "fnd_animal-care",
+    "name": "애니멀케어 네트워크",
+    "category": "animal",
+    "region": "KR",
+    "description": "유기동물 구조와 보호소 운영, 입양 연계를 지원합니다.",
+    "tags": ["동물복지", "구조", "입양"],
+    "trustMetrics": {
+      "auditedAt": "2026-01-05",
+      "proofCoveragePct": 90,
+      "updateCadenceDays": 10,
+      "verificationLevel": "verified"
+    }
+  },
+  {
+    "id": "fnd_relief-now",
+    "name": "릴리프나우 코얼리션",
+    "category": "humanitarian",
+    "region": "Global",
+    "description": "재난 발생 시 긴급 구호물자와 복구 지원을 수행합니다.",
+    "tags": ["재난", "구호", "긴급지원"],
+    "trustMetrics": {
+      "auditedAt": "2026-02-12",
+      "proofCoveragePct": 87,
+      "updateCadenceDays": 5,
+      "verificationLevel": "premium"
+    }
+  }
+]

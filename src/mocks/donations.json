@@ -1,0 +1,48 @@
+[
+  {
+    "id": "dnt_seed_001",
+    "userId": "usr_demo_001",
+    "donatedAt": "2026-04-05T09:30:00.000Z",
+    "amountKrw": 100000,
+    "allocations": [
+      { "foundationId": "fnd_green-earth", "ratioPct": 50 },
+      { "foundationId": "fnd_next-class", "ratioPct": 50 }
+    ],
+    "paymentStatus": "paid",
+    "proofStatus": "recorded",
+    "nftStatus": "minted",
+    "settlementStatus": "done",
+    "txHash": "tx_a17bc91ef003",
+    "proofNftId": "proof_7a21cd33"
+  },
+  {
+    "id": "dnt_seed_002",
+    "userId": "usr_demo_001",
+    "donatedAt": "2026-04-10T13:12:00.000Z",
+    "amountKrw": 50000,
+    "allocations": [
+      { "foundationId": "fnd_relief-now", "ratioPct": 100 }
+    ],
+    "paymentStatus": "paid",
+    "proofStatus": "recorded",
+    "nftStatus": "minted",
+    "settlementStatus": "scheduled",
+    "txHash": "tx_f9d30ab8be10",
+    "proofNftId": "proof_901ccd71"
+  },
+  {
+    "id": "dnt_seed_003",
+    "userId": "usr_demo_002",
+    "donatedAt": "2026-04-11T07:40:00.000Z",
+    "amountKrw": 70000,
+    "allocations": [
+      { "foundationId": "fnd_animal-care", "ratioPct": 60 },
+      { "foundationId": "fnd_open-health", "ratioPct": 40 }
+    ],
+    "paymentStatus": "pending",
+    "proofStatus": "pending",
+    "nftStatus": "pending",
+    "settlementStatus": "scheduled"
+  }
+]
+

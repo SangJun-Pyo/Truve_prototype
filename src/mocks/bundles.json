@@ -1,0 +1,33 @@
+[
+  {
+    "id": "bdl_balanced-impact",
+    "name": "균형 임팩트 40/30/30",
+    "summary": "환경·교육·긴급구호를 균형 있게 담은 기본 번들",
+    "theme": "balanced",
+    "allocations": [
+      { "foundationId": "fnd_green-earth", "ratioPct": 40 },
+      { "foundationId": "fnd_next-class", "ratioPct": 30 },
+      { "foundationId": "fnd_relief-now", "ratioPct": 30 }
+    ]
+  },
+  {
+    "id": "bdl_climate-focus",
+    "name": "환경 집중 70/30",
+    "summary": "기후·해양 복원 중심의 환경 특화 번들",
+    "theme": "climate",
+    "allocations": [
+      { "foundationId": "fnd_green-earth", "ratioPct": 70 },
+      { "foundationId": "fnd_blue-ocean", "ratioPct": 30 }
+    ]
+  },
+  {
+    "id": "bdl_local-care",
+    "name": "로컬 케어 50/50",
+    "summary": "국내 교육/동물 복지 중심의 로컬 번들",
+    "theme": "local",
+    "allocations": [
+      { "foundationId": "fnd_next-class", "ratioPct": 50 },
+      { "foundationId": "fnd_animal-care", "ratioPct": 50 }
+    ]
+  }
+]

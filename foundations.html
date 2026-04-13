@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Truve | 재단 탐색</title>
+    <link rel="stylesheet" href="./assets/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <div id="top-nav"></div>
+
+      <section class="hero">
+        <p class="hero-eyebrow">FOUNDATION EXPLORER</p>
+        <h2 class="hero-title">등록된 재단을 비교하고 책가방에 담기</h2>
+        <p class="hero-copy">카테고리/키워드로 빠르게 찾아보고, 상세 정보를 확인한 뒤 기부 탭으로 이동할 수 있습니다.</p>
+      </section>
+
+      <section class="card">
+        <div class="search-row">
+          <label class="field">
+            <span>검색</span>
+            <input id="search-input" type="search" placeholder="재단명, 설명, 태그 검색" />
+          </label>
+          <label class="field">
+            <span>카테고리</span>
+            <select id="category-select">
+              <option value="">전체</option>
+              <option value="climate">환경</option>
+              <option value="education">교육</option>
+              <option value="health">의료</option>
+              <option value="animal">동물</option>
+              <option value="humanitarian">긴급구호</option>
+            </select>
+          </label>
+        </div>
+        <div id="foundations-grid" class="foundation-grid mt-12"></div>
+      </section>
+    </main>
+
+    <script type="module" src="./src/main/foundations.ts"></script>
+  </body>
+</html>

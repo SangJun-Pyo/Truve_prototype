@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Truve | 내 기부 Status</title>
+    <link rel="stylesheet" href="./assets/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <div id="top-nav"></div>
+
+      <section class="hero">
+        <p class="hero-eyebrow">MY DONATION STATUS</p>
+        <h2 class="hero-title">내 기부 처리 상태와 증빙을 한눈에</h2>
+      </section>
+
+      <section class="card">
+        <div id="status-summary" class="status-summary"></div>
+        <div id="status-timeline" class="timeline mt-12"></div>
+      </section>
+
+      <section class="card mt-16">
+        <h3 class="section-title">최근 기부 내역</h3>
+        <div id="status-table"></div>
+      </section>
+    </main>
+
+    <script type="module" src="./src/main/status.ts"></script>
+  </body>
+</html>

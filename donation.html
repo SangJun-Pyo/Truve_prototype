@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Truve | 기부 담기</title>
+    <link rel="stylesheet" href="./assets/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <div id="top-nav"></div>
+
+      <section class="hero">
+        <p class="hero-eyebrow">MOCK PROTOTYPE</p>
+        <h2 class="hero-title">수강신청 책가방처럼 기부를 담아보세요</h2>
+        <p class="hero-copy">
+          재단 단품과 ETF형 번들을 선택하고, 비율을 조정한 뒤 한 번에 기부할 수 있습니다.
+        </p>
+      </section>
+
+      <div class="page-grid page-grid--donation">
+        <section class="card">
+          <div class="section-head">
+            <h3 class="section-title">재단 단품</h3>
+            <p class="section-desc">원하는 재단을 직접 선택해 책가방에 담으세요.</p>
+          </div>
+          <div id="foundation-list" class="stack gap-12"></div>
+        </section>
+
+        <section class="card">
+          <div class="section-head">
+            <h3 class="section-title">ETF형 번들</h3>
+            <p class="section-desc">테마별 분산 기부 포트폴리오를 바로 적용할 수 있습니다.</p>
+          </div>
+          <div id="bundle-list" class="stack gap-12"></div>
+        </section>
+
+        <aside class="card card--accent">
+          <div class="section-head">
+            <h3 class="section-title">내 기부 책가방</h3>
+            <p class="section-desc">비율 합계는 100%여야 기부가 가능합니다.</p>
+          </div>
+
+          <section class="wallet-box">
+            <h4 class="section-title section-title--sm">Xaman 지갑 연결 (Testnet)</h4>
+            <p class="section-desc">
+              프로토타입에서는 Xaman API 키/시크릿을 직접 입력해 SignIn을 요청합니다.
+            </p>
+            <label class="field mt-12">
+              <span>Xaman API Key</span>
+              <input id="xaman-api-key" type="text" placeholder="xApp API Key" />
+            </label>
+            <label class="field mt-12">
+              <span>Xaman API Secret</span>
+              <input id="xaman-api-secret" type="password" placeholder="xApp API Secret" />
+            </label>
+            <button id="xaman-connect-btn" class="btn btn-secondary mt-12 w-full" type="button">
+              Xaman 연결(SignIn)
+            </button>
+            <div id="wallet-status" class="notice mt-12">지갑이 아직 연결되지 않았습니다.</div>
+            <div id="xaman-qr-wrap" class="xaman-qr-wrap"></div>
+          </section>
+
+          <label class="field">
+            <span>총 기부 금액 (원)</span>
+            <input id="donation-amount" type="number" min="1000" step="1000" value="100000" />
+          </label>
+
+          <div id="cart-items" class="stack gap-10"></div>
+
+          <div class="inline-actions">
+            <button id="rebalance-btn" class="btn btn-secondary" type="button">자동 균등 배분</button>
+            <button id="clear-btn" class="btn btn-ghost" type="button">비우기</button>
+          </div>
+
+          <div id="allocation-summary" class="notice"></div>
+
+          <div class="section-head mt-16">
+            <h4 class="section-title section-title--sm">예상 분배 미리보기</h4>
+          </div>
+          <div id="preview" class="preview-box">기부 금액과 비율을 설정하면 미리보기가 표시됩니다.</div>
+
+          <button id="submit-btn" class="btn btn-primary w-full mt-16" type="button">
+            기부 실행 (목업)
+          </button>
+        </aside>
+      </div>
+    </main>
+
+    <script type="module" src="./src/main/donation.ts"></script>
+  </body>
+</html>

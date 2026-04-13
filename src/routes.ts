@@ -1,4 +1,4 @@
-export type AppRouteKey = "donation" | "foundations" | "about" | "status";
+export type AppRouteKey = "donation" | "foundations" | "governance" | "about" | "status";
 
 export interface AppRoute {
   key: AppRouteKey;
@@ -25,6 +25,12 @@ export const routes: Record<AppRouteKey, AppRoute> = {
     path: "/about",
     title: "About Truve",
     navLabel: "About",
+  },
+  governance: {
+    key: "governance",
+    path: "/governance",
+    title: "Governance Voting",
+    navLabel: "Governance",
   },
   status: {
     key: "status",

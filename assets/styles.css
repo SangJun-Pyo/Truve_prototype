@@ -201,7 +201,9 @@ body {
 .foundation-card,
 .bundle-card,
 .cart-item,
-.timeline-item {
+.timeline-item,
+.vote-option,
+.result-item {
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 12px;
@@ -271,6 +273,11 @@ select {
   font-weight: 700;
   cursor: pointer;
   text-decoration: none;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .btn-primary {

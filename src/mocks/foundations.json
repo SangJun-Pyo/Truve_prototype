@@ -70,6 +70,20 @@
     }
   },
   {
+    "id": "fnd_truve-community",
+    "name": "Truve 커뮤니티 펀드",
+    "category": "humanitarian",
+    "region": "KR",
+    "description": "플랫폼 운영 고도화와 공익 실험 프로젝트를 위한 Truve 자체 재단 트랙입니다.",
+    "tags": ["truve", "커뮤니티", "공익실험"],
+    "trustMetrics": {
+      "auditedAt": "2026-04-13",
+      "proofCoveragePct": 80,
+      "updateCadenceDays": 14,
+      "verificationLevel": "verified"
+    }
+  },
+  {
     "id": "fnd_relief-now",
     "name": "릴리프나우 코얼리션",
     "category": "humanitarian",

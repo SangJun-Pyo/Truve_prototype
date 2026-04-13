@@ -7,6 +7,7 @@ type Tab = {
 const TABS: Tab[] = [
   { id: "donation", label: "기부 담기", href: "./donation.html" },
   { id: "foundations", label: "재단 탐색", href: "./foundations.html" },
+  { id: "governance", label: "거버넌스 투표", href: "./governance.html" },
   { id: "about", label: "Truve 설명", href: "./about.html" },
   { id: "status", label: "내 기부 Status", href: "./status.html" },
 ];

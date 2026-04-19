@@ -1,0 +1,71 @@
+﻿<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Truve | 기부 탐색</title>
+    <script type="module" crossorigin src="/assets/foundations-BWYb-LNX.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-DfS4ul37.js">
+    <link rel="modulepreload" crossorigin href="/assets/provider-BwND5Fqf.js">
+    <link rel="modulepreload" crossorigin href="/assets/cart-poU_UKBB.js">
+    <link rel="modulepreload" crossorigin href="/assets/nav-CdH8gFKt.js">
+    <link rel="stylesheet" crossorigin href="/assets/styles-OiM_4i1h.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <div id="top-nav"></div>
+
+      <header class="page-header">
+        <h1>기부 탐색</h1>
+        <p class="subtitle">마음에 드는 재단을 선택하고 장바구니에 담아 기부를 설계하세요.</p>
+      </header>
+
+      <section class="controls-bar">
+        <div class="search-wrapper">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <label class="field">
+            <input id="search-input" type="search" placeholder="재단명, 설명, 태그 검색" />
+          </label>
+        </div>
+        <div class="tabs">
+          <button id="tab-foundation" class="tab-btn active" type="button">단일 재단</button>
+          <button id="tab-bundle" class="tab-btn" type="button">ETF 묶음</button>
+        </div>
+      </section>
+
+      <section class="controls-bar controls-bar--sub">
+        <label class="field field-inline">
+          <span>카테고리</span>
+          <div class="select-wrapper">
+            <select id="category-select">
+              <option value="">전체</option>
+              <option value="climate">환경</option>
+              <option value="education">아동/교육</option>
+              <option value="health">의료</option>
+              <option value="animal">동물</option>
+              <option value="humanitarian">긴급구호</option>
+            </select>
+          </div>
+        </label>
+      </section>
+
+      <div id="foundations-grid" class="grid foundation-grid"></div>
+      <div id="bundles-grid" class="grid foundation-grid hidden"></div>
+    </main>
+
+    <a id="cart-fab" class="cart-container floating-cart" href="./donation.html" aria-label="기부 장바구니">
+      <svg class="cart-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <path d="M16 10a4 4 0 0 1-8 0"></path>
+      </svg>
+      <div id="cart-count" class="cart-badge">0</div>
+    </a>
+
+    <div id="fly-layer" class="fly-layer" aria-hidden="true"></div>
+
+  </body>
+</html>

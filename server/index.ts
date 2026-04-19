@@ -2,14 +2,15 @@ import cors from "cors";
 import dotenv from "dotenv";
 dotenv.config();
 import express from "express";
+import path from "path";
 import { PrismaClient } from "@prisma/client";
 import { Client } from "xrpl";
-
 const prisma = new PrismaClient();
 
 const app = express();
-const port = Number(process.env.API_PORT ?? 8787);
+const port = Number(process.env.API_PORT ?? process.env.PORT ?? 8787);
 const frontendOrigin = process.env.FRONTEND_ORIGIN ?? "http://localhost:5173";
+const isProd = process.env.NODE_ENV === "production";
 const xrplTestnetWs = process.env.XRPL_TESTNET_WS ?? "wss://s.altnet.rippletest.net:51233";
 const xamanApiKey = process.env.XAMAN_API_KEY;
 const xamanApiSecret = process.env.XAMAN_API_SECRET;
@@ -378,6 +379,15 @@ app.get("/api/db/governance/:proposalId", async (req, res) => {
     res.status(500).json({ error: error instanceof Error ? error.message : "투표 집계 실패" });
   }
 });
+
+// ── 프로덕션: dist/ 정적 파일 서빙 ────────────────────────────────────
+if (isProd) {
+  const distPath = path.resolve(process.cwd(), "dist");
+  app.use(express.static(distPath));
+  app.get("*", (_req, res) => {
+    res.sendFile(path.join(distPath, "index.html"));
+  });
+}
 
 app.listen(port, () => {
   console.log(`[truve-api] listening on http://localhost:${port}`);

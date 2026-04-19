@@ -6,7 +6,10 @@
       "Bash(kill %1)",
       "Bash(curl -s -X POST http://localhost:8787/api/db/users -H \"Content-Type: application/json\" -d '{\"xrplAccount\":\"rTestAccount123\",\"displayName\":\"테스트유저\"}')",
       "Bash(findstr :8787)",
-      "Bash(cmd *)"
+      "Bash(cmd *)",
+      "Bash(npm uninstall *)",
+      "Bash(node -e \"const d=require\\('./package-lock.json'\\); const pkgs=d.packages||{}; const v7=Object.entries\\(pkgs\\).filter\\(\\([k,v]\\)=>v.version&&v.version.startsWith\\('7.'\\)&&k.includes\\('prisma'\\)\\); console.log\\(v7.length===0?'✅ No prisma v7 found':'❌ Found v7:', v7\\)\")",
+      "Bash(npm run *)"
     ]
   }
 }

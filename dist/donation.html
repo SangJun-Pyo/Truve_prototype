@@ -1,0 +1,559 @@
+﻿<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Truve | 기부 포트폴리오 설정</title>
+    <style>
+      .portfolio-page {
+        --bg-app: #f7f8fa;
+        --bg-surface: #ffffff;
+        --text-primary: #111111;
+        --text-secondary: #8a8d93;
+        --text-tertiary: #a0a4ab;
+        --accent-black: #111111;
+        --accent-white: #ffffff;
+        --tag-bg-orange: #fff0e6;
+        --tag-text-orange: #e86f4a;
+        --radius-card: 20px;
+        --radius-pill: 999px;
+        --radius-button: 8px;
+        --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.02);
+        --shadow-elevated: 0 12px 40px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+        --status-success: #10b981;
+        --status-success-bg: #d1fae5;
+        --status-warning: #f59e0b;
+        --status-warning-bg: #fef3c7;
+        --border-color: #eaebee;
+      }
+
+      .portfolio-page body,
+      body.portfolio-page {
+        background: var(--bg-app);
+      }
+
+      .portfolio-nav {
+        background-color: var(--bg-surface);
+        box-shadow: 0 1px 10px rgba(0, 0, 0, 0.03);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        padding: 16px 24px;
+      }
+
+      .portfolio-nav-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .portfolio-logo {
+        font-weight: 700;
+        font-size: 20px;
+        letter-spacing: -0.5px;
+        color: var(--text-primary);
+        text-decoration: none;
+      }
+
+      .portfolio-back-link {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 14px;
+      }
+
+      .portfolio-main {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 32px 24px;
+      }
+
+      .portfolio-page-header {
+        margin-bottom: 32px;
+      }
+
+      .portfolio-page-header h1 {
+        font-size: 32px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin-bottom: 8px;
+      }
+
+      .portfolio-subtitle {
+        color: var(--text-secondary);
+        font-size: 16px;
+      }
+
+      .config-layout {
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        gap: 32px;
+        align-items: start;
+      }
+
+      @media (max-width: 900px) {
+        .config-layout {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .items-container {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+
+      .config-card {
+        background-color: var(--bg-surface);
+        border-radius: var(--radius-card);
+        padding: 24px;
+        box-shadow: var(--shadow-card);
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .card-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+      }
+
+      .card-info-group {
+        display: flex;
+        gap: 16px;
+        flex: 1;
+      }
+
+      .card-visual-small {
+        width: 64px;
+        height: 64px;
+        border-radius: 12px;
+        flex-shrink: 0;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .visual-pattern {
+        position: absolute;
+        inset: 0;
+        opacity: 0.1;
+        background-image: radial-gradient(var(--accent-black) 1px, transparent 1px);
+        background-size: 8px 8px;
+      }
+
+      .card-title-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 4px;
+      }
+
+      .card-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      .card-tag {
+        background-color: var(--tag-bg-orange);
+        color: var(--tag-text-orange);
+        font-size: 11px;
+        font-weight: 700;
+        padding: 4px 8px;
+        border-radius: 6px;
+      }
+
+      .card-desc {
+        font-size: 13px;
+        color: var(--text-secondary);
+      }
+
+      .remove-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-tertiary);
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 50%;
+      }
+
+      .remove-btn:hover {
+        background: #f0f1f3;
+        color: #ef4444;
+      }
+
+      .allocation-area {
+        background-color: var(--bg-app);
+        border-radius: 12px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .allocation-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-secondary);
+      }
+
+      .allocation-controls {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .adjust-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background-color: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+      }
+
+      .slider-container {
+        flex: 1;
+      }
+
+      .allocation-slider {
+        -webkit-appearance: none;
+        width: 100%;
+        background: transparent;
+      }
+
+      .allocation-slider::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 6px;
+        background: var(--border-color);
+        border-radius: 99px;
+      }
+
+      .allocation-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        height: 20px;
+        width: 20px;
+        border-radius: 50%;
+        background: var(--bg-surface);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15), 0 0 0 2px var(--accent-black);
+        margin-top: -7px;
+      }
+
+      .percent-input-wrapper {
+        display: flex;
+        align-items: center;
+        background-color: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 4px 8px;
+        width: 70px;
+      }
+
+      .percent-input {
+        width: 100%;
+        border: none;
+        background: transparent;
+        font-family: inherit;
+        font-weight: 600;
+        font-size: 14px;
+        text-align: right;
+        box-shadow: none;
+        padding: 0;
+      }
+
+      .summary-panel {
+        position: sticky;
+        top: 100px;
+      }
+
+      .summary-card {
+        background-color: var(--bg-surface);
+        border-radius: var(--radius-card);
+        padding: 24px;
+        box-shadow: var(--shadow-elevated);
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .summary-title {
+        font-size: 20px;
+        font-weight: 700;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 16px;
+      }
+
+      .summary-section {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .section-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-secondary);
+      }
+
+      .amount-input-group {
+        display: flex;
+        align-items: center;
+        background-color: var(--bg-app);
+        border-radius: 12px;
+        padding: 12px 16px;
+      }
+
+      .amount-input-group input {
+        flex: 1;
+        border: none;
+        background: transparent;
+        font-size: 24px;
+        font-weight: 700;
+        box-shadow: none;
+        padding: 0;
+      }
+
+      .quick-amounts {
+        display: flex;
+        gap: 8px;
+      }
+
+      .quick-btn {
+        flex: 1;
+        background-color: var(--bg-app);
+        border: 1px solid transparent;
+        padding: 8px 0;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .preview-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+
+      .preview-item {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .preview-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 14px;
+      }
+
+      .preview-vals {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .preview-percent { color: var(--text-secondary); width: 42px; text-align: right; }
+      .preview-xrp { font-weight: 600; width: 80px; text-align: right; }
+
+      .mini-progress-bg {
+        width: 100%;
+        height: 4px;
+        background-color: var(--bg-app);
+        border-radius: 2px;
+      }
+
+      .mini-progress-fill { height: 100%; border-radius: 2px; }
+
+      .validation-box {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .validation-box.success { background-color: var(--status-success-bg); color: #065f46; }
+      .validation-box.warning { background-color: var(--status-warning-bg); color: #92400e; }
+
+      .onchain-card {
+        background-color: var(--bg-app);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .onchain-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 13px;
+      }
+
+      .status-badge {
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 99px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
+      .status-badge.error { background: #fee2e2; color: #b91c1c; }
+      .status-badge.success { background: var(--status-success-bg); color: #065f46; }
+
+      .cta-btn {
+        width: 100%;
+        background-color: var(--accent-black);
+        color: var(--accent-white);
+        border: none;
+        padding: 16px;
+        border-radius: var(--radius-pill);
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .cta-btn:disabled {
+        background-color: #eaebee;
+        color: var(--text-tertiary);
+        cursor: not-allowed;
+      }
+
+      .action-row {
+        display: flex;
+        gap: 8px;
+      }
+
+      .ghost-btn {
+        flex: 1;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        background: #fff;
+        padding: 10px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 48px 0;
+        color: var(--text-secondary);
+        background: var(--bg-surface);
+        border-radius: var(--radius-card);
+        border: 1px dashed var(--border-color);
+      }
+    </style>
+    <script type="module" crossorigin src="/assets/donation-DoG2Sp2j.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-DfS4ul37.js">
+    <link rel="modulepreload" crossorigin href="/assets/provider-BwND5Fqf.js">
+    <link rel="modulepreload" crossorigin href="/assets/cart-poU_UKBB.js">
+    <link rel="modulepreload" crossorigin href="/assets/wallet-Bo5h3zyX.js">
+    <link rel="modulepreload" crossorigin href="/assets/donations-D7ZvcxFw.js">
+    <link rel="modulepreload" crossorigin href="/assets/xrpl-7m6Y5567.js">
+    <link rel="stylesheet" crossorigin href="/assets/styles-OiM_4i1h.css">
+  </head>
+  <body class="portfolio-page">
+    <nav class="portfolio-nav">
+      <div class="portfolio-nav-container">
+        <a href="./foundations.html" class="portfolio-back-link">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          탐색으로 돌아가기
+        </a>
+        <a href="./foundations.html" class="portfolio-logo">Truve.</a>
+      </div>
+    </nav>
+
+    <main class="portfolio-main">
+      <header class="portfolio-page-header">
+        <h1>기부 포트폴리오 설정</h1>
+        <p class="portfolio-subtitle">선택한 재단 비율을 조정하고 온체인 실행을 준비하세요.</p>
+      </header>
+
+      <div class="config-layout">
+        <div class="items-container" id="items-container"></div>
+
+        <div class="summary-panel">
+          <div class="summary-card">
+            <h2 class="summary-title">실행 요약</h2>
+
+            <div class="summary-section">
+              <label class="section-label" for="total-amount">총 기부 금액</label>
+              <div class="amount-input-group">
+                <input type="number" id="total-amount" value="100" min="1" />
+                <span>XRP</span>
+              </div>
+              <div class="quick-amounts">
+                <button class="quick-btn" data-add="10" type="button">+10</button>
+                <button class="quick-btn" data-add="25" type="button">+25</button>
+                <button class="quick-btn" data-add="50" type="button">+50</button>
+                <button class="quick-btn" data-add="100" type="button">+100</button>
+              </div>
+            </div>
+
+            <div class="summary-section">
+              <label class="section-label">분배 미리보기</label>
+              <div class="preview-list" id="preview-list"></div>
+            </div>
+
+            <div class="validation-box success" id="validation-box">
+              <span>총 비율</span>
+              <span id="validation-total">100%</span>
+            </div>
+
+            <div class="onchain-card">
+              <div class="onchain-row"><span>Network</span><span>XRPL Testnet</span></div>
+              <div class="onchain-row"><span>Wallet</span><span id="wallet-status" class="status-badge error">NOT CONNECTED</span></div>
+              <div class="onchain-row"><span>Address</span><span id="wallet-address">-</span></div>
+              <div class="onchain-row"><span>Balance</span><span id="wallet-balance">-</span></div>
+              <div class="onchain-row"><span>Destination</span><span id="donation-destination">-</span></div>
+              <div class="onchain-row"><span>Status</span><span id="donation-tx-status">대기</span></div>
+            </div>
+
+            <div class="action-row">
+              <button id="xaman-connect-btn" class="ghost-btn" type="button">Xaman으로 연결</button>
+              <button id="xaman-disconnect-btn" class="ghost-btn" type="button">연결 해제</button>
+            </div>
+            <div id="xaman-qr-wrap" class="xaman-qr-wrap"></div>
+
+            <button class="cta-btn" id="execute-btn" disabled type="button">Xaman으로 기부 실행</button>
+
+            <div class="action-row">
+              <button id="rebalance-btn" class="ghost-btn" type="button">균등 배분</button>
+              <button id="clear-btn" class="ghost-btn" type="button">비우기</button>
+            </div>
+
+            <button id="proof-nft-btn" class="ghost-btn" type="button" disabled>Proof NFT 요청</button>
+            <div id="proof-nft-status" class="card-desc">Proof NFT 요청 대기</div>
+            <div id="donation-tx-result" class="card-desc">아직 제출된 트랜잭션이 없습니다.</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+  </body>
+</html>

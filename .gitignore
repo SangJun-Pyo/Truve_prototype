@@ -1,5 +1,5 @@
 node_modules/
-dist/
+# dist/ 는 Railway 배포용으로 커밋 (Railway Node 22.11에서 Vite 빌드 불가)
 dev-server.log
 .env
 .env.local

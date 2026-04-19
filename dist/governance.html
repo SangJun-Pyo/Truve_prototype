@@ -1,0 +1,53 @@
+﻿<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Truve | 거버넌스</title>
+    <script type="module" crossorigin src="/assets/governance-C2qWH2-2.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-DfS4ul37.js">
+    <link rel="modulepreload" crossorigin href="/assets/provider-BwND5Fqf.js">
+    <link rel="modulepreload" crossorigin href="/assets/wallet-Bo5h3zyX.js">
+    <link rel="modulepreload" crossorigin href="/assets/xrpl-7m6Y5567.js">
+    <link rel="modulepreload" crossorigin href="/assets/nav-CdH8gFKt.js">
+    <link rel="stylesheet" crossorigin href="/assets/styles-OiM_4i1h.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <div id="top-nav"></div>
+
+      <header class="page-header">
+        <h1>거버넌스 투표</h1>
+        <p class="subtitle">NFT 보유 기부자가 재단 방향성에 참여하는 투표 탭입니다.</p>
+      </header>
+
+      <section class="card">
+        <div id="governance-eligibility" class="notice"></div>
+        <div class="inline-actions mt-12">
+          <button id="governance-connect-btn" class="btn btn-secondary" type="button">Xaman으로 연결</button>
+          <button id="governance-disconnect-btn" class="btn btn-ghost" type="button">연결 해제</button>
+        </div>
+        <div id="governance-wallet-status" class="notice mt-12">지갑 미연결</div>
+        <div id="governance-qr-wrap" class="xaman-qr-wrap"></div>
+      </section>
+
+      <section class="card mt-16">
+        <h3 class="section-title">이번 라운드 안건</h3>
+        <p class="section-desc">다음 분기 커뮤니티 Treasury 우선 지원 재단을 1곳 선택하세요.</p>
+        <div id="governance-options" class="stack gap-12 mt-12"></div>
+      </section>
+
+      <section class="card mt-16">
+        <h3 class="section-title">실시간 결과</h3>
+        <div id="governance-results" class="stack gap-10 mt-12"></div>
+      </section>
+
+      <section class="card mt-16">
+        <h3 class="section-title">온체인 투표 기록</h3>
+        <div id="governance-tx-log" class="stack gap-10 mt-12"></div>
+      </section>
+    </main>
+
+  </body>
+</html>
+

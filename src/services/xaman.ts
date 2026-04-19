@@ -1,15 +1,18 @@
-export interface XamanPayloadCreateResponse {
+﻿export interface XamanPayloadCreateResponse {
   uuid: string;
   qrPngUrl: string;
   deepLink: string;
+  qr_url?: string;
+  next_url?: string;
 }
 
 export interface XamanPayloadStatusResponse {
-  uuid: string;
-  resolved: boolean;
   signed: boolean;
+  uuid?: string;
+  resolved?: boolean;
   expired?: boolean;
   account?: string;
+  address?: string;
   txHash?: string;
 }
 
@@ -70,8 +73,12 @@ export async function createMemoPayload(
 }
 
 export async function getPayloadStatus(uuid: string): Promise<XamanPayloadStatusResponse> {
-  const response = await fetch(`/api/xaman/payload/${uuid}`);
-  return parseJsonOrThrow(response);
+  const response = await fetch(`/api/xaman/status/${uuid}`);
+  const status = (await parseJsonOrThrow(response)) as XamanPayloadStatusResponse;
+  return {
+    ...status,
+    account: status.account ?? status.address,
+  };
 }
 
 export async function waitForPayloadResolution(
@@ -84,7 +91,7 @@ export async function waitForPayloadResolution(
 
   while (Date.now() - start < timeoutMs) {
     const status = await getPayloadStatus(uuid);
-    if (status.resolved) {
+    if (status.signed || status.resolved || status.expired) {
       return status;
     }
     await new Promise((resolve) => setTimeout(resolve, intervalMs));

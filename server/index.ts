@@ -61,6 +61,8 @@ function mapPayloadCreateResponse(payload: any) {
     uuid: payload.uuid,
     qrPngUrl: payload?.refs?.qr_png,
     deepLink: payload?.next?.always,
+    qr_url: payload?.refs?.qr_png,
+    next_url: payload?.next?.always,
   };
 }
 
@@ -74,7 +76,10 @@ app.post("/api/xaman/signin", async (_req, res) => {
       method: "POST",
       body: JSON.stringify({
         txjson: { TransactionType: "SignIn" },
-        options: { submit: false },
+        options: {
+          submit: false,
+          force_network: "TESTNET",
+        },
       }),
     });
     res.json(mapPayloadCreateResponse(payload));
@@ -169,6 +174,22 @@ app.get("/api/xaman/payload/:uuid", async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ error: error instanceof Error ? error.message : "Payload 조회 실패" });
+  }
+});
+
+app.get("/api/xaman/status/:uuid", async (req, res) => {
+  try {
+    const payload = await callXaman(`/payload/${req.params.uuid}`, { method: "GET" });
+    const signed = Boolean(payload?.meta?.signed);
+    res.json({
+      signed,
+      address: signed ? payload?.response?.account : undefined,
+      resolved: Boolean(payload?.meta?.resolved),
+      expired: Boolean(payload?.meta?.expired),
+      txHash: payload?.response?.txid,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error instanceof Error ? error.message : "Payload status 조회 실패" });
   }
 });
 

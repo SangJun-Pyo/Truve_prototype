@@ -2,6 +2,7 @@ import { xrpToDrops } from "xrpl";
 import type { BundleAllocation, DonationBundle, Foundation } from "../api";
 import { createRepositories } from "../api/provider";
 import { upsertLocalDonation, type LocalDonationRecord } from "../services/donations";
+import { upsertDbUser, saveDbDonation, patchDbDonation } from "../services/db";
 import { requestProofNftMintScaffold } from "../services/proofNft";
 import { getWalletSession, setWalletSession, clearWalletSession } from "../services/wallet";
 import {
@@ -434,6 +435,7 @@ async function connectXaman(): Promise<void> {
       connectedAt: new Date().toISOString(),
       lastPayloadUuid: payload.uuid,
     });
+    void upsertDbUser(resolved.account);
     clearXamanQrSection();
     updateWalletStatusFromSession();
   } catch (error) {
@@ -535,6 +537,21 @@ async function submitDonation(): Promise<void> {
     lastDonationRecord = donationRecord;
     renderTxResult(lastDonationRecord);
 
+    // DB 저장 (fire-and-forget)
+    void saveDbDonation({
+      xrplAccount: wallet.account,
+      amountKrw,
+      allocations,
+      txHash: resolved.txHash,
+      explorerUrl: validated.explorerUrl,
+    }).then((saved) => {
+      if (saved && lastDonationRecord) {
+        const withDbId: LocalDonationRecord = { ...lastDonationRecord, dbId: saved.id };
+        upsertLocalDonation(withDbId);
+        lastDonationRecord = withDbId;
+      }
+    });
+
     if (proofNftBtnEl) {
       proofNftBtnEl.disabled = false;
     }
@@ -585,6 +602,15 @@ async function requestProofNftScaffold(): Promise<void> {
     upsertLocalDonation(nextRecord);
     lastDonationRecord = nextRecord;
     renderTxResult(nextRecord);
+
+    // DB 업데이트 (fire-and-forget)
+    if (nextRecord.dbId) {
+      void patchDbDonation(nextRecord.dbId, {
+        nftStatus: patch.nftStatus,
+        proofNftId: patch.proofNftId ?? null,
+        proofStatus: "recorded",
+      });
+    }
 
     if (result.txHash) {
       proofNftStatusEl.className = "notice mt-12";

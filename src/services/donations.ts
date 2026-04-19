@@ -4,6 +4,7 @@ const DONATION_STORAGE_KEY = "truve_local_donations_v2";
 
 export interface LocalDonationRecord extends DonationRecord {
   source: "mock" | "local";
+  dbId?: string;
 }
 
 function loadStoredDonations(): LocalDonationRecord[] {

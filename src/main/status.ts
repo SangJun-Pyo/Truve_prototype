@@ -1,5 +1,7 @@
 import { createRepositories } from "../api/provider";
-import { mergeDonationRecords } from "../services/donations";
+import { mergeDonationRecords, type LocalDonationRecord } from "../services/donations";
+import { fetchDbDonations } from "../services/db";
+import { getWalletSession } from "../services/wallet";
 import { renderTopNav } from "../shared/nav";
 
 const navRoot = document.getElementById("top-nav");
@@ -46,7 +48,38 @@ async function init(): Promise<void> {
   const profile = await repositories.userRepository.getProfile(USER_ID);
   const baseStatus = await repositories.userRepository.getDonationStatus(USER_ID);
   const baseDonations = await repositories.donationRepository.listDonationsByUser(USER_ID);
-  const donations = mergeDonationRecords(baseDonations, USER_ID);
+
+  // 지갑 연결된 경우 DB에서 실제 기부 내역 추가 병합
+  const wallet = getWalletSession();
+  let dbDonations: LocalDonationRecord[] = [];
+  if (wallet) {
+    const fetched = await fetchDbDonations(wallet.account);
+    dbDonations = fetched.map((d) => ({
+      id: d.id,
+      userId: d.userId,
+      donatedAt: d.donatedAt,
+      amountKrw: d.amountKrw,
+      allocations: d.allocations as LocalDonationRecord["allocations"],
+      paymentStatus: d.paymentStatus as LocalDonationRecord["paymentStatus"],
+      proofStatus: d.proofStatus as LocalDonationRecord["proofStatus"],
+      nftStatus: d.nftStatus as LocalDonationRecord["nftStatus"],
+      settlementStatus: d.settlementStatus as LocalDonationRecord["settlementStatus"],
+      txHash: d.txHash ?? undefined,
+      proofNftId: d.proofNftId ?? undefined,
+      explorerUrl: d.explorerUrl ?? undefined,
+      validationStatus: d.validationStatus as LocalDonationRecord["validationStatus"],
+      source: "local" as const,
+      dbId: d.id,
+    }));
+  }
+
+  // mock + localStorage + DB 통합 (중복 제거: dbId 기준)
+  const merged = mergeDonationRecords(baseDonations, USER_ID);
+  const dbIds = new Set(dbDonations.map((d) => d.id));
+  const donations = [
+    ...dbDonations,
+    ...merged.filter((d) => !dbIds.has(d.dbId ?? "") && !dbIds.has(d.id)),
+  ].sort((a, b) => (a.donatedAt < b.donatedAt ? 1 : -1));
 
   if (!profile || !baseStatus) {
     if (summaryEl) {

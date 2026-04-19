@@ -5,6 +5,7 @@ import {
   upsertGovernanceRecord,
   type GovernanceVoteRecord,
 } from "../services/governance";
+import { upsertDbUser, saveDbVote, fetchDbVoteTally } from "../services/db";
 import { clearWalletSession, getWalletSession, setWalletSession } from "../services/wallet";
 import {
   createMemoPayload,
@@ -170,6 +171,7 @@ async function connectWallet(): Promise<void> {
       connectedAt: new Date().toISOString(),
       lastPayloadUuid: payload.uuid,
     });
+    void upsertDbUser(resolved.account);
     clearQrcode();
     updateWalletStatusFromSession();
   } catch (error) {
@@ -207,7 +209,15 @@ async function init(): Promise<void> {
   const candidates = foundations.filter((foundation) =>
     ["fnd_truve-community", "fnd_green-earth", "fnd_next-class", "fnd_relief-now"].includes(foundation.id),
   );
-  const voteState = loadVoteState(candidates.map((item) => item.id));
+
+  // DB 집계 우선, 실패 시 localStorage fallback
+  let voteState = loadVoteState(candidates.map((item) => item.id));
+  const dbTally = await fetchDbVoteTally(PROPOSAL_ID);
+  if (dbTally.length > 0) {
+    dbTally.forEach((row) => {
+      voteState[row.candidateId] = row._sum.weight ?? 0;
+    });
+  }
   renderResults(candidates, voteState);
   renderTxLog();
   updateWalletStatusFromSession();
@@ -297,6 +307,17 @@ async function init(): Promise<void> {
           createdAt: new Date().toISOString(),
         };
         upsertGovernanceRecord(voteRecord);
+
+        // DB 저장 (fire-and-forget)
+        void saveDbVote({
+          xrplAccount: wallet.account,
+          proposalId: PROPOSAL_ID,
+          candidateId,
+          candidateName: candidate.name,
+          weight,
+          txHash: signed.txHash,
+        });
+
         renderTxLog();
         window.alert(`투표가 온체인에 기록되었습니다. (${status})`);
       } catch (error) {

@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id          String           @id @default(cuid())
+  xrplAccount String           @unique
+  displayName String?
+  tier        Tier             @default(SEED)
+  joinedAt    DateTime         @default(now())
+  donations   Donation[]
+  votes       GovernanceVote[]
+}
+
+model Donation {
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id])
+  donatedAt        DateTime @default(now())
+  amountKrw        Int
+  allocations      Json
+  paymentStatus    String   @default("pending")
+  proofStatus      String   @default("pending")
+  nftStatus        String   @default("pending")
+  settlementStatus String   @default("scheduled")
+  txHash           String?
+  proofNftId       String?
+  explorerUrl      String?
+  validationStatus String   @default("pending")
+}
+
+model GovernanceVote {
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id])
+  proposalId       String
+  candidateId      String
+  candidateName    String
+  weight           Int
+  votedAt          DateTime @default(now())
+  txHash           String?
+  validationStatus String   @default("pending")
+}
+
+enum Tier {
+  SEED
+  SPROUT
+  FOREST
+}

@@ -6,3 +6,5 @@ dev-server.log
 .env.*.local
 .DS_Store
 Thumbs.db
+
+/src/generated/prisma

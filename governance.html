@@ -20,6 +20,12 @@
 
       <section class="card">
         <div id="governance-eligibility" class="notice"></div>
+        <div class="inline-actions mt-12">
+          <button id="governance-connect-btn" class="btn btn-secondary" type="button">Xaman 연결</button>
+          <button id="governance-disconnect-btn" class="btn btn-ghost" type="button">연결 해제</button>
+        </div>
+        <div id="governance-wallet-status" class="notice mt-12">지갑 미연결</div>
+        <div id="governance-qr-wrap" class="xaman-qr-wrap"></div>
       </section>
 
       <section class="card mt-16">
@@ -31,6 +37,11 @@
       <section class="card mt-16">
         <h3 class="section-title">실시간 결과 (목업)</h3>
         <div id="governance-results" class="stack gap-10 mt-12"></div>
+      </section>
+
+      <section class="card mt-16">
+        <h3 class="section-title">온체인 투표 기록</h3>
+        <div id="governance-tx-log" class="stack gap-10 mt-12"></div>
       </section>
     </main>
 

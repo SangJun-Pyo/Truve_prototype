@@ -1,4 +1,5 @@
 import { createRepositories } from "../api/provider";
+import { mergeDonationRecords } from "../services/donations";
 import { renderTopNav } from "../shared/nav";
 
 const navRoot = document.getElementById("top-nav");
@@ -43,16 +44,18 @@ function stepToKorean(step: string): string {
 async function init(): Promise<void> {
   const repositories = await createRepositories();
   const profile = await repositories.userRepository.getProfile(USER_ID);
-  const status = await repositories.userRepository.getDonationStatus(USER_ID);
-  const donations = await repositories.donationRepository.listDonationsByUser(USER_ID);
+  const baseStatus = await repositories.userRepository.getDonationStatus(USER_ID);
+  const baseDonations = await repositories.donationRepository.listDonationsByUser(USER_ID);
+  const donations = mergeDonationRecords(baseDonations, USER_ID);
 
-  if (!profile || !status) {
+  if (!profile || !baseStatus) {
     if (summaryEl) {
       summaryEl.innerHTML = `<div class="notice error">사용자 상태를 불러오지 못했습니다.</div>`;
     }
     return;
   }
 
+  const totalDonated = donations.reduce((sum, item) => sum + item.amountKrw, 0);
   if (summaryEl) {
     summaryEl.innerHTML = `
       <div class="summary-box">
@@ -61,7 +64,7 @@ async function init(): Promise<void> {
       </div>
       <div class="summary-box">
         <div class="summary-label">누적 기부금</div>
-        <div class="summary-value">${formatKrw(status.totalDonationsKrw)}</div>
+        <div class="summary-value">${formatKrw(totalDonated)}</div>
       </div>
       <div class="summary-box">
         <div class="summary-label">등급</div>
@@ -83,7 +86,7 @@ async function init(): Promise<void> {
             <div class="trust mt-12">1) ${stepToKorean(donation.paymentStatus)}</div>
             <div class="trust">2) ${stepToKorean(donation.proofStatus)}</div>
             <div class="trust">3) ${stepToKorean(donation.nftStatus)}</div>
-            <div class="trust">4) ${stepToKorean(donation.settlementStatus)}</div>
+            <div class="trust">4) ${stepToKorean(donation.settlementStatus)} · 검증 ${donation.validationStatus ?? "-"}</div>
           </article>
         `;
       })
@@ -96,12 +99,21 @@ async function init(): Promise<void> {
         const txLink = donation.txHash
           ? `<a class="text-link" href="https://testnet.xrpl.org/transactions/${donation.txHash}" target="_blank" rel="noreferrer">${donation.txHash}</a>`
           : "-";
+        const proofStatus =
+          donation.proofMintStatus === "recorded"
+            ? "요청 기록 완료"
+            : donation.proofMintStatus === "requested"
+              ? "요청됨"
+              : donation.nftStatus === "minted"
+                ? "발행 완료"
+                : "대기";
 
         return `
           <tr>
             <td>${formatDate(donation.donatedAt)}</td>
             <td>${formatKrw(donation.amountKrw)}</td>
-            <td>${stepToKorean(donation.settlementStatus)}</td>
+            <td>${stepToKorean(donation.settlementStatus)} / ${donation.validationStatus ?? "-"}</td>
+            <td>${proofStatus}</td>
             <td>${txLink}</td>
           </tr>
         `;
@@ -114,7 +126,8 @@ async function init(): Promise<void> {
           <tr>
             <th>일시</th>
             <th>금액</th>
-            <th>정산 상태</th>
+            <th>정산/검증</th>
+            <th>Proof 상태</th>
             <th>증빙 링크</th>
           </tr>
         </thead>

@@ -1,5 +1,8 @@
 node_modules/
 dist/
 dev-server.log
+.env
+.env.local
+.env.*.local
 .DS_Store
 Thumbs.db

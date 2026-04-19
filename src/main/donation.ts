@@ -1,6 +1,15 @@
 import { xrpToDrops } from "xrpl";
-import type { DonationBundle, Foundation } from "../api";
+import type { BundleAllocation, DonationBundle, Foundation } from "../api";
 import { createRepositories } from "../api/provider";
+import { upsertLocalDonation, type LocalDonationRecord } from "../services/donations";
+import { requestProofNftMintScaffold } from "../services/proofNft";
+import { getWalletSession, setWalletSession, clearWalletSession } from "../services/wallet";
+import {
+  createPaymentPayload,
+  createSignInPayload,
+  waitForPayloadResolution,
+} from "../services/xaman";
+import { getTestnetExplorerLink, waitForTxValidation } from "../services/xrpl";
 import { renderTopNav } from "../shared/nav";
 
 type CartEntry = {
@@ -8,13 +17,8 @@ type CartEntry = {
   foundationName: string;
 };
 
-type XamanCredentials = {
-  apiKey: string;
-  apiSecret: string;
-};
-
 const MOCK_KRW_PER_XRP = 1000;
-const TESTNET_DONATION_ADDRESS = "rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe";
+const USER_ID = "usr_demo_001";
 
 const navRoot = document.getElementById("top-nav");
 if (navRoot) {
@@ -25,15 +29,19 @@ const foundationListEl = document.getElementById("foundation-list");
 const bundleListEl = document.getElementById("bundle-list");
 const cartItemsEl = document.getElementById("cart-items");
 const allocationSummaryEl = document.getElementById("allocation-summary");
+const destinationEl = document.getElementById("donation-destination");
+const txStatusEl = document.getElementById("donation-tx-status");
+const txResultEl = document.getElementById("donation-tx-result");
 const previewEl = document.getElementById("preview");
 const amountInputEl = document.getElementById("donation-amount") as HTMLInputElement | null;
 const rebalanceBtnEl = document.getElementById("rebalance-btn");
 const clearBtnEl = document.getElementById("clear-btn");
 const submitBtnEl = document.getElementById("submit-btn");
+const proofNftBtnEl = document.getElementById("proof-nft-btn") as HTMLButtonElement | null;
+const proofNftStatusEl = document.getElementById("proof-nft-status");
 
-const xamanApiKeyEl = document.getElementById("xaman-api-key") as HTMLInputElement | null;
-const xamanApiSecretEl = document.getElementById("xaman-api-secret") as HTMLInputElement | null;
 const xamanConnectBtnEl = document.getElementById("xaman-connect-btn");
+const xamanDisconnectBtnEl = document.getElementById("xaman-disconnect-btn");
 const walletStatusEl = document.getElementById("wallet-status");
 const xamanQrWrapEl = document.getElementById("xaman-qr-wrap");
 
@@ -42,18 +50,43 @@ let bundles: DonationBundle[] = [];
 let cart: CartEntry[] = [];
 let allocationMap: Record<string, number> = {};
 let previewRequestSeq = 0;
-let xamanCreds: XamanCredentials | null = null;
-let connectedWalletAddress: string | null = null;
+let lastDonationRecord: LocalDonationRecord | null = null;
 
 function formatKrw(value: number): string {
   return `${new Intl.NumberFormat("ko-KR").format(value)}원`;
 }
 
-function toHex(input: string): string {
-  return Array.from(new TextEncoder().encode(input))
-    .map((byte) => byte.toString(16).padStart(2, "0"))
-    .join("")
-    .toUpperCase();
+function setWalletStatus(message: string, isError = false): void {
+  if (!walletStatusEl) {
+    return;
+  }
+  walletStatusEl.className = isError ? "notice error mt-12" : "notice mt-12";
+  walletStatusEl.textContent = message;
+}
+
+function setTxStatus(message: string, isError = false): void {
+  if (!txStatusEl) {
+    return;
+  }
+  txStatusEl.className = isError ? "notice error mt-12" : "notice mt-12";
+  txStatusEl.textContent = message;
+}
+
+function renderXamanQrSection(qrPngUrl: string, openUrl: string): void {
+  if (!xamanQrWrapEl) {
+    return;
+  }
+  xamanQrWrapEl.innerHTML = `
+    <img src="${qrPngUrl}" alt="Xaman QR" />
+    <a class="btn btn-primary" href="${openUrl}" target="_blank" rel="noreferrer">Xaman 앱으로 열기</a>
+  `;
+}
+
+function clearXamanQrSection(): void {
+  if (!xamanQrWrapEl) {
+    return;
+  }
+  xamanQrWrapEl.innerHTML = "";
 }
 
 function categoryToKorean(category: Foundation["category"]): string {
@@ -67,75 +100,6 @@ function categoryToKorean(category: Foundation["category"]): string {
   return map[category];
 }
 
-function setWalletStatus(message: string, isError = false): void {
-  if (!walletStatusEl) {
-    return;
-  }
-  walletStatusEl.className = isError ? "notice error mt-12" : "notice mt-12";
-  walletStatusEl.textContent = message;
-}
-
-function renderXamanQrSection(qrPngUrl: string, openUrl: string): void {
-  if (!xamanQrWrapEl) {
-    return;
-  }
-
-  xamanQrWrapEl.innerHTML = `
-    <img src="${qrPngUrl}" alt="Xaman QR" />
-    <a class="btn btn-primary" href="${openUrl}" target="_blank" rel="noreferrer">Xaman 앱으로 열기</a>
-  `;
-}
-
-async function createXamanPayload(
-  creds: XamanCredentials,
-  payload: Record<string, unknown>,
-): Promise<any> {
-  const response = await fetch("https://xumm.app/api/v1/platform/payload", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": creds.apiKey,
-      "x-api-secret": creds.apiSecret,
-    },
-    body: JSON.stringify(payload),
-  });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`Xaman payload 생성 실패: ${response.status} ${text}`);
-  }
-
-  return response.json();
-}
-
-async function getXamanPayload(creds: XamanCredentials, uuid: string): Promise<any> {
-  const response = await fetch(`https://xumm.app/api/v1/platform/payload/${uuid}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": creds.apiKey,
-      "x-api-secret": creds.apiSecret,
-    },
-  });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`Xaman payload 조회 실패: ${response.status} ${text}`);
-  }
-  return response.json();
-}
-
-async function waitForXamanResult(creds: XamanCredentials, uuid: string): Promise<any> {
-  for (let attempt = 0; attempt < 120; attempt += 1) {
-    const payload = await getXamanPayload(creds, uuid);
-    if (payload?.meta?.resolved) {
-      return payload;
-    }
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-  }
-  throw new Error("Xaman 응답 대기 시간이 초과되었습니다.");
-}
-
 function getCurrentAmount(): number {
   const amount = Number(amountInputEl?.value ?? 0);
   return Number.isFinite(amount) && amount > 0 ? amount : 0;
@@ -143,6 +107,28 @@ function getCurrentAmount(): number {
 
 function getAllocationTotal(): number {
   return cart.reduce((sum, item) => sum + (allocationMap[item.foundationId] ?? 0), 0);
+}
+
+function getRepresentativeFoundation(): Foundation | null {
+  const first = cart[0];
+  if (!first) {
+    return null;
+  }
+  return foundations.find((item) => item.id === first.foundationId) ?? null;
+}
+
+function renderDestinationInfo(): void {
+  if (!destinationEl) {
+    return;
+  }
+
+  const representative = getRepresentativeFoundation();
+  if (!representative) {
+    destinationEl.textContent = "대표 전송 지갑이 아직 선택되지 않았습니다.";
+    return;
+  }
+
+  destinationEl.textContent = `대표 전송 지갑: ${representative.name} (${representative.walletAddress})`;
 }
 
 function setEqualAllocation(): void {
@@ -234,6 +220,7 @@ function renderFoundationList(): void {
             <span class="badge">${foundation.trustMetrics.verificationLevel.toUpperCase()}</span>
           </div>
           <p class="section-desc">${foundation.description}</p>
+          <div class="trust mt-12">수취 지갑: ${foundation.walletAddress}</div>
           <div class="row-between mt-12">
             <span class="trust">증빙 커버리지 ${foundation.trustMetrics.proofCoveragePct}%</span>
             <button class="btn btn-secondary" data-add-id="${foundation.id}" type="button">담기</button>
@@ -325,6 +312,7 @@ function renderCart(): void {
       allocationMap[id] = Number(input.value);
       renderSummary();
       void renderPreview();
+      renderDestinationInfo();
     });
   });
 
@@ -373,7 +361,7 @@ async function renderPreview(): Promise<void> {
   const seq = ++previewRequestSeq;
   const repositories = await createRepositories();
   const preview = await repositories.donationRepository.previewDonation({
-    userId: "usr_demo_001",
+    userId: USER_ID,
     amountKrw: amount,
     allocations: cart.map((entry) => ({
       foundationId: entry.foundationId,
@@ -399,52 +387,74 @@ async function renderPreview(): Promise<void> {
   `;
 }
 
-async function connectXaman(): Promise<void> {
-  const apiKey = xamanApiKeyEl?.value.trim() ?? "";
-  const apiSecret = xamanApiSecretEl?.value.trim() ?? "";
-  if (!apiKey || !apiSecret) {
-    setWalletStatus("Xaman API Key/Secret을 입력해 주세요.", true);
+function updateWalletStatusFromSession(): void {
+  const session = getWalletSession();
+  if (!session) {
+    setWalletStatus("지갑이 아직 연결되지 않았습니다.");
     return;
   }
+  setWalletStatus(`연결됨: ${session.account}`);
+}
 
-  xamanCreds = { apiKey, apiSecret };
-  setWalletStatus("Xaman SignIn QR을 생성 중입니다...");
+function renderTxResult(record: LocalDonationRecord | null): void {
+  if (!txResultEl) {
+    return;
+  }
+  if (!record) {
+    txResultEl.textContent = "아직 제출된 트랜잭션이 없습니다.";
+    return;
+  }
+  const explorer = record.explorerUrl ?? (record.txHash ? getTestnetExplorerLink(record.txHash) : "-");
+  txResultEl.innerHTML = `
+    <div class="row-between"><span>기부 ID</span><strong>${record.id}</strong></div>
+    <div class="row-between"><span>상태</span><strong>${record.validationStatus ?? "-"}</strong></div>
+    <div class="row-between"><span>tx hash</span><strong>${record.txHash ?? "-"}</strong></div>
+    ${
+      record.txHash
+        ? `<div class="mt-12"><a class="text-link" href="${explorer}" target="_blank" rel="noreferrer">Testnet Explorer에서 보기</a></div>`
+        : ""
+    }
+  `;
+}
 
+async function connectXaman(): Promise<void> {
   try {
-    const payload = await createXamanPayload(xamanCreds, {
-      txjson: { TransactionType: "SignIn" },
-      options: { submit: false },
+    setWalletStatus("Xaman SignIn QR 생성 중...");
+    const payload = await createSignInPayload();
+    renderXamanQrSection(payload.qrPngUrl, payload.deepLink);
+    const resolved = await waitForPayloadResolution(payload.uuid);
+
+    if (!resolved.signed || !resolved.account) {
+      setWalletStatus("지갑 연결이 거절되었습니다.", true);
+      return;
+    }
+
+    setWalletSession({
+      account: resolved.account,
+      connectedAt: new Date().toISOString(),
+      lastPayloadUuid: payload.uuid,
     });
-
-    renderXamanQrSection(payload.refs.qr_png, payload.next.always);
-    setWalletStatus("Xaman 앱에서 SignIn 요청을 승인해 주세요.");
-
-    const resolved = await waitForXamanResult(xamanCreds, payload.uuid);
-    if (!resolved?.meta?.signed) {
-      setWalletStatus("SignIn 요청이 거절되었습니다.", true);
-      return;
-    }
-
-    connectedWalletAddress = resolved?.response?.account ?? null;
-    if (!connectedWalletAddress) {
-      setWalletStatus("연결 주소를 확인하지 못했습니다.", true);
-      return;
-    }
-
-    setWalletStatus(`연결 완료: ${connectedWalletAddress}`);
+    clearXamanQrSection();
+    updateWalletStatusFromSession();
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Xaman 연결 중 오류가 발생했습니다.";
+    const message = error instanceof Error ? error.message : "지갑 연결 중 오류가 발생했습니다.";
     setWalletStatus(message, true);
   }
 }
 
+function disconnectXaman(): void {
+  clearWalletSession();
+  clearXamanQrSection();
+  updateWalletStatusFromSession();
+}
+
 async function submitDonation(): Promise<void> {
-  const amount = getCurrentAmount();
+  const amountKrw = getCurrentAmount();
   if (cart.length === 0) {
     window.alert("먼저 재단을 담아주세요.");
     return;
   }
-  if (amount <= 0) {
+  if (amountKrw <= 0) {
     window.alert("기부 금액을 입력해 주세요.");
     return;
   }
@@ -452,79 +462,141 @@ async function submitDonation(): Promise<void> {
     window.alert("비율 합계를 100%로 맞춰주세요.");
     return;
   }
-  if (!xamanCreds) {
-    window.alert("먼저 Xaman 연결을 진행해 주세요.");
-    return;
-  }
-  if (!connectedWalletAddress) {
-    window.alert("지갑 주소가 연결되지 않았습니다. SignIn을 완료해 주세요.");
+
+  const wallet = getWalletSession();
+  if (!wallet) {
+    window.alert("먼저 Xaman 지갑을 연결해 주세요.");
     return;
   }
 
-  const repositories = await createRepositories();
-  const allocations = cart.map((entry) => ({
+  const destination = getRepresentativeFoundation();
+  if (!destination) {
+    window.alert("대표 수취 재단을 찾을 수 없습니다.");
+    return;
+  }
+
+  const allocations: BundleAllocation[] = cart.map((entry) => ({
     foundationId: entry.foundationId,
     ratioPct: allocationMap[entry.foundationId] ?? 0,
   }));
-  const donationSummary = {
-    app: "TRUVE",
-    amountKrw: amount,
-    allocations,
-    createdAt: new Date().toISOString(),
-  };
 
-  const amountXrp = (amount / MOCK_KRW_PER_XRP).toFixed(6);
-  const drops = xrpToDrops(amountXrp);
+  const amountXrp = (amountKrw / MOCK_KRW_PER_XRP).toFixed(6);
+  const amountDrops = xrpToDrops(amountXrp);
 
   try {
-    setWalletStatus("기부 결제 QR을 생성 중입니다...");
-
-    const payload = await createXamanPayload(xamanCreds, {
-      txjson: {
-        TransactionType: "Payment",
-        Account: connectedWalletAddress,
-        Destination: TESTNET_DONATION_ADDRESS,
-        Amount: drops,
-        Memos: [
-          {
-            Memo: {
-              MemoType: toHex("TRUVE_DONATION"),
-              MemoData: toHex(JSON.stringify(donationSummary).slice(0, 230)),
-            },
-          },
-        ],
-      },
-      options: { submit: true },
+    setTxStatus("상태: pending (Xaman 서명 대기 중)");
+    const payload = await createPaymentPayload({
+      account: wallet.account,
+      destination: destination.walletAddress,
+      amountDrops,
+      memoType: "TRUVE_DONATION",
+      memoData: JSON.stringify({
+        app: "TRUVE",
+        userId: USER_ID,
+        amountKrw,
+        allocations,
+        createdAt: new Date().toISOString(),
+      }).slice(0, 230),
     });
 
-    renderXamanQrSection(payload.refs.qr_png, payload.next.always);
-    setWalletStatus("Xaman 앱에서 기부 결제 서명을 승인해 주세요.");
-
-    const resolved = await waitForXamanResult(xamanCreds, payload.uuid);
-    if (!resolved?.meta?.signed) {
-      setWalletStatus("결제 요청이 거절되었습니다.", true);
+    renderXamanQrSection(payload.qrPngUrl, payload.deepLink);
+    const resolved = await waitForPayloadResolution(payload.uuid);
+    if (!resolved.signed || !resolved.txHash) {
+      setTxStatus("상태: failed (서명이 거절되었습니다.)", true);
       return;
     }
 
-    const txHash = resolved?.response?.txid;
-    setWalletStatus(`기부 트랜잭션 완료: ${txHash ?? "해시 미확인"}`);
+    setTxStatus("상태: signed (검증 대기 중)");
+    const validated = await waitForTxValidation(resolved.txHash);
+    const validationStatus = validated.validated ? "validated" : "signed";
+    setTxStatus(`상태: ${validationStatus}`);
 
-    const receipt = await repositories.donationRepository.submitDonation({
-      userId: "usr_demo_001",
-      amountKrw: amount,
+    const donationRecord: LocalDonationRecord = {
+      id: `dnt_live_${Date.now()}`,
+      userId: USER_ID,
+      donatedAt: new Date().toISOString(),
+      amountKrw,
       allocations,
+      paymentStatus: "paid",
+      proofStatus: "recorded",
+      nftStatus: "pending",
+      settlementStatus: "scheduled",
+      txHash: resolved.txHash,
+      explorerUrl: validated.explorerUrl,
+      validationStatus,
+      network: "testnet",
+      destinationAddress: destination.walletAddress,
+      foundationWallet: destination.walletAddress,
+      proofMintStatus: "none",
+      source: "local",
+    };
+
+    upsertLocalDonation(donationRecord);
+    lastDonationRecord = donationRecord;
+    renderTxResult(lastDonationRecord);
+
+    if (proofNftBtnEl) {
+      proofNftBtnEl.disabled = false;
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "기부 트랜잭션 처리 중 오류가 발생했습니다.";
+    setTxStatus(`상태: failed (${message})`, true);
+  }
+}
+
+async function requestProofNftScaffold(): Promise<void> {
+  if (!proofNftStatusEl) {
+    return;
+  }
+  const wallet = getWalletSession();
+  if (!wallet) {
+    proofNftStatusEl.className = "notice error mt-12";
+    proofNftStatusEl.textContent = "지갑 연결이 필요합니다.";
+    return;
+  }
+  if (!lastDonationRecord?.txHash) {
+    proofNftStatusEl.className = "notice error mt-12";
+    proofNftStatusEl.textContent = "먼저 기부 트랜잭션을 완료해 주세요.";
+    return;
+  }
+
+  try {
+    proofNftStatusEl.className = "notice mt-12";
+    proofNftStatusEl.textContent = "Proof NFT 민팅 요청 트랜잭션 생성 중...";
+
+    const result = await requestProofNftMintScaffold({
+      account: wallet.account,
+      donationId: lastDonationRecord.id,
+      donationTxHash: lastDonationRecord.txHash,
     });
 
-    window.alert(
-      [
-        "목업 기부가 완료되었습니다.",
-        `기부 ID: ${receipt.donationId}`,
-        `Xaman TX: ${txHash ?? "확인 필요"}`,
-      ].join("\n"),
-    );
+    const patch = {
+      proofMintStatus: result.validated ? ("recorded" as const) : ("requested" as const),
+      proofMintTxHash: result.txHash,
+      nftStatus: result.validated ? ("minted" as const) : ("pending" as const),
+      proofNftId: result.validated ? `proof_req_${Date.now()}` : undefined,
+    };
+
+    const nextRecord: LocalDonationRecord = {
+      ...lastDonationRecord,
+      ...patch,
+    };
+
+    upsertLocalDonation(nextRecord);
+    lastDonationRecord = nextRecord;
+    renderTxResult(nextRecord);
+
+    if (result.txHash) {
+      proofNftStatusEl.className = "notice mt-12";
+      proofNftStatusEl.innerHTML = `Proof NFT 요청 기록 완료: <a class="text-link" href="${result.explorerUrl}" target="_blank" rel="noreferrer">${result.txHash}</a>`;
+    } else {
+      proofNftStatusEl.className = "notice error mt-12";
+      proofNftStatusEl.textContent = "Proof NFT 요청이 거절되었거나 실패했습니다.";
+    }
   } catch (error) {
-    const message = error instanceof Error ? error.message : "기부 요청 중 오류가 발생했습니다.";
-    setWalletStatus(message, true);
+    proofNftStatusEl.className = "notice error mt-12";
+    proofNftStatusEl.textContent =
+      error instanceof Error ? error.message : "Proof NFT 요청 중 오류가 발생했습니다.";
   }
 }
 
@@ -548,8 +620,16 @@ function bindEvents(): void {
     void connectXaman();
   });
 
+  xamanDisconnectBtnEl?.addEventListener("click", () => {
+    disconnectXaman();
+  });
+
   submitBtnEl?.addEventListener("click", () => {
     void submitDonation();
+  });
+
+  proofNftBtnEl?.addEventListener("click", () => {
+    void requestProofNftScaffold();
   });
 }
 
@@ -558,6 +638,7 @@ function renderAll(): void {
   renderBundleList();
   renderCart();
   renderSummary();
+  renderDestinationInfo();
   void renderPreview();
 }
 
@@ -573,6 +654,8 @@ async function init(): Promise<void> {
   }
 
   bindEvents();
+  updateWalletStatusFromSession();
+  renderTxResult(lastDonationRecord);
   renderAll();
 }
 

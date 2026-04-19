@@ -19,6 +19,7 @@ export interface Foundation {
   region: string;
   description: string;
   tags: string[];
+  walletAddress: string;
   trustMetrics: TrustMetrics;
 }
 
@@ -63,6 +64,13 @@ export interface DonationRecord {
   settlementStatus: "scheduled" | "done" | "error";
   txHash?: string;
   proofNftId?: string;
+  explorerUrl?: string;
+  validationStatus?: "pending" | "signed" | "validated" | "failed";
+  network?: "testnet";
+  destinationAddress?: string;
+  foundationWallet?: string;
+  proofMintStatus?: "none" | "requested" | "recorded";
+  proofMintTxHash?: string;
 }
 
 export interface DonationReceipt {
@@ -111,4 +119,3 @@ export interface UserRepository {
   getProfile(userId: string): Promise<UserProfile | null>;
   getDonationStatus(userId: string): Promise<UserDonationStatus | null>;
 }
-

@@ -12,6 +12,7 @@ export default defineConfig({
         governance: resolve(__dirname, "governance.html"),
         status:     resolve(__dirname, "status.html"),
         about:      resolve(__dirname, "about.html"),
+        support:    resolve(__dirname, "support.html"),
       },
     },
   },

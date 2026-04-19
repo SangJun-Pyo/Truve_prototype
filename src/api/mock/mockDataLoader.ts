@@ -35,7 +35,8 @@ export async function loadMockSeedData(
   }
 
   const fetchImpl = options.fetchImpl ?? fetch;
-  const basePath = options.basePath ?? "/src/mocks";
+  // Use /public/mocks assets so both local dev and production builds resolve consistently.
+  const basePath = options.basePath ?? "/mocks";
 
   const [foundations, bundles, donations, users] = await Promise.all([
     loadJson<Foundation[]>(fetchImpl, `${basePath}/foundations.json`),
@@ -51,4 +52,3 @@ export async function loadMockSeedData(
 export function resetMockSeedCache(): void {
   cachedSeedData = null;
 }
-

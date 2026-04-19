@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
@@ -10,82 +10,69 @@
     <main class="app-shell">
       <div id="top-nav"></div>
 
-      <section class="hero">
-        <p class="hero-eyebrow">MOCK PROTOTYPE</p>
-        <h2 class="hero-title">수강신청 책가방처럼 기부를 담아보세요</h2>
-        <p class="hero-copy">
-          재단 단품과 ETF형 번들을 선택하고, 비율을 조정한 뒤 한 번에 기부할 수 있습니다.
-        </p>
-      </section>
+      <header class="page-header">
+        <h1>기부 담기</h1>
+        <p class="subtitle">기부할 재단 비율을 조정하고 온체인 실행을 준비하세요.</p>
+      </header>
 
-      <div class="page-grid page-grid--donation">
+      <div class="cart-layout">
         <section class="card">
           <div class="section-head">
-            <h3 class="section-title">재단 단품</h3>
-            <p class="section-desc">원하는 재단을 직접 선택해 책가방에 담으세요.</p>
+            <h3 class="section-title">담긴 재단 리스트</h3>
+            <p class="section-desc">각 재단 비율을 조정해 기부 포트폴리오를 설계하세요.</p>
           </div>
-          <div id="foundation-list" class="stack gap-12"></div>
+          <div id="cart-empty" class="notice">장바구니가 비어 있습니다. 기부 탐색 탭에서 재단을 먼저 담아주세요.</div>
+          <div id="cart-items" class="stack gap-10"></div>
         </section>
 
-        <section class="card">
+        <aside class="card cart-summary-card">
           <div class="section-head">
-            <h3 class="section-title">ETF형 번들</h3>
-            <p class="section-desc">테마별 분산 기부 포트폴리오를 바로 적용할 수 있습니다.</p>
-          </div>
-          <div id="bundle-list" class="stack gap-12"></div>
-        </section>
-
-        <aside class="card card--accent">
-          <div class="section-head">
-            <h3 class="section-title">내 기부 책가방</h3>
-            <p class="section-desc">비율 합계는 100%여야 기부가 가능합니다.</p>
+            <h3 class="section-title text-white">실행 요약</h3>
+            <p class="section-desc text-slate-300">비율/금액 검증 후 Xaman으로 XRPL Testnet 기부를 실행합니다.</p>
           </div>
 
           <section class="wallet-box">
             <h4 class="section-title section-title--sm">Xaman 지갑 연결 (Testnet)</h4>
-            <p class="section-desc">
-              비수탁형 방식으로 Xaman 앱에서 직접 서명합니다.
-            </p>
-            <button id="xaman-connect-btn" class="btn btn-secondary mt-12 w-full" type="button">
-              Xaman 연결(SignIn)
-            </button>
-            <button id="xaman-disconnect-btn" class="btn btn-ghost mt-12 w-full" type="button">
-              연결 해제
-            </button>
+            <p class="section-desc">비수탁형 방식으로 Xaman 앱에서 직접 서명합니다.</p>
+            <button id="xaman-connect-btn" class="btn btn-secondary mt-12 w-full" type="button">Xaman 연결 (SignIn)</button>
+            <button id="xaman-disconnect-btn" class="btn btn-ghost mt-12 w-full" type="button">연결 해제</button>
             <div id="wallet-status" class="notice mt-12">지갑이 아직 연결되지 않았습니다.</div>
+            <div id="wallet-balance" class="notice mt-12">지갑 잔고: -</div>
             <div id="xaman-qr-wrap" class="xaman-qr-wrap"></div>
           </section>
 
           <label class="field">
-            <span>총 기부 금액 (원)</span>
-            <input id="donation-amount" type="number" min="1000" step="1000" value="100000" />
+            <span>총 기부 금액 (XRP)</span>
+            <input id="donation-amount-xrp" type="number" min="1" step="1" value="10" />
           </label>
-
-          <div id="cart-items" class="stack gap-10"></div>
-
           <div class="inline-actions">
-            <button id="rebalance-btn" class="btn btn-secondary" type="button">자동 균등 배분</button>
-            <button id="clear-btn" class="btn btn-ghost" type="button">비우기</button>
+            <button class="btn btn-ghost amount-chip" data-xrp="10" type="button">10 XRP</button>
+            <button class="btn btn-ghost amount-chip" data-xrp="25" type="button">25 XRP</button>
+            <button class="btn btn-ghost amount-chip" data-xrp="50" type="button">50 XRP</button>
           </div>
 
-          <div id="allocation-summary" class="notice"></div>
-          <div id="donation-destination" class="notice mt-12">대표 전송 지갑이 아직 선택되지 않았습니다.</div>
+          <div id="allocation-summary" class="notice mt-12"></div>
+          <div id="donation-destination" class="notice mt-12">수신 재단 지갑이 아직 선택되지 않았습니다.</div>
+          <div id="donation-network" class="notice mt-12">Network: XRPL Testnet · Transaction: Payment</div>
           <div id="donation-tx-status" class="notice mt-12">트랜잭션 상태: 대기</div>
+
+          <div class="section-head mt-12">
+            <h4 class="section-title section-title--sm text-white">분배 결과</h4>
+          </div>
+          <div id="preview" class="preview-box">기부 금액과 비율을 설정하면 분배 결과가 표시됩니다.</div>
           <div id="donation-tx-result" class="preview-box mt-12">아직 제출된 트랜잭션이 없습니다.</div>
 
-          <div class="section-head mt-16">
-            <h4 class="section-title section-title--sm">예상 분배 미리보기</h4>
+          <div class="inline-actions mt-16">
+            <button id="rebalance-btn" class="btn btn-secondary" type="button">균등 배분</button>
+            <button id="clear-btn" class="btn btn-ghost" type="button">장바구니 비우기</button>
           </div>
-          <div id="preview" class="preview-box">기부 금액과 비율을 설정하면 미리보기가 표시됩니다.</div>
 
-          <button id="submit-btn" class="btn btn-primary w-full mt-16" type="button">
-            기부 실행 (XRPL Testnet)
-          </button>
+          <button id="submit-btn" class="btn btn-primary w-full mt-12" type="button">Xaman으로 기부 실행</button>
 
           <button id="proof-nft-btn" class="btn btn-secondary w-full mt-12" type="button" disabled>
             Proof NFT 민팅 요청 (스캐폴드)
           </button>
-          <div id="proof-nft-status" class="notice mt-12">Proof NFT 요청 전</div>
+          <div id="proof-nft-status" class="notice mt-12">Proof NFT 요청 대기</div>
         </aside>
       </div>
     </main>

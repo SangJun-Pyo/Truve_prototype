@@ -1,15 +1,15 @@
-type Tab = {
+﻿type Tab = {
   id: string;
   label: string;
   href: string;
 };
 
 const TABS: Tab[] = [
+  { id: "foundations", label: "기부 탐색", href: "./foundations.html" },
   { id: "donation", label: "기부 담기", href: "./donation.html" },
-  { id: "foundations", label: "재단 탐색", href: "./foundations.html" },
-  { id: "governance", label: "거버넌스 투표", href: "./governance.html" },
-  { id: "about", label: "Truve 설명", href: "./about.html" },
-  { id: "status", label: "내 기부 Status", href: "./status.html" },
+  { id: "governance", label: "거버넌스", href: "./governance.html" },
+  { id: "status", label: "내 기부 현황", href: "./status.html" },
+  { id: "about", label: "서비스 소개", href: "./about.html" },
 ];
 
 export function renderTopNav(activeTabId: string): string {
@@ -20,12 +20,10 @@ export function renderTopNav(activeTabId: string): string {
 
   return `
     <header class="app-header">
-      <div>
-        <h1 class="brand">Truve 목업</h1>
-        <p class="sub-copy">기부 책가방 + 재단 탐색 프로토타입</p>
-      </div>
+      <h1 class="brand">Truve.</h1>
+      <p class="sub-copy">Trust + Give · XRPL Testnet Prototype</p>
     </header>
-    <nav class="tab-nav" aria-label="Main tab navigation">
+    <nav class="tab-nav" aria-label="Main Navigation">
       ${links}
     </nav>
   `;

@@ -1,4 +1,4 @@
-import { createRepositories } from "../api/provider";
+﻿import { createRepositories } from "../api/provider";
 import { mergeDonationRecords, type LocalDonationRecord } from "../services/donations";
 import { fetchDbDonations } from "../services/db";
 import { getWalletSession } from "../services/wallet";
@@ -34,7 +34,7 @@ function stepToKorean(step: string): string {
     paid: "결제 완료",
     pending: "결제 대기",
     failed: "결제 실패",
-    recorded: "해시 기록 완료",
+    recorded: "증빙 기록 완료",
     minted: "Proof NFT 발행 완료",
     scheduled: "정산 예정",
     done: "정산 완료",
@@ -49,9 +49,9 @@ async function init(): Promise<void> {
   const baseStatus = await repositories.userRepository.getDonationStatus(USER_ID);
   const baseDonations = await repositories.donationRepository.listDonationsByUser(USER_ID);
 
-  // 지갑 연결된 경우 DB에서 실제 기부 내역 추가 병합
   const wallet = getWalletSession();
   let dbDonations: LocalDonationRecord[] = [];
+
   if (wallet) {
     const fetched = await fetchDbDonations(wallet.account);
     dbDonations = fetched.map((d) => ({
@@ -73,7 +73,6 @@ async function init(): Promise<void> {
     }));
   }
 
-  // mock + localStorage + DB 통합 (중복 제거: dbId 기준)
   const merged = mergeDonationRecords(baseDonations, USER_ID);
   const dbIds = new Set(dbDonations.map((d) => d.id));
   const donations = [
@@ -89,6 +88,7 @@ async function init(): Promise<void> {
   }
 
   const totalDonated = donations.reduce((sum, item) => sum + item.amountKrw, 0);
+
   if (summaryEl) {
     summaryEl.innerHTML = `
       <div class="summary-box">
@@ -100,7 +100,7 @@ async function init(): Promise<void> {
         <div class="summary-value">${formatKrw(totalDonated)}</div>
       </div>
       <div class="summary-box">
-        <div class="summary-label">등급</div>
+        <div class="summary-label">티어</div>
         <div class="summary-value">${profile.tier.toUpperCase()}</div>
       </div>
     `;
@@ -132,6 +132,7 @@ async function init(): Promise<void> {
         const txLink = donation.txHash
           ? `<a class="text-link" href="https://testnet.xrpl.org/transactions/${donation.txHash}" target="_blank" rel="noreferrer">${donation.txHash}</a>`
           : "-";
+
         const proofStatus =
           donation.proofMintStatus === "recorded"
             ? "요청 기록 완료"
@@ -161,7 +162,7 @@ async function init(): Promise<void> {
             <th>금액</th>
             <th>정산/검증</th>
             <th>Proof 상태</th>
-            <th>증빙 링크</th>
+            <th>트랜잭션</th>
           </tr>
         </thead>
         <tbody>${rows}</tbody>

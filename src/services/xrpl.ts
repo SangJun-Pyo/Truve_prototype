@@ -1,7 +1,14 @@
-export interface XrplTxStatus {
+﻿export interface XrplTxStatus {
   hash: string;
   validated: boolean;
   explorerUrl: string;
+}
+
+export interface XrplAccountInfo {
+  address: string;
+  balanceDrops: string;
+  balanceXrp: string;
+  sequence?: number;
 }
 
 interface WaitOptions {
@@ -23,6 +30,11 @@ async function parseJsonOrThrow(response: Response): Promise<any> {
 
 export async function fetchTxStatus(txHash: string): Promise<XrplTxStatus> {
   const response = await fetch(`/api/xrpl/tx/${txHash}`);
+  return parseJsonOrThrow(response);
+}
+
+export async function fetchAccountInfo(address: string): Promise<XrplAccountInfo> {
+  const response = await fetch(`/api/xrpl/account/${address}`);
   return parseJsonOrThrow(response);
 }
 

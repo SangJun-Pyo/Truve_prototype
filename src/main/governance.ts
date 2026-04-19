@@ -1,4 +1,4 @@
-import type { Foundation } from "../api";
+﻿import type { Foundation } from "../api";
 import { createRepositories } from "../api/provider";
 import {
   listGovernanceRecords,
@@ -156,13 +156,13 @@ function renderTxLog(): void {
 
 async function connectWallet(): Promise<void> {
   try {
-    setWalletStatus("Xaman SignIn QR 생성 중...");
+    setWalletStatus("Xaman SignIn 요청 생성 중...");
     const payload = await createSignInPayload();
     renderQrcode(payload.qrPngUrl, payload.deepLink);
     const resolved = await waitForPayloadResolution(payload.uuid);
 
     if (!resolved.signed || !resolved.account) {
-      setWalletStatus("지갑 연결이 거절되었습니다.", true);
+      setWalletStatus("지갑 연결이 취소되었습니다.", true);
       return;
     }
 
@@ -203,14 +203,13 @@ async function init(): Promise<void> {
 
   eligibilityEl.className = eligible ? "notice" : "notice error";
   eligibilityEl.innerHTML = eligible
-    ? `투표 가능: ${profile.displayName} 님 · NFT ${nftCount}개 보유 · 티어 <strong>${profile.tier.toUpperCase()}</strong> · 가중치 <strong>${weight}표</strong>`
-    : `투표 불가: Proof NFT 보유가 확인되지 않았습니다. 기부 후 NFT를 발급받아 참여해 주세요.`;
+    ? `투표 가능: ${profile.displayName} · NFT ${nftCount}개 보유 · 티어 <strong>${profile.tier.toUpperCase()}</strong> · 가중치 <strong>${weight}표</strong>`
+    : `투표 불가: Proof NFT 보유가 확인되지 않았습니다. 기부 후 NFT를 발급받아 참여해주세요.`;
 
   const candidates = foundations.filter((foundation) =>
     ["fnd_truve-community", "fnd_green-earth", "fnd_next-class", "fnd_relief-now"].includes(foundation.id),
   );
 
-  // DB 집계 우선, 실패 시 localStorage fallback
   let voteState = loadVoteState(candidates.map((item) => item.id));
   const dbTally = await fetchDbVoteTally(PROPOSAL_ID);
   if (dbTally.length > 0) {
@@ -218,6 +217,7 @@ async function init(): Promise<void> {
       voteState[row.candidateId] = row._sum.weight ?? 0;
     });
   }
+
   renderResults(candidates, voteState);
   renderTxLog();
   updateWalletStatusFromSession();
@@ -255,7 +255,7 @@ async function init(): Promise<void> {
 
       const wallet = getWalletSession();
       if (!wallet) {
-        window.alert("먼저 Xaman 지갑을 연결해 주세요.");
+        window.alert("먼저 Xaman 지갑을 연결해주세요.");
         return;
       }
 
@@ -266,6 +266,7 @@ async function init(): Promise<void> {
 
       try {
         button.disabled = true;
+
         const payload = await createMemoPayload({
           account: wallet.account,
           destination: candidate.walletAddress,
@@ -283,7 +284,7 @@ async function init(): Promise<void> {
         renderQrcode(payload.qrPngUrl, payload.deepLink);
         const signed = await waitForPayloadResolution(payload.uuid);
         if (!signed.signed || !signed.txHash) {
-          window.alert("투표 트랜잭션 서명이 거절되었습니다.");
+          window.alert("투표 트랜잭션 서명이 취소되었습니다.");
           return;
         }
 
@@ -308,7 +309,6 @@ async function init(): Promise<void> {
         };
         upsertGovernanceRecord(voteRecord);
 
-        // DB 저장 (fire-and-forget)
         void saveDbVote({
           xrplAccount: wallet.account,
           proposalId: PROPOSAL_ID,

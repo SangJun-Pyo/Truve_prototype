@@ -203,6 +203,41 @@ app.get("/api/xrpl/tx/:hash", async (req, res) => {
   }
 });
 
+app.get("/api/xrpl/account/:address", async (req, res) => {
+  const address = req.params.address;
+  const client = new Client(xrplTestnetWs);
+
+  try {
+    await client.connect();
+    const accountInfo = await client.request({
+      command: "account_info",
+      account: address,
+      ledger_index: "validated",
+    });
+
+    const result = accountInfo.result as any;
+    const balanceDrops = String(result?.account_data?.Balance ?? "0");
+    const balanceXrp = (Number(balanceDrops) / 1_000_000).toFixed(6);
+    const sequence = Number(result?.account_data?.Sequence ?? 0);
+
+    res.json({
+      address,
+      balanceDrops,
+      balanceXrp,
+      sequence,
+    });
+  } catch (error) {
+    res.status(500).json({
+      address,
+      error: error instanceof Error ? error.message : "계정 조회 실패",
+    });
+  } finally {
+    if (client.isConnected()) {
+      await client.disconnect();
+    }
+  }
+});
+
 // ── DB: 사용자 upsert (지갑 연결 시 호출) ──────────────────────────────
 app.post("/api/db/users", async (req, res) => {
   try {

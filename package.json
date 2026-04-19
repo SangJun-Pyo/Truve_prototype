@@ -17,7 +17,9 @@
     "preview:cf": "npm run build && wrangler dev",
     "typecheck": "tsc --noEmit",
     "build:server": "tsc --project tsconfig.server.json",
-    "start": "node dist/server/index.js"
+    "start": "node dist/server/index.js",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:reset": "tsx prisma/seed.ts --reset"
   },
   "engines": {
     "node": ">=20.19.0"

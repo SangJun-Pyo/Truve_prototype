@@ -1,4 +1,4 @@
-/* empty css               */import"./modulepreload-polyfill-EeOZK34R.js";import{t as e}from"./provider-CBt5WCFb.js";import{i as t,n,s as r,t as i}from"./cart-BDbIWkmH.js";import{t as a}from"./nav-DOCFXJ5j.js";var o=[[`#E8F5E9`,`#C8E6C9`],[`#F3E8FF`,`#D8B4FE`],[`#FFEFD5`,`#FFD6A5`],[`#E6F4FF`,`#C5E2FF`]];function s(e,t){let n=e.allocations.map(e=>t.find(t=>t.id===e.foundationId)?.name??e.foundationId).slice(0,3).join(`, `),[r,i]=o[Math.abs(e.id.split(``).reduce((e,t)=>e+t.charCodeAt(0),0))%o.length];return`
+import{t as e}from"./provider-BW_KG98z.js";import{i as t,n,s as r,t as i}from"./cart-poU_UKBB.js";import{t as a}from"./nav-CMc74gyL.js";var o=[[`#E8F5E9`,`#C8E6C9`],[`#F3E8FF`,`#D8B4FE`],[`#FFEFD5`,`#FFD6A5`],[`#E6F4FF`,`#C5E2FF`]];function s(e,t){let n=e.allocations.map(e=>t.find(t=>t.id===e.foundationId)?.name??e.foundationId).slice(0,3).join(`, `),[r,i]=o[Math.abs(e.id.split(``).reduce((e,t)=>e+t.charCodeAt(0),0))%o.length];return`
     <article class="card explore-card" data-bundle-card-id="${e.id}">
       <div class="card-visual" style="background: linear-gradient(135deg, ${r}, ${i})">
         <div class="visual-pattern"></div>

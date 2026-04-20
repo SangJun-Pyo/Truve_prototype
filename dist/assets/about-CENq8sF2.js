@@ -1,0 +1,1 @@
+import"./styles-BzChqKUB.js";import{t as e}from"./nav-CMc74gyL.js";var t=document.getElementById(`top-nav`);t&&(t.innerHTML=e(`about`));

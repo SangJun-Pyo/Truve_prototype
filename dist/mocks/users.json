@@ -1,0 +1,14 @@
+[
+  {
+    "id": "usr_demo_001",
+    "displayName": "김상진",
+    "tier": "sprout",
+    "joinedAt": "2025-10-09T00:00:00.000Z"
+  },
+  {
+    "id": "usr_demo_002",
+    "displayName": "박민지",
+    "tier": "seed",
+    "joinedAt": "2026-02-21T00:00:00.000Z"
+  }
+]

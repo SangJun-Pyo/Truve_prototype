@@ -1,4 +1,6 @@
-﻿export interface XrplTxStatus {
+﻿import { API_BASE } from "./apiBase";
+
+export interface XrplTxStatus {
   hash: string;
   validated: boolean;
   explorerUrl: string;
@@ -29,12 +31,12 @@ async function parseJsonOrThrow(response: Response): Promise<any> {
 }
 
 export async function fetchTxStatus(txHash: string): Promise<XrplTxStatus> {
-  const response = await fetch(`/api/xrpl/tx/${txHash}`);
+  const response = await fetch(`${API_BASE}/api/xrpl/tx/${txHash}`);
   return parseJsonOrThrow(response);
 }
 
 export async function fetchAccountInfo(address: string): Promise<XrplAccountInfo> {
-  const response = await fetch(`/api/xrpl/account/${address}`);
+  const response = await fetch(`${API_BASE}/api/xrpl/account/${address}`);
   return parseJsonOrThrow(response);
 }
 

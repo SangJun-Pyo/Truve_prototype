@@ -1,4 +1,6 @@
-﻿export interface XamanPayloadCreateResponse {
+﻿import { API_BASE } from "./apiBase";
+
+export interface XamanPayloadCreateResponse {
   uuid: string;
   qrPngUrl: string;
   deepLink: string;
@@ -46,14 +48,14 @@ async function parseJsonOrThrow(response: Response): Promise<any> {
 }
 
 export async function createSignInPayload(): Promise<XamanPayloadCreateResponse> {
-  const response = await fetch("/api/xaman/signin", { method: "POST" });
+  const response = await fetch(`${API_BASE}/api/xaman/signin`, { method: "POST" });
   return parseJsonOrThrow(response);
 }
 
 export async function createPaymentPayload(
   input: CreatePaymentPayloadInput,
 ): Promise<XamanPayloadCreateResponse> {
-  const response = await fetch("/api/xaman/payment", {
+  const response = await fetch(`${API_BASE}/api/xaman/payment`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
@@ -64,7 +66,7 @@ export async function createPaymentPayload(
 export async function createMemoPayload(
   input: CreateMemoPayloadInput,
 ): Promise<XamanPayloadCreateResponse> {
-  const response = await fetch("/api/xaman/memo", {
+  const response = await fetch(`${API_BASE}/api/xaman/memo`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
@@ -73,7 +75,7 @@ export async function createMemoPayload(
 }
 
 export async function getPayloadStatus(uuid: string): Promise<XamanPayloadStatusResponse> {
-  const response = await fetch(`/api/xaman/status/${uuid}`);
+  const response = await fetch(`${API_BASE}/api/xaman/status/${uuid}`);
   const status = (await parseJsonOrThrow(response)) as XamanPayloadStatusResponse;
   return {
     ...status,

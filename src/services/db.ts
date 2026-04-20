@@ -1,4 +1,5 @@
-const BASE = "/api/db";
+import { API_BASE } from "./apiBase";
+const BASE = `${API_BASE}/api/db`;
 
 export interface DbDonation {
   id: string;

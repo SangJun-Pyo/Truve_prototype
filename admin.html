@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Truve | Admin</title>
+    <link rel="stylesheet" href="./assets/styles.css" />
+    <style>
+      .admin-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+        gap: 18px;
+        align-items: start;
+        margin-bottom: 18px;
+      }
+
+      .admin-card {
+        background: #fff;
+        border: 1px solid #eceef2;
+        border-radius: 18px;
+        padding: 18px;
+        box-shadow: var(--shadow-card);
+      }
+
+      .admin-card h2 {
+        font-size: 22px;
+        margin-bottom: 6px;
+      }
+
+      .faucet-form {
+        display: grid;
+        gap: 14px;
+        margin-top: 18px;
+      }
+
+      .faucet-warning {
+        border: 1px solid rgba(255, 90, 0, 0.26);
+        background: #fff7ed;
+        color: #9a3412;
+        border-radius: 14px;
+        padding: 12px 14px;
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .faucet-result {
+        display: grid;
+        gap: 10px;
+        margin-top: 16px;
+        word-break: break-all;
+      }
+
+      .result-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid #eef2f7;
+        font-size: 14px;
+      }
+
+      .result-row span:first-child {
+        color: var(--text-secondary);
+        font-weight: 800;
+      }
+
+      .foundation-admin-list {
+        display: grid;
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      .audit-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+        gap: 18px;
+        align-items: start;
+        margin-top: 18px;
+      }
+
+      .foundation-admin-card {
+        border: 1px solid #eef2f7;
+        border-radius: 16px;
+        padding: 14px;
+        display: grid;
+        gap: 10px;
+      }
+
+      .foundation-admin-head,
+      .foundation-admin-actions,
+      .trustline-pills {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .foundation-admin-head h3 {
+        font-size: 16px;
+        margin: 0;
+      }
+
+      .trustline-pills {
+        justify-content: flex-start;
+      }
+
+      .pill {
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-size: 12px;
+        font-weight: 900;
+        background: #f1f5f9;
+        color: #475569;
+      }
+
+      .pill.ready {
+        background: #dcfce7;
+        color: #166534;
+      }
+
+      .pill.missing {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+
+      @media (max-width: 820px) {
+        .admin-grid,
+        .audit-layout {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app-shell">
+      <div id="top-nav"></div>
+
+      <header class="page-header">
+        <h1>Admin</h1>
+        <p class="subtitle">Internal tools for XRPL testnet MVP validation. Testnet only · No real value.</p>
+      </header>
+
+      <section class="admin-grid">
+        <article class="admin-card">
+          <p class="summary-kicker">XRPL Testnet</p>
+          <h2>Testnet Faucet</h2>
+          <p class="subtitle">Send test RLUSD or USDC to a Xaman testnet wallet. Testnet only · No real value.</p>
+
+          <div class="faucet-warning">This sends test tokens on XRPL Testnet only. Testnet only · No real value.</div>
+
+          <form id="faucet-form" class="faucet-form">
+            <label class="field">
+              <span>Admin Secret</span>
+              <input id="admin-secret" type="password" autocomplete="off" placeholder="x-admin-secret" />
+            </label>
+            <label class="field">
+              <span>Recipient Address</span>
+              <input id="recipient-address" type="text" autocomplete="off" placeholder="r..." required />
+            </label>
+            <label class="field">
+              <span>Token</span>
+              <select id="token-select">
+                <option value="RLUSD">RLUSD</option>
+                <option value="USDC">USDC</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Amount</span>
+              <input id="token-amount" type="number" min="0.000001" step="0.000001" value="100" required />
+            </label>
+            <button id="trustline-btn" class="ghost-btn" type="button">Create TrustLine Request</button>
+            <button id="default-ripple-btn" class="ghost-btn" type="button">Enable Issuer Default Ripple</button>
+            <button id="clear-no-ripple-btn" class="ghost-btn" type="button">Clear Issuer NoRipple</button>
+            <button id="send-token-btn" class="cta-btn" type="submit">Send Test Token</button>
+          </form>
+          <div id="trustline-qr-wrap" class="xaman-qr-wrap"></div>
+        </article>
+
+        <aside class="admin-card">
+          <div class="row-between">
+            <h2>Result</h2>
+            <span id="faucet-status" class="status-badge error">IDLE</span>
+          </div>
+          <div id="faucet-result" class="faucet-result">
+            <p class="microcopy">No faucet transaction has been submitted yet.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="admin-card">
+        <div class="row-between">
+          <div>
+            <p class="summary-kicker">Foundation Ops</p>
+            <h2>Foundation Onboarding Dashboard</h2>
+            <p class="subtitle">Review payout wallets, RLUSD/USDC TrustLine readiness, and approval status for the testnet MVP.</p>
+          </div>
+          <button id="refresh-foundations-btn" class="ghost-btn" type="button">Refresh</button>
+        </div>
+        <div id="foundation-admin-list" class="foundation-admin-list">
+          <p class="microcopy">Loading foundation onboarding status...</p>
+        </div>
+      </section>
+
+      <section class="admin-card">
+        <div class="row-between">
+          <div>
+            <p class="summary-kicker">Audit Trail</p>
+            <h2>Receipt Approval & Audit Log</h2>
+            <p class="subtitle">Record foundation receipt approvals with receipt_id and evidence_hash. No KYC or personal data is stored here.</p>
+          </div>
+          <button id="export-audit-btn" class="ghost-btn" type="button">Export JSON</button>
+        </div>
+
+        <div class="audit-layout">
+          <form id="audit-form" class="faucet-form">
+            <label class="field">
+              <span>Receipt ID</span>
+              <input id="audit-receipt-id" type="text" autocomplete="off" />
+            </label>
+            <label class="field">
+              <span>Foundation Wallet</span>
+              <input id="audit-wallet" type="text" autocomplete="off" placeholder="r..." />
+            </label>
+            <label class="field">
+              <span>Tx Hash</span>
+              <input id="audit-tx-hash" type="text" autocomplete="off" placeholder="XRPL transaction hash" />
+            </label>
+            <label class="field">
+              <span>Status</span>
+              <select id="audit-status">
+                <option value="received">Received</option>
+                <option value="reviewed">Reviewed</option>
+                <option value="flagged">Flagged</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Evidence Note</span>
+              <input id="audit-note" type="text" autocomplete="off" placeholder="Internal note without personal data" />
+            </label>
+            <button id="record-audit-btn" class="cta-btn" type="submit">Record Audit Event</button>
+          </form>
+
+          <div id="audit-log-list" class="foundation-admin-list">
+            <p class="microcopy">No audit events recorded yet.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="./src/main/admin.ts"></script>
+  </body>
+</html>

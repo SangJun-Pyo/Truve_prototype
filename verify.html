@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Truve | Verification</title>
+    <link rel="stylesheet" href="./assets/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <div id="top-nav"></div>
+
+      <header class="page-header">
+        <h1>Proof Verification</h1>
+        <p class="subtitle">Verify a Truve receipt_id, evidence_hash, and XRPL Testnet transaction.</p>
+      </header>
+
+      <section class="card">
+        <div class="row-between">
+          <div>
+            <h3 class="section-title">Verification Page</h3>
+            <p class="section-desc">Public proof view for testnet MVP receipts. Testnet only · No real value.</p>
+          </div>
+          <span id="verify-status" class="status-badge error">LOOKUP</span>
+        </div>
+        <div id="verify-result" class="timeline mt-12"></div>
+      </section>
+    </main>
+
+    <script type="module" src="./src/main/verify.ts"></script>
+  </body>
+</html>

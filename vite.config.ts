@@ -13,6 +13,8 @@ export default defineConfig({
         status:     resolve(__dirname, "status.html"),
         about:      resolve(__dirname, "about.html"),
         support:    resolve(__dirname, "support.html"),
+        admin:      resolve(__dirname, "admin.html"),
+        verify:     resolve(__dirname, "verify.html"),
       },
     },
   },

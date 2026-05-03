@@ -67,7 +67,6 @@
               <label class="section-label" for="asset-select">기부 자산</label>
               <div class="select-wrapper">
                 <select id="asset-select">
-                  <option value="XRP">XRP</option>
                   <option value="RLUSD">RLUSD</option>
                   <option value="USDC">USDC on XRPL</option>
                 </select>
@@ -78,15 +77,15 @@
             <div class="summary-section">
               <label class="section-label" for="total-amount">총 기부 금액</label>
               <div class="amount-input-group">
-                <input type="number" id="total-amount" value="100" min="1" />
+                <input type="number" id="total-amount" value="1" min="0.000001" step="0.000001" />
                 <span id="amount-unit">XRP</span>
               </div>
               <div id="amount-krw-estimate" class="conversion-box">예상 원화 환산액: 100,000 KRW</div>
               <div class="quick-amounts">
+                <button class="quick-btn" data-add="-10" type="button">-10</button>
+                <button class="quick-btn" data-add="-1" type="button">-1</button>
+                <button class="quick-btn" data-add="1" type="button">+1</button>
                 <button class="quick-btn" data-add="10" type="button">+10</button>
-                <button class="quick-btn" data-add="25" type="button">+25</button>
-                <button class="quick-btn" data-add="50" type="button">+50</button>
-                <button class="quick-btn" data-add="100" type="button">+100</button>
               </div>
             </div>
 

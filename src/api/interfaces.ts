@@ -39,6 +39,8 @@ export interface DonationBundle {
 export interface DonationRequest {
   userId: string;
   amountKrw: number;
+  asset?: "XRP" | "RLUSD" | "USDC";
+  amountAsset?: number;
   allocations: BundleAllocation[];
 }
 
@@ -57,6 +59,8 @@ export interface DonationRecord {
   userId: string;
   donatedAt: string;
   amountKrw: number;
+  asset?: "XRP" | "RLUSD" | "USDC";
+  amountAsset?: number;
   allocations: BundleAllocation[];
   paymentStatus: "paid" | "pending" | "failed";
   proofStatus: "recorded" | "pending" | "error";
@@ -66,6 +70,8 @@ export interface DonationRecord {
   proofNftId?: string;
   explorerUrl?: string;
   validationStatus?: "pending" | "signed" | "validated" | "failed";
+  receiptId?: string;
+  evidenceHash?: string;
   network?: "testnet";
   destinationAddress?: string;
   foundationWallet?: string;

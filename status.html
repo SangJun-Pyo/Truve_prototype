@@ -16,6 +16,26 @@
       </header>
 
       <section class="card">
+        <div class="row-between">
+          <div>
+            <h3 class="section-title">Xaman 지갑 동기화</h3>
+            <p class="section-desc">지갑을 연결하면 해당 XRPL 계정으로 저장된 기부 기록을 자동으로 불러옵니다.</p>
+          </div>
+          <span id="status-wallet-badge" class="status-badge error">NOT CONNECTED</span>
+        </div>
+        <div class="onchain-card mt-12">
+          <div class="onchain-row"><span>Connected Account</span><span id="status-wallet-address">-</span></div>
+          <div class="onchain-row"><span>Sync Source</span><span id="status-wallet-sync">목업 + 로컬 기록</span></div>
+        </div>
+        <div class="action-row mt-12">
+          <button id="status-xaman-connect-btn" class="ghost-btn" type="button">Xaman 연결</button>
+          <button id="status-xaman-disconnect-btn" class="ghost-btn" type="button">연결 해제</button>
+          <button id="status-refresh-btn" class="ghost-btn" type="button">기록 새로고침</button>
+        </div>
+        <div id="status-xaman-qr-wrap" class="xaman-qr-wrap"></div>
+      </section>
+
+      <section class="card">
         <div id="status-summary" class="status-summary"></div>
         <div id="status-timeline" class="timeline mt-12"></div>
       </section>
@@ -68,6 +88,18 @@
             <div class="onchain-row"><span>기부 이력 합계</span><strong id="status-tax-donation-amount">0원</strong></div>
             <div class="onchain-row"><span>예상 세액공제 범위</span><strong id="status-tax-deduction-range">계산 대기</strong></div>
             <div class="onchain-row"><span>실질 기부 비용</span><strong id="status-tax-real-cost">-</strong></div>
+          </div>
+
+          <div class="tax-graph-panel">
+            <div class="row-between">
+              <div>
+                <h4 class="section-title">기부액별 절세 시나리오</h4>
+                <p class="section-desc">슬라이더를 움직이면 예상 세액공제와 실질 기부 비용이 함께 바뀝니다.</p>
+              </div>
+              <strong id="tax-scenario-label">0원</strong>
+            </div>
+            <input id="tax-scenario-slider" class="tax-scenario-slider" type="range" min="0" max="1000000" step="10000" value="0" />
+            <div id="tax-scenario-chart" class="tax-scenario-chart" role="img" aria-label="기부액별 절세 효과 그래프"></div>
           </div>
 
           <p id="status-tax-explanation" class="microcopy">기부 이력과 기부자 유형을 기준으로 참고 추정치를 확인하세요.</p>

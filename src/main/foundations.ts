@@ -20,7 +20,15 @@ import { upsertLocalDonation, type LocalDonationRecord } from "../services/donat
 import { API_BASE } from "../services/apiBase";
 import { clearWalletSession, getWalletSession, setWalletSession } from "../services/wallet";
 import { createPaymentPayload, createSignInPayload, waitForPayloadResolution } from "../services/xaman";
-import { fetchAccountInfo, getTestnetExplorerLink, waitForTxValidation } from "../services/xrpl";
+import {
+  fetchAccountAssetBalances,
+  fetchAccountInfo,
+  fetchDonationDestination,
+  fetchXrplAssets,
+  getTestnetExplorerLink,
+  waitForTxValidation,
+  type XrplAssetConfig,
+} from "../services/xrpl";
 import { renderTopNav } from "../shared/nav";
 
 const USER_ID = "usr_demo_001";
@@ -30,6 +38,7 @@ const DEMO_KRW_RATES: Record<DonationAsset, number> = {
   RLUSD: 1400,
   USDC: 1400,
 };
+const DONATION_ASSETS: DonationAsset[] = ["RLUSD", "USDC"];
 
 const navRoot = document.getElementById("top-nav");
 if (navRoot) {
@@ -83,10 +92,21 @@ const walletAddressEl = document.getElementById("wallet-address");
 const walletBalanceEl = document.getElementById("wallet-balance");
 const qrWrapEl = document.getElementById("xaman-qr-wrap");
 
+document.querySelector<HTMLElement>(".donation-console .tax-card")?.remove();
+
 let foundations: Foundation[] = [];
 let bundles: DonationBundle[] = [];
 let activeTab: "foundation" | "bundle" = "foundation";
 let lastDonationRecord: LocalDonationRecord | null = null;
+let donationDestination = {
+  address: "",
+  label: "Truve MVP settlement wallet",
+};
+let xrplAssets: XrplAssetConfig[] = [
+  { asset: "XRP", label: "XRP", native: true, configured: true },
+  { asset: "RLUSD", label: "RLUSD", native: false, configured: false },
+  { asset: "USDC", label: "USDC", native: false, configured: false },
+];
 
 interface TaxSimulationResult {
   estimated_deduction_min: number;
@@ -99,7 +119,12 @@ interface TaxSimulationResult {
 
 function getSelectedAsset(): DonationAsset {
   const value = assetSelectEl?.value;
-  return value === "RLUSD" || value === "USDC" ? value : "XRP";
+  return value === "USDC" ? "USDC" : "RLUSD";
+}
+
+function getSelectedAssetConfig(): XrplAssetConfig | undefined {
+  const selected = getSelectedAsset();
+  return xrplAssets.find((asset) => asset.asset === selected);
 }
 
 function getAmount(): number {
@@ -389,12 +414,28 @@ function renderValidation(): void {
 
 function renderAssetState(): void {
   const asset = getSelectedAsset();
+  const config = getSelectedAssetConfig();
   if (amountUnitEl) amountUnitEl.textContent = asset;
   if (amountKrwEstimateEl) {
-    amountKrwEstimateEl.textContent = `예상 원화 환산액: ${formatKrw(getDonationAmountKrw())} · 데모 환율 ${formatKrwRate(asset)}`;
+    amountKrwEstimateEl.innerHTML = `
+      <span class="conversion-label">예상 원화 환산액</span>
+      <strong>${formatKrw(getDonationAmountKrw())}</strong>
+      <span class="conversion-rate">데모 환율 · ${formatKrwRate(asset)}</span>
+    `;
   }
+  assetSelectEl?.querySelectorAll<HTMLOptionElement>("option").forEach((option) => {
+    const optionConfig = xrplAssets.find((item) => item.asset === option.value);
+    option.disabled = !DONATION_ASSETS.includes(option.value as DonationAsset) || Boolean(optionConfig && !optionConfig.configured);
+  });
   if (assetHelpEl) {
-    assetHelpEl.textContent =
+    if (!config?.configured) {
+      assetHelpEl.textContent = `${asset} testnet issuer is not configured. Set XRPL_TESTNET_${asset}_ISSUER on the API server.`;
+      return;
+    }
+    const issuer = config.issuer ? `${config.issuer.slice(0, 6)}...${config.issuer.slice(-4)}` : "-";
+    assetHelpEl.textContent = `${asset} issued currency payment is ready. Receiver needs a TrustLine to issuer ${issuer}.`;
+    return;
+    assetHelpEl!.textContent =
       asset === "XRP"
         ? "XRP는 Xaman Testnet 결제 데모를 바로 실행할 수 있습니다."
         : `${asset} 수령은 재단 TrustLine 설정 후 지원됩니다. 현재 데모 실행은 XRP만 활성화됩니다.`;
@@ -484,18 +525,20 @@ async function calculateTaxSimulation(): Promise<void> {
 
 function renderDestinationInfo(): void {
   if (!destinationEl) return;
-  const foundation = getRepresentativeFoundation();
-  destinationEl.textContent = foundation ? foundation.name : "-";
+  destinationEl.textContent = donationDestination.address
+    ? `${donationDestination.label} (${donationDestination.address.slice(0, 6)}...${donationDestination.address.slice(-4)})`
+    : "-";
 }
 
 function evaluateExecuteState(): void {
   if (!executeBtnEl) return;
+  const assetConfig = getSelectedAssetConfig();
   executeBtnEl.disabled = !(
     Boolean(getWalletSession()) &&
     getCartView().length > 0 &&
     getRatioTotal() === 100 &&
     getAmount() > 0 &&
-    getSelectedAsset() === "XRP" &&
+    Boolean(assetConfig?.configured) &&
     Boolean(complianceCheckEl?.checked)
   );
 }
@@ -537,8 +580,21 @@ async function updateWalletStatusFromSession(): Promise<void> {
 
   setWalletBadge(wallet.account);
   try {
-    const accountInfo = await fetchAccountInfo(wallet.account);
-    setWalletBalanceText(`${accountInfo.balanceXrp} XRP`);
+    const [accountInfo, assetInfo] = await Promise.all([
+      fetchAccountInfo(wallet.account),
+      fetchAccountAssetBalances(wallet.account),
+    ]);
+    const issuedBalances = ["RLUSD", "USDC"]
+      .map((asset) => {
+        const config = xrplAssets.find((item) => item.asset === asset);
+        if (!config?.issuer) return `${asset}: no issuer`;
+        const line = assetInfo.balances.find(
+          (balance) => balance.issuer === config.issuer && balance.displayCurrency === asset,
+        );
+        return `${asset}: ${line?.balance ?? "no TrustLine"}`;
+      })
+      .join(" | ");
+    setWalletBalanceText(`${accountInfo.balanceXrp} XRP | ${issuedBalances}`);
   } catch {
     setWalletBalanceText("조회 실패");
   }
@@ -584,29 +640,34 @@ function toBundleAllocations() {
 
 async function submitDonation(): Promise<void> {
   const wallet = getWalletSession();
-  const destination = getRepresentativeFoundation();
-  if (!wallet || !destination) return;
-  if (getSelectedAsset() !== "XRP") {
-    window.alert("현재 Xaman 데모 실행은 XRP만 지원합니다.");
+  if (!wallet || getCartView().length === 0 || !donationDestination.address) return;
+  const asset = getSelectedAsset();
+  const assetConfig = getSelectedAssetConfig();
+  if (!assetConfig?.configured) {
+    window.alert(`${asset} testnet issuer is not configured.`);
     return;
   }
-
   try {
     const amount = getAmount();
+    const receiptId = `receipt_${Date.now()}`;
+    const evidenceHash = `evidence_${wallet.account.slice(0, 6)}_${receiptId}`;
     setTxStatus("Xaman 서명 대기", false);
     const payload = await createPaymentPayload({
       account: wallet.account,
-      destination: destination.walletAddress,
-      amountDrops: xrpToDrops(amount.toFixed(6)),
+      destination: donationDestination.address,
+      asset,
+      amountDrops: asset === "XRP" ? xrpToDrops(amount.toFixed(6)) : undefined,
+      amountValue: asset === "XRP" ? undefined : amount.toFixed(6),
       memoType: "TRUVE_DONATION",
       memoData: JSON.stringify({
         userId: USER_ID,
-        asset: getSelectedAsset(),
+        asset,
         amount,
         allocations: toBundleAllocations(),
+        settlement_wallet: donationDestination.address,
         campaignId: "truve_mvp",
-        kycHash: "demo_kyc_terms_hash",
-        receipt: "nft_pdf",
+        receipt_id: receiptId,
+        evidence_hash: evidenceHash,
         createdAt: new Date().toISOString(),
       }).slice(0, 230),
     });
@@ -629,6 +690,8 @@ async function submitDonation(): Promise<void> {
       userId: USER_ID,
       donatedAt: new Date().toISOString(),
       amountKrw,
+      asset,
+      amountAsset: amount,
       allocations: toBundleAllocations(),
       paymentStatus: "paid",
       proofStatus: "recorded",
@@ -637,9 +700,11 @@ async function submitDonation(): Promise<void> {
       txHash: signed.txHash,
       explorerUrl: validated.explorerUrl,
       validationStatus,
+      receiptId,
+      evidenceHash,
       network: "testnet",
-      destinationAddress: destination.walletAddress,
-      foundationWallet: destination.walletAddress,
+      destinationAddress: donationDestination.address,
+      foundationWallet: donationDestination.address,
       proofMintStatus: "none",
       source: "local",
     };
@@ -711,7 +776,8 @@ function bindEvents(): void {
   quickAmountEls.forEach((button) => {
     button.addEventListener("click", () => {
       if (!totalAmountEl) return;
-      totalAmountEl.value = String(Math.max(0, (Number(totalAmountEl.value) || 0) + Number(button.dataset.add ?? 0)));
+      const next = (Number(totalAmountEl.value) || 0) + Number(button.dataset.add ?? 0);
+      totalAmountEl.value = String(Math.max(0.000001, Math.round(next * 1_000_000) / 1_000_000));
       renderAll();
     });
   });
@@ -731,6 +797,23 @@ function bindEvents(): void {
 
 async function init(): Promise<void> {
   const repositories = await createRepositories();
+  try {
+    xrplAssets = (await fetchXrplAssets()).assets;
+  } catch {
+    xrplAssets = xrplAssets.map((asset) => (asset.asset === "XRP" ? asset : { ...asset, configured: false }));
+  }
+  try {
+    const destinationResponse = await fetchDonationDestination();
+    donationDestination = {
+      address: destinationResponse.address,
+      label: destinationResponse.label,
+    };
+  } catch {
+    donationDestination = {
+      address: "",
+      label: "Truve MVP settlement wallet",
+    };
+  }
   foundations = await repositories.foundationRepository.list();
   bundles = await repositories.foundationRepository.listBundles();
   bindEvents();

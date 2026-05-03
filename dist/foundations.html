@@ -4,13 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Truve | 기부하기</title>
-    <script type="module" crossorigin src="/assets/foundations-1pOGucdt.js"></script>
-    <link rel="modulepreload" crossorigin href="/assets/cart-DQyj-aMq.js">
-    <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-iJ-6Fn-a.js">
-    <link rel="modulepreload" crossorigin href="/assets/wallet-BizwjWsR.js">
-    <link rel="modulepreload" crossorigin href="/assets/donations-D7ZvcxFw.js">
-    <link rel="modulepreload" crossorigin href="/assets/nav-DrZOEPA-.js">
-    <link rel="stylesheet" crossorigin href="/assets/styles-CgcgR-_Y.css">
+    <script type="module" crossorigin src="/assets/foundations-BlCFJ6Ue.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/cart-B_KX-ywA.js">
+    <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-N-DOuI4P.js">
+    <link rel="modulepreload" crossorigin href="/assets/apiBase-BXOIOaTT.js">
+    <link rel="modulepreload" crossorigin href="/assets/xrpl-HgkFuIC6.js">
+    <link rel="modulepreload" crossorigin href="/assets/wallet-BfUZP1Y-.js">
+    <link rel="modulepreload" crossorigin href="/assets/donations-DhDq83rv.js">
+    <link rel="modulepreload" crossorigin href="/assets/nav-Br5_uZS3.js">
+    <link rel="stylesheet" crossorigin href="/assets/styles-UEy4Nfgd.css">
   </head>
   <body>
     <main class="app-shell">
@@ -73,7 +75,6 @@
               <label class="section-label" for="asset-select">기부 자산</label>
               <div class="select-wrapper">
                 <select id="asset-select">
-                  <option value="XRP">XRP</option>
                   <option value="RLUSD">RLUSD</option>
                   <option value="USDC">USDC on XRPL</option>
                 </select>
@@ -84,15 +85,15 @@
             <div class="summary-section">
               <label class="section-label" for="total-amount">총 기부 금액</label>
               <div class="amount-input-group">
-                <input type="number" id="total-amount" value="100" min="1" />
+                <input type="number" id="total-amount" value="1" min="0.000001" step="0.000001" />
                 <span id="amount-unit">XRP</span>
               </div>
               <div id="amount-krw-estimate" class="conversion-box">예상 원화 환산액: 100,000 KRW</div>
               <div class="quick-amounts">
+                <button class="quick-btn" data-add="-10" type="button">-10</button>
+                <button class="quick-btn" data-add="-1" type="button">-1</button>
+                <button class="quick-btn" data-add="1" type="button">+1</button>
                 <button class="quick-btn" data-add="10" type="button">+10</button>
-                <button class="quick-btn" data-add="25" type="button">+25</button>
-                <button class="quick-btn" data-add="50" type="button">+50</button>
-                <button class="quick-btn" data-add="100" type="button">+100</button>
               </div>
             </div>
 

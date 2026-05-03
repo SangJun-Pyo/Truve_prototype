@@ -13,6 +13,41 @@ export interface XrplAccountInfo {
   sequence?: number;
 }
 
+export interface XrplAssetConfig {
+  asset: "XRP" | "RLUSD" | "USDC";
+  label: string;
+  native: boolean;
+  configured: boolean;
+  currency?: string;
+  displayCurrency?: string;
+  issuer?: string | null;
+}
+
+export interface XrplIssuedBalance {
+  currency: string;
+  displayCurrency: string;
+  issuer: string;
+  balance: string;
+  limit: string;
+}
+
+export interface XrplAssetConfigResponse {
+  network: string;
+  assets: XrplAssetConfig[];
+}
+
+export interface XrplAccountAssetsResponse {
+  address: string;
+  balances: XrplIssuedBalance[];
+  assets: XrplAssetConfig[];
+}
+
+export interface XrplDonationDestination {
+  network: string;
+  address: string;
+  label: string;
+}
+
 interface WaitOptions {
   timeoutMs?: number;
   intervalMs?: number;
@@ -37,6 +72,21 @@ export async function fetchTxStatus(txHash: string): Promise<XrplTxStatus> {
 
 export async function fetchAccountInfo(address: string): Promise<XrplAccountInfo> {
   const response = await fetch(`${API_BASE}/api/xrpl/account/${address}`);
+  return parseJsonOrThrow(response);
+}
+
+export async function fetchXrplAssets(): Promise<XrplAssetConfigResponse> {
+  const response = await fetch(`${API_BASE}/api/xrpl/assets`);
+  return parseJsonOrThrow(response);
+}
+
+export async function fetchAccountAssetBalances(address: string): Promise<XrplAccountAssetsResponse> {
+  const response = await fetch(`${API_BASE}/api/xrpl/account/${encodeURIComponent(address)}/assets`);
+  return parseJsonOrThrow(response);
+}
+
+export async function fetchDonationDestination(): Promise<XrplDonationDestination> {
+  const response = await fetch(`${API_BASE}/api/xrpl/donation-destination`);
   return parseJsonOrThrow(response);
 }
 

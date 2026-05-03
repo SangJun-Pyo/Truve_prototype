@@ -26,7 +26,9 @@ interface WaitOptions {
 interface CreatePaymentPayloadInput {
   account: string;
   destination: string;
-  amountDrops: string;
+  asset?: "XRP" | "RLUSD" | "USDC";
+  amountDrops?: string;
+  amountValue?: string;
   memoType: string;
   memoData: string;
 }

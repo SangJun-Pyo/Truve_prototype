@@ -4,7 +4,7 @@ dotenv.config();
 import express from "express";
 import path from "path";
 import { PrismaClient } from "@prisma/client";
-import { Client } from "xrpl";
+import { Client, Wallet, isValidClassicAddress } from "xrpl";
 const prisma = new PrismaClient();
 
 const app = express();
@@ -13,16 +13,36 @@ const frontendOrigins = (process.env.FRONTEND_ORIGIN ?? "http://localhost:5173")
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
-const isProd = process.env.NODE_ENV === "production";
+const shouldServeStaticDist = process.env.NODE_ENV === "production";
 const xrplTestnetWs = process.env.XRPL_TESTNET_WS ?? "wss://s.altnet.rippletest.net:51233";
+const xrplNetwork = process.env.XRPL_NETWORK ?? "testnet";
+const xrplTestnetWss = process.env.XRPL_TESTNET_WSS ?? xrplTestnetWs;
 const xamanApiKey = process.env.XAMAN_API_KEY;
 const xamanApiSecret = process.env.XAMAN_API_SECRET;
+const adminSecret = process.env.ADMIN_SECRET;
+const adminFaucetEnabled = process.env.ADMIN_FAUCET_ENABLED === "true";
 const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
 const anthropicModel = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-5";
 const fallbackDonationDestination =
   process.env.XRPL_TESTNET_DONATION_DESTINATION ?? "rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe";
 const fallbackGovernanceDestination =
   process.env.XRPL_TESTNET_GOVERNANCE_DESTINATION ?? "rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe";
+const issuedAssetConfig = {
+  RLUSD: {
+    label: "RLUSD",
+    currency: process.env.XRPL_TESTNET_RLUSD_CURRENCY ?? "RLUSD",
+    issuer: process.env.XRPL_TESTNET_RLUSD_ISSUER_ADDRESS ?? process.env.XRPL_TESTNET_RLUSD_ISSUER ?? "",
+    seed: process.env.XRPL_TESTNET_RLUSD_ISSUER_SEED ?? "",
+  },
+  USDC: {
+    label: "USDC",
+    currency: process.env.XRPL_TESTNET_USDC_CURRENCY ?? "USDC",
+    issuer: process.env.XRPL_TESTNET_USDC_ISSUER_ADDRESS ?? process.env.XRPL_TESTNET_USDC_ISSUER ?? "",
+    seed: process.env.XRPL_TESTNET_USDC_ISSUER_SEED ?? "",
+  },
+} as const;
+
+type PaymentAsset = "XRP" | keyof typeof issuedAssetConfig;
 
 app.use(
   cors({
@@ -46,6 +66,172 @@ function requireXamanKeys(): void {
 
 function toHex(input: string): string {
   return Buffer.from(input, "utf8").toString("hex").toUpperCase();
+}
+
+function toXrplCurrencyCode(code: string): string {
+  const trimmed = String(code).trim();
+  if (/^[A-Fa-f0-9]{40}$/.test(trimmed)) {
+    return trimmed.toUpperCase();
+  }
+  if (/^[A-Za-z0-9?!@#$%^&*<>(){}\[\]|]{3}$/.test(trimmed) && trimmed !== "XRP") {
+    return trimmed;
+  }
+  const bytes = Buffer.from(trimmed, "ascii");
+  if (bytes.length === 0 || bytes.length > 20) {
+    throw new Error("Issued currency code must be 1-20 ASCII characters.");
+  }
+  return bytes.toString("hex").toUpperCase().padEnd(40, "0");
+}
+
+function fromXrplCurrencyCode(code: string): string {
+  if (!/^[A-Fa-f0-9]{40}$/.test(code)) {
+    return code;
+  }
+  return Buffer.from(code, "hex").toString("ascii").replace(/\0+$/g, "") || code;
+}
+
+function normalizeIssuedValue(value: unknown): string {
+  const amount = Number(value);
+  if (!Number.isFinite(amount) || amount <= 0) {
+    throw new Error("Issued currency amount must be greater than 0.");
+  }
+  return amount.toFixed(6).replace(/\.?0+$/g, "");
+}
+
+function getIssuedAsset(asset: PaymentAsset) {
+  if (asset === "XRP") return null;
+  const config = issuedAssetConfig[asset];
+  if (!config?.issuer) {
+    throw new Error(`${asset} testnet issuer is not configured.`);
+  }
+  return {
+    ...config,
+    currency: toXrplCurrencyCode(config.currency),
+  };
+}
+
+function getFaucetIssuer(asset: keyof typeof issuedAssetConfig) {
+  const config = issuedAssetConfig[asset];
+  if (!config.issuer || !config.seed) {
+    throw new Error(`${asset} faucet issuer address/seed is not configured.`);
+  }
+  const wallet = Wallet.fromSeed(config.seed);
+  if (wallet.address !== config.issuer) {
+    throw new Error(`${asset} issuer seed does not match issuer address.`);
+  }
+  return {
+    wallet,
+    currency: toXrplCurrencyCode(config.currency),
+  };
+}
+
+function requireAdminSecret(req: express.Request): void {
+  if (!adminSecret) {
+    throw new Error("ADMIN_SECRET is not configured.");
+  }
+  if (req.header("x-admin-secret") !== adminSecret) {
+    const error = new Error("Admin secret is invalid.");
+    (error as Error & { statusCode?: number }).statusCode = 401;
+    throw error;
+  }
+}
+
+function normalizeFaucetInput(input: any) {
+  const recipient = String(input?.recipient ?? "").trim();
+  const currency = String(input?.currency ?? "").trim();
+  const amount = String(input?.amount ?? "").trim();
+
+  if (xrplNetwork !== "testnet") {
+    throw new Error("Testnet Faucet is blocked because XRPL_NETWORK is not testnet.");
+  }
+  if (!adminFaucetEnabled) {
+    throw new Error("Testnet Faucet is disabled. Set ADMIN_FAUCET_ENABLED=true.");
+  }
+  if (!isValidClassicAddress(recipient)) {
+    throw new Error("Recipient must be a valid XRPL classic address.");
+  }
+  if (currency !== "RLUSD" && currency !== "USDC") {
+    throw new Error("currency must be RLUSD or USDC.");
+  }
+  const config = issuedAssetConfig[currency];
+  if (recipient === config.issuer) {
+    throw new Error(
+      "Recipient cannot be the issuer wallet. Enter a different Xaman testnet wallet that has opened a TrustLine for this token issuer.",
+    );
+  }
+  if (!Number.isFinite(Number(amount)) || Number(amount) <= 0) {
+    throw new Error("amount must be greater than 0.");
+  }
+
+  return {
+    recipient,
+    currency: currency as keyof typeof issuedAssetConfig,
+    amount: normalizeIssuedValue(amount),
+  };
+}
+
+function normalizeTrustLineInput(input: any) {
+  const recipient = String(input?.recipient ?? "").trim();
+  const currency = String(input?.currency ?? "").trim();
+  const limit = String(input?.limit ?? input?.amount ?? "1000000").trim();
+
+  if (xrplNetwork !== "testnet") {
+    throw new Error("Testnet TrustLine request is blocked because XRPL_NETWORK is not testnet.");
+  }
+  if (!adminFaucetEnabled) {
+    throw new Error("Testnet TrustLine request is disabled. Set ADMIN_FAUCET_ENABLED=true.");
+  }
+  if (!isValidClassicAddress(recipient)) {
+    throw new Error("Recipient must be a valid XRPL classic address.");
+  }
+  if (currency !== "RLUSD" && currency !== "USDC") {
+    throw new Error("currency must be RLUSD or USDC.");
+  }
+  if (!Number.isFinite(Number(limit)) || Number(limit) <= 0) {
+    throw new Error("TrustLine limit must be greater than 0.");
+  }
+
+  const issuedAsset = getIssuedAsset(currency as keyof typeof issuedAssetConfig);
+  return {
+    recipient,
+    currency: currency as keyof typeof issuedAssetConfig,
+    limit: normalizeIssuedValue(limit),
+    issuer: issuedAsset?.issuer,
+    xrplCurrency: issuedAsset?.currency,
+  };
+}
+
+function normalizeIssuerOpsInput(input: any) {
+  const currency = String(input?.currency ?? "").trim();
+
+  if (xrplNetwork !== "testnet") {
+    throw new Error("Issuer operation is blocked because XRPL_NETWORK is not testnet.");
+  }
+  if (!adminFaucetEnabled) {
+    throw new Error("Issuer operation is disabled. Set ADMIN_FAUCET_ENABLED=true.");
+  }
+  if (currency !== "RLUSD" && currency !== "USDC") {
+    throw new Error("currency must be RLUSD or USDC.");
+  }
+
+  return {
+    currency: currency as keyof typeof issuedAssetConfig,
+  };
+}
+
+function listAssets() {
+  return [
+    { asset: "XRP", label: "XRP", native: true, configured: true },
+    ...Object.entries(issuedAssetConfig).map(([asset, config]) => ({
+      asset,
+      label: config.label,
+      native: false,
+      currency: toXrplCurrencyCode(config.currency),
+      displayCurrency: config.currency,
+      issuer: config.issuer || null,
+      configured: Boolean(config.issuer),
+    })),
+  ];
 }
 
 async function callXaman(path: string, init: RequestInit): Promise<any> {
@@ -200,6 +386,231 @@ app.get("/api/health", (_req, res) => {
   res.json({ ok: true, service: "truve-api" });
 });
 
+app.get("/api/xrpl/assets", (_req, res) => {
+  try {
+    res.json({ network: "XRPL Testnet", assets: listAssets() });
+  } catch (error) {
+    res.status(500).json({ error: error instanceof Error ? error.message : "Asset config lookup failed" });
+  }
+});
+
+app.get("/api/xrpl/donation-destination", (_req, res) => {
+  res.json({
+    network: "XRPL Testnet",
+    address: fallbackDonationDestination,
+    label: "Truve MVP settlement wallet",
+  });
+});
+
+app.post("/api/admin/testnet-faucet", async (req, res) => {
+  const client = new Client(xrplTestnetWss);
+
+  try {
+    requireAdminSecret(req);
+    const input = normalizeFaucetInput(req.body);
+    const issuer = getFaucetIssuer(input.currency);
+
+    await client.connect();
+    const tx = {
+      TransactionType: "Payment" as const,
+      Account: issuer.wallet.address,
+      Destination: input.recipient,
+      Amount: {
+        currency: issuer.currency,
+        issuer: issuer.wallet.address,
+        value: input.amount,
+      },
+    };
+    const prepared = await client.autofill(tx);
+    const signed = issuer.wallet.sign(prepared);
+    const submitted = await client.submitAndWait(signed.tx_blob);
+    const result = submitted.result as any;
+    const engineResult = result?.engine_result ?? result?.meta?.TransactionResult;
+
+    if (engineResult && engineResult !== "tesSUCCESS") {
+      throw new Error(`XRPL transaction failed: ${engineResult}`);
+    }
+
+    res.json({
+      ok: true,
+      currency: input.currency,
+      amount: input.amount,
+      recipient: input.recipient,
+      txHash: signed.hash,
+      validated: Boolean(result?.validated),
+      explorerUrl: `https://testnet.xrpl.org/transactions/${signed.hash}`,
+      message: "Test token sent successfully. Testnet only · No real value.",
+    });
+  } catch (error) {
+    const rawMessage = error instanceof Error ? error.message : "Testnet faucet failed.";
+    const trustLineHint =
+      /tecNO_LINE|tecPATH_DRY|trustline|trust line|path/i.test(rawMessage)
+        ? " Recipient wallet must open a TrustLine for this token issuer before receiving test tokens."
+        : "";
+    const statusCode = (error as Error & { statusCode?: number })?.statusCode ?? 400;
+    res.status(statusCode).json({ error: `${rawMessage}${trustLineHint}` });
+  } finally {
+    if (client.isConnected()) {
+      await client.disconnect();
+    }
+  }
+});
+
+app.post("/api/admin/testnet-trustline", async (req, res) => {
+  try {
+    requireAdminSecret(req);
+    const input = normalizeTrustLineInput(req.body);
+
+    const payload = await callXaman("/payload", {
+      method: "POST",
+      body: JSON.stringify({
+        txjson: {
+          TransactionType: "TrustSet",
+          Account: input.recipient,
+          Flags: 262144,
+          LimitAmount: {
+            currency: input.xrplCurrency,
+            issuer: input.issuer,
+            value: input.limit,
+          },
+        },
+        options: { submit: true, force_network: "TESTNET" },
+      }),
+    });
+
+    res.json({
+      ...mapPayloadCreateResponse(payload),
+      currency: input.currency,
+      issuer: input.issuer,
+      limit: input.limit,
+      message: "Open this TrustLine request in the recipient Xaman testnet wallet. Testnet only · No real value.",
+    });
+  } catch (error) {
+    const statusCode = (error as Error & { statusCode?: number })?.statusCode ?? 400;
+    res.status(statusCode).json({
+      error: error instanceof Error ? error.message : "Testnet TrustLine request failed.",
+    });
+  }
+});
+
+app.post("/api/admin/issuer/default-ripple", async (req, res) => {
+  const client = new Client(xrplTestnetWss);
+
+  try {
+    requireAdminSecret(req);
+    const input = normalizeIssuerOpsInput(req.body);
+    const issuer = getFaucetIssuer(input.currency);
+
+    await client.connect();
+    const accountInfo = await client.request({
+      command: "account_info",
+      account: issuer.wallet.address,
+      ledger_index: "validated",
+    });
+    const flags = Number((accountInfo.result.account_data as any)?.Flags ?? 0);
+    const defaultRippleEnabled = (flags & 0x00800000) !== 0;
+
+    if (defaultRippleEnabled) {
+      res.json({
+        ok: true,
+        currency: input.currency,
+        issuer: issuer.wallet.address,
+        alreadyEnabled: true,
+        defaultRippleEnabled: true,
+        message: "Issuer Default Ripple is already enabled. Testnet only · No real value.",
+      });
+      return;
+    }
+
+    const tx = {
+      TransactionType: "AccountSet" as const,
+      Account: issuer.wallet.address,
+      SetFlag: 8,
+    };
+    const prepared = await client.autofill(tx);
+    const signed = issuer.wallet.sign(prepared);
+    const submitted = await client.submitAndWait(signed.tx_blob);
+    const result = submitted.result as any;
+    const engineResult = result?.engine_result ?? result?.meta?.TransactionResult;
+
+    if (engineResult && engineResult !== "tesSUCCESS") {
+      throw new Error(`XRPL transaction failed: ${engineResult}`);
+    }
+
+    res.json({
+      ok: true,
+      currency: input.currency,
+      issuer: issuer.wallet.address,
+      txHash: signed.hash,
+      validated: Boolean(result?.validated),
+      defaultRippleEnabled: true,
+      explorerUrl: `https://testnet.xrpl.org/transactions/${signed.hash}`,
+      message: "Issuer Default Ripple enabled. Holder-to-holder test token transfers can now path through the issuer.",
+    });
+  } catch (error) {
+    const statusCode = (error as Error & { statusCode?: number })?.statusCode ?? 400;
+    res.status(statusCode).json({
+      error: error instanceof Error ? error.message : "Issuer Default Ripple operation failed.",
+    });
+  } finally {
+    if (client.isConnected()) {
+      await client.disconnect();
+    }
+  }
+});
+
+app.post("/api/admin/issuer/clear-no-ripple", async (req, res) => {
+  const client = new Client(xrplTestnetWss);
+
+  try {
+    requireAdminSecret(req);
+    const input = normalizeTrustLineInput(req.body);
+    const issuer = getFaucetIssuer(input.currency);
+
+    await client.connect();
+    const tx = {
+      TransactionType: "TrustSet" as const,
+      Account: issuer.wallet.address,
+      Flags: 262144,
+      LimitAmount: {
+        currency: issuer.currency,
+        issuer: input.recipient,
+        value: "0",
+      },
+    };
+    const prepared = await client.autofill(tx);
+    const signed = issuer.wallet.sign(prepared);
+    const submitted = await client.submitAndWait(signed.tx_blob);
+    const result = submitted.result as any;
+    const engineResult = result?.engine_result ?? result?.meta?.TransactionResult;
+
+    if (engineResult && engineResult !== "tesSUCCESS") {
+      throw new Error(`XRPL transaction failed: ${engineResult}`);
+    }
+
+    res.json({
+      ok: true,
+      currency: input.currency,
+      issuer: issuer.wallet.address,
+      peer: input.recipient,
+      txHash: signed.hash,
+      validated: Boolean(result?.validated),
+      explorerUrl: `https://testnet.xrpl.org/transactions/${signed.hash}`,
+      message:
+        "Issuer-side NoRipple cleared for this TrustLine. The holder wallet may also need to sign a Clear NoRipple TrustSet request.",
+    });
+  } catch (error) {
+    const statusCode = (error as Error & { statusCode?: number })?.statusCode ?? 400;
+    res.status(statusCode).json({
+      error: error instanceof Error ? error.message : "Issuer Clear NoRipple operation failed.",
+    });
+  } finally {
+    if (client.isConnected()) {
+      await client.disconnect();
+    }
+  }
+});
+
 app.post("/api/tax-sim/calculate", async (req, res) => {
   try {
     const input = normalizeTaxSimulationInput(req.body);
@@ -230,9 +641,25 @@ app.post("/api/xaman/signin", async (_req, res) => {
 
 app.post("/api/xaman/payment", async (req, res) => {
   try {
-    const { account, destination, amountDrops, memoType, memoData } = req.body ?? {};
-    if (!account || !destination || !amountDrops) {
+    const { account, destination, amountDrops, amountValue, asset, memoType, memoData } = req.body ?? {};
+    const selectedAsset = (asset === "RLUSD" || asset === "USDC" ? asset : "XRP") as PaymentAsset;
+    if (!account || !destination) {
       res.status(400).json({ error: "account, destination, amountDrops는 필수입니다." });
+      return;
+    }
+
+    const issuedAsset = getIssuedAsset(selectedAsset);
+    const amount =
+      selectedAsset === "XRP"
+        ? String(amountDrops)
+        : {
+            currency: issuedAsset?.currency,
+            issuer: issuedAsset?.issuer,
+            value: normalizeIssuedValue(amountValue),
+          };
+
+    if (selectedAsset === "XRP" && !amountDrops) {
+      res.status(400).json({ error: "amountDrops is required for XRP payments." });
       return;
     }
 
@@ -243,7 +670,7 @@ app.post("/api/xaman/payment", async (req, res) => {
           TransactionType: "Payment",
           Account: account,
           Destination: destination ?? fallbackDonationDestination,
-          Amount: String(amountDrops),
+          Amount: amount,
           Memos:
             memoType && memoData
               ? [
@@ -256,7 +683,7 @@ app.post("/api/xaman/payment", async (req, res) => {
                 ]
               : undefined,
         },
-        options: { submit: true },
+        options: { submit: true, force_network: "TESTNET" },
       }),
     });
 
@@ -291,7 +718,7 @@ app.post("/api/xaman/memo", async (req, res) => {
             },
           ],
         },
-        options: { submit: true },
+        options: { submit: true, force_network: "TESTNET" },
       }),
     });
 
@@ -400,6 +827,97 @@ app.get("/api/xrpl/account/:address", async (req, res) => {
 });
 
 // ── DB: 사용자 upsert (지갑 연결 시 호출) ──────────────────────────────
+app.get("/api/xrpl/account/:address/assets", async (req, res) => {
+  const address = req.params.address;
+  const client = new Client(xrplTestnetWs);
+
+  try {
+    await client.connect();
+    const lines = await client.request({
+      command: "account_lines",
+      account: address,
+      ledger_index: "validated",
+    });
+
+    const balances = ((lines.result as any)?.lines ?? []).map((line: any) => ({
+      currency: line.currency,
+      displayCurrency: fromXrplCurrencyCode(String(line.currency)),
+      issuer: line.account,
+      balance: line.balance,
+      limit: line.limit,
+    }));
+
+    res.json({
+      address,
+      balances,
+      assets: listAssets(),
+    });
+  } catch (error) {
+    res.status(500).json({
+      address,
+      error: error instanceof Error ? error.message : "Issued currency balance lookup failed",
+    });
+  } finally {
+    if (client.isConnected()) {
+      await client.disconnect();
+    }
+  }
+});
+
+app.get("/api/xrpl/account/:address/trustlines", async (req, res) => {
+  const address = req.params.address;
+  const client = new Client(xrplTestnetWs);
+
+  try {
+    if (!isValidClassicAddress(address)) {
+      res.status(400).json({ error: "address must be a valid XRPL classic address." });
+      return;
+    }
+
+    await client.connect();
+    const lines = await client.request({
+      command: "account_lines",
+      account: address,
+      ledger_index: "validated",
+    });
+
+    const balances = ((lines.result as any)?.lines ?? []).map((line: any) => ({
+      currency: line.currency,
+      displayCurrency: fromXrplCurrencyCode(String(line.currency)),
+      issuer: line.account,
+      balance: line.balance,
+      limit: line.limit,
+    }));
+
+    const trustlines = (["RLUSD", "USDC"] as const).map((asset) => {
+      const config = issuedAssetConfig[asset];
+      const xrplCurrency = toXrplCurrencyCode(config.currency);
+      const line = balances.find(
+        (balance: any) => balance.issuer === config.issuer && balance.currency === xrplCurrency,
+      );
+      return {
+        asset,
+        issuer: config.issuer || null,
+        configured: Boolean(config.issuer),
+        ready: Boolean(line),
+        balance: line?.balance ?? null,
+        limit: line?.limit ?? null,
+      };
+    });
+
+    res.json({ address, trustlines });
+  } catch (error) {
+    res.status(500).json({
+      address,
+      error: error instanceof Error ? error.message : "TrustLine lookup failed",
+    });
+  } finally {
+    if (client.isConnected()) {
+      await client.disconnect();
+    }
+  }
+});
+
 app.post("/api/db/users", async (req, res) => {
   try {
     const { xrplAccount, displayName } = req.body ?? {};
@@ -520,7 +1038,7 @@ app.get("/api/db/governance/:proposalId", async (req, res) => {
 });
 
 // ── 프로덕션: dist/ 정적 파일 서빙 ────────────────────────────────────
-if (isProd) {
+if (shouldServeStaticDist) {
   const distPath = path.resolve(process.cwd(), "dist");
   app.use(express.static(distPath));
   app.get("/{*splat}", (_req, res) => {

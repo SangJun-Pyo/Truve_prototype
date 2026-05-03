@@ -10,6 +10,7 @@ const TABS: Tab[] = [
   { id: "governance", label: "거버넌스", href: "./governance.html" },
   { id: "about", label: "서비스 소개", href: "./about.html" },
   { id: "support", label: "지원 센터", href: "./support.html" },
+  { id: "admin", label: "Admin", href: "./admin.html" },
 ];
 
 export function renderTopNav(activeTabId: string): string {

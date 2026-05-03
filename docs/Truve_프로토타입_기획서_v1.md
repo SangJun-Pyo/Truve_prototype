@@ -10,7 +10,7 @@
 ### 1.1 서비스명
 - Truve (Trust + Give)
 
-### 1.2 한 줄 정의
+### 1.2 한 줄 정의https://portal.cdp.coinbase.com/products/faucet?projectId=e356c956-09ae-429c-8db5-6f46bff2d09d&token=ETH&network=base-sepolia&address=0x8A4a0ed3B8042058f3EfcaC2B7a6b41482684d96
 - 기부를 단순 결제가 아닌 참여 권한으로 전환하는 XRPL 기반 투명 기부 플랫폼 프로토타입
 
 ### 1.3 프로토타입 목표

@@ -4,15 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Truve | 기부하기</title>
-    <script type="module" crossorigin src="/assets/foundations-BlCFJ6Ue.js"></script>
+    <script type="module" crossorigin src="/assets/foundations-Db5Fa86w.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/cart-B_KX-ywA.js">
     <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-N-DOuI4P.js">
     <link rel="modulepreload" crossorigin href="/assets/apiBase-BXOIOaTT.js">
-    <link rel="modulepreload" crossorigin href="/assets/xrpl-HgkFuIC6.js">
-    <link rel="modulepreload" crossorigin href="/assets/wallet-BfUZP1Y-.js">
-    <link rel="modulepreload" crossorigin href="/assets/donations-DhDq83rv.js">
+    <link rel="modulepreload" crossorigin href="/assets/xrpl-FTcenvDK.js">
+    <link rel="modulepreload" crossorigin href="/assets/donations-BtxmKuHC.js">
+    <link rel="modulepreload" crossorigin href="/assets/wallet-Dr8BPKSq.js">
     <link rel="modulepreload" crossorigin href="/assets/nav-Br5_uZS3.js">
-    <link rel="stylesheet" crossorigin href="/assets/styles-UEy4Nfgd.css">
+    <link rel="stylesheet" crossorigin href="/assets/styles-zSAEe-X7.css">
   </head>
   <body>
     <main class="app-shell">
@@ -180,7 +180,7 @@
               <div class="onchain-row"><span>Status</span><span id="donation-tx-status">대기</span></div>
             </div>
 
-            <label class="check-row">
+            <label class="check-row hidden">
               <input id="compliance-check" type="checkbox" />
               <span>거래소 KYC 지갑 사용, 허용 자산 기부, NFT/PDF 영수증 발급 구조를 확인했습니다.</span>
             </label>
@@ -210,6 +210,72 @@
       </div>
 
       <div id="fly-layer" class="fly-layer" aria-hidden="true"></div>
+
+      <div id="preflight-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="preflight-title">
+        <section class="modal-panel preflight-panel">
+          <div class="row-between">
+            <div>
+              <p class="summary-kicker">Before Payment</p>
+              <h2 id="preflight-title">기부 전 확인</h2>
+              <p class="section-desc">입력값 원문은 온체인에 올리지 않고, 검증용 해시만 결제 메모에 포함합니다.</p>
+            </div>
+            <button id="preflight-close-btn" class="icon-btn" type="button" aria-label="닫기">×</button>
+          </div>
+
+          <div class="preflight-grid">
+            <label class="field">
+              <span>실명 확인</span>
+              <input id="preflight-real-name" type="text" autocomplete="name" placeholder="예: 김상진" />
+            </label>
+            <label class="field">
+              <span>기부 목적 확인</span>
+              <select id="preflight-purpose">
+                <option value="">선택</option>
+                <option value="public-benefit">공익 목적 기부</option>
+                <option value="campaign-support">캠페인 지정 기부</option>
+                <option value="general-support">재단 일반 후원</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>가상자산 출처 확인</span>
+              <select id="preflight-asset-source">
+                <option value="">선택</option>
+                <option value="exchange-kyc">KYC 완료 거래소 보유 자산</option>
+                <option value="personal-wallet">본인 지갑 보유 자산</option>
+                <option value="business-treasury">법인/단체 보유 자산</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>특수관계성 확인</span>
+              <select id="preflight-related-party">
+                <option value="">선택</option>
+                <option value="none">재단/수혜자와 특수관계 없음</option>
+                <option value="disclosed">특수관계 있음, 사전 고지</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="preflight-checks">
+            <label class="check-row">
+              <input id="preflight-exchange-notice" type="checkbox" />
+              <span>거래소 기반 기부 및 사전 고지 사항을 확인했습니다.</span>
+            </label>
+            <label class="check-row">
+              <input id="preflight-proof-consent" type="checkbox" />
+              <span>결제 완료 후 Truve Proof가 자동 생성되며, 공식 영수증 대체물이 아닌 검증용 증빙임을 이해했습니다.</span>
+            </label>
+          </div>
+
+          <div class="notice">
+            XLS-20 Proof Token이 필요한 경우에도 개인정보 원문이 아니라 receipt_id, evidence_hash, compliance_hash 중심으로 연결합니다.
+          </div>
+
+          <div class="action-row">
+            <button id="preflight-cancel-btn" class="ghost-btn" type="button">취소</button>
+            <button id="preflight-confirm-btn" class="cta-btn" type="button" disabled>확인 후 Xaman 결제</button>
+          </div>
+        </section>
+      </div>
     </main>
 
   </body>

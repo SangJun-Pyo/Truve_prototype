@@ -854,7 +854,7 @@ app.post("/api/db/users", async (req, res) => {
 // ── DB: 기부 기록 저장 ─────────────────────────────────────────────────
 app.post("/api/db/donations", async (req, res) => {
     try {
-        const { xrplAccount, amountKrw, allocations, txHash, explorerUrl } = req.body ?? {};
+        const { xrplAccount, amountKrw, allocations, txHash, explorerUrl, receiptId, evidenceHash, complianceHash, asset, amountAsset } = req.body ?? {};
         if (!xrplAccount || !amountKrw || !allocations) {
             res.status(400).json({ error: "xrplAccount, amountKrw, allocations는 필수입니다." });
             return;
@@ -864,13 +864,33 @@ app.post("/api/db/donations", async (req, res) => {
             update: {},
             create: { xrplAccount },
         });
+        if (txHash) {
+            const existing = await prisma.donation.findFirst({
+                where: { userId: user.id, txHash },
+            });
+            if (existing) {
+                res.json(existing);
+                return;
+            }
+        }
+        const allocationPayload = {
+            items: allocations,
+            meta: {
+                receiptId: receiptId ?? null,
+                evidenceHash: evidenceHash ?? null,
+                complianceHash: complianceHash ?? null,
+                asset: asset ?? null,
+                amountAsset: amountAsset ?? null,
+            },
+        };
         const donation = await prisma.donation.create({
             data: {
                 userId: user.id,
                 amountKrw: Number(amountKrw),
-                allocations,
+                allocations: allocationPayload,
                 paymentStatus: "paid",
                 proofStatus: txHash ? "recorded" : "pending",
+                nftStatus: txHash ? "minted" : "pending",
                 txHash: txHash ?? null,
                 explorerUrl: explorerUrl ?? null,
                 validationStatus: txHash ? "validated" : "pending",
@@ -890,6 +910,21 @@ app.get("/api/db/donations/:xrplAccount", async (req, res) => {
             include: { donations: { orderBy: { donatedAt: "desc" } } },
         });
         res.json(user?.donations ?? []);
+    }
+    catch (error) {
+        res.status(500).json({ error: error instanceof Error ? error.message : "기부 조회 실패" });
+    }
+});
+app.get("/api/db/donation-by-tx/:txHash", async (req, res) => {
+    try {
+        const donation = await prisma.donation.findFirst({
+            where: { txHash: req.params.txHash },
+        });
+        if (!donation) {
+            res.status(404).json({ error: "Donation not found" });
+            return;
+        }
+        res.json(donation);
     }
     catch (error) {
         res.status(500).json({ error: error instanceof Error ? error.message : "기부 조회 실패" });

@@ -91,6 +91,16 @@ const walletStatusEl = document.getElementById("wallet-status");
 const walletAddressEl = document.getElementById("wallet-address");
 const walletBalanceEl = document.getElementById("wallet-balance");
 const qrWrapEl = document.getElementById("xaman-qr-wrap");
+const preflightModalEl = document.getElementById("preflight-modal");
+const preflightRealNameEl = document.getElementById("preflight-real-name") as HTMLInputElement | null;
+const preflightPurposeEl = document.getElementById("preflight-purpose") as HTMLSelectElement | null;
+const preflightAssetSourceEl = document.getElementById("preflight-asset-source") as HTMLSelectElement | null;
+const preflightRelatedPartyEl = document.getElementById("preflight-related-party") as HTMLSelectElement | null;
+const preflightExchangeNoticeEl = document.getElementById("preflight-exchange-notice") as HTMLInputElement | null;
+const preflightProofConsentEl = document.getElementById("preflight-proof-consent") as HTMLInputElement | null;
+const preflightConfirmBtnEl = document.getElementById("preflight-confirm-btn") as HTMLButtonElement | null;
+const preflightCloseBtnEl = document.getElementById("preflight-close-btn") as HTMLButtonElement | null;
+const preflightCancelBtnEl = document.getElementById("preflight-cancel-btn") as HTMLButtonElement | null;
 
 document.querySelector<HTMLElement>(".donation-console .tax-card")?.remove();
 
@@ -107,6 +117,17 @@ let xrplAssets: XrplAssetConfig[] = [
   { asset: "RLUSD", label: "RLUSD", native: false, configured: false },
   { asset: "USDC", label: "USDC", native: false, configured: false },
 ];
+
+interface ComplianceSnapshot {
+  realNameHash: string;
+  purpose: string;
+  assetSource: string;
+  relatedParty: string;
+  exchangeNoticeAccepted: boolean;
+  proofConsentAccepted: boolean;
+  complianceHash: string;
+  capturedAt: string;
+}
 
 interface TaxSimulationResult {
   estimated_deduction_min: number;
@@ -142,6 +163,14 @@ function formatKrw(amount: number): string {
 
 function formatKrwRate(asset: DonationAsset): string {
   return `1 ${asset} = ${DEMO_KRW_RATES[asset].toLocaleString("ko-KR")} KRW`;
+}
+
+async function sha256Hex(input: string): Promise<string> {
+  const bytes = new TextEncoder().encode(input);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 function getCartView() {
@@ -538,9 +567,49 @@ function evaluateExecuteState(): void {
     getCartView().length > 0 &&
     getRatioTotal() === 100 &&
     getAmount() > 0 &&
-    Boolean(assetConfig?.configured) &&
-    Boolean(complianceCheckEl?.checked)
+    Boolean(assetConfig?.configured)
   );
+}
+
+function isPreflightComplete(): boolean {
+  return Boolean(
+    preflightRealNameEl?.value.trim() &&
+      preflightPurposeEl?.value &&
+      preflightAssetSourceEl?.value &&
+      preflightRelatedPartyEl?.value &&
+      preflightExchangeNoticeEl?.checked &&
+      preflightProofConsentEl?.checked,
+  );
+}
+
+function updatePreflightState(): void {
+  if (preflightConfirmBtnEl) preflightConfirmBtnEl.disabled = !isPreflightComplete();
+}
+
+function openPreflightModal(): void {
+  preflightModalEl?.classList.remove("hidden");
+  updatePreflightState();
+  preflightRealNameEl?.focus();
+}
+
+function closePreflightModal(): void {
+  preflightModalEl?.classList.add("hidden");
+}
+
+async function collectComplianceSnapshot(receiptId: string, walletAccount: string): Promise<ComplianceSnapshot> {
+  const capturedAt = new Date().toISOString();
+  const realNameHash = await sha256Hex(`${walletAccount}:${receiptId}:${preflightRealNameEl?.value.trim() ?? ""}`);
+  const snapshot = {
+    realNameHash,
+    purpose: preflightPurposeEl?.value ?? "",
+    assetSource: preflightAssetSourceEl?.value ?? "",
+    relatedParty: preflightRelatedPartyEl?.value ?? "",
+    exchangeNoticeAccepted: Boolean(preflightExchangeNoticeEl?.checked),
+    proofConsentAccepted: Boolean(preflightProofConsentEl?.checked),
+    capturedAt,
+  };
+  const complianceHash = await sha256Hex(JSON.stringify(snapshot));
+  return { ...snapshot, complianceHash };
 }
 
 function renderTxResult(record: LocalDonationRecord | null): void {
@@ -641,6 +710,10 @@ function toBundleAllocations() {
 async function submitDonation(): Promise<void> {
   const wallet = getWalletSession();
   if (!wallet || getCartView().length === 0 || !donationDestination.address) return;
+  if (!isPreflightComplete()) {
+    openPreflightModal();
+    return;
+  }
   const asset = getSelectedAsset();
   const assetConfig = getSelectedAssetConfig();
   if (!assetConfig?.configured) {
@@ -650,7 +723,18 @@ async function submitDonation(): Promise<void> {
   try {
     const amount = getAmount();
     const receiptId = `receipt_${Date.now()}`;
-    const evidenceHash = `evidence_${wallet.account.slice(0, 6)}_${receiptId}`;
+    const compliance = await collectComplianceSnapshot(receiptId, wallet.account);
+    const evidenceHash = await sha256Hex(
+      JSON.stringify({
+        receiptId,
+        wallet: wallet.account,
+        destination: donationDestination.address,
+        asset,
+        amount,
+        allocations: toBundleAllocations(),
+        complianceHash: compliance.complianceHash,
+      }),
+    );
     setTxStatus("Xaman 서명 대기", false);
     const payload = await createPaymentPayload({
       account: wallet.account,
@@ -668,8 +752,9 @@ async function submitDonation(): Promise<void> {
         campaignId: "truve_mvp",
         receipt_id: receiptId,
         evidence_hash: evidenceHash,
+        compliance_hash: compliance.complianceHash,
         createdAt: new Date().toISOString(),
-      }).slice(0, 230),
+      }).slice(0, 900),
     });
 
     renderQrcode(payload.qrPngUrl, payload.deepLink);
@@ -688,6 +773,7 @@ async function submitDonation(): Promise<void> {
     const donationRecord: LocalDonationRecord = {
       id: `dnt_live_${Date.now()}`,
       userId: USER_ID,
+      xrplAccount: wallet.account,
       donatedAt: new Date().toISOString(),
       amountKrw,
       asset,
@@ -702,10 +788,14 @@ async function submitDonation(): Promise<void> {
       validationStatus,
       receiptId,
       evidenceHash,
+      complianceHash: compliance.complianceHash,
+      compliancePurpose: compliance.purpose,
+      assetSource: compliance.assetSource,
+      relatedParty: compliance.relatedParty,
       network: "testnet",
       destinationAddress: donationDestination.address,
       foundationWallet: donationDestination.address,
-      proofMintStatus: "none",
+      proofMintStatus: "recorded",
       source: "local",
     };
 
@@ -718,6 +808,11 @@ async function submitDonation(): Promise<void> {
       allocations: donationRecord.allocations,
       txHash: donationRecord.txHash,
       explorerUrl: donationRecord.explorerUrl,
+      receiptId,
+      evidenceHash,
+      complianceHash: compliance.complianceHash,
+      asset,
+      amountAsset: amount,
     }).then((saved) => {
       if (saved && lastDonationRecord) {
         lastDonationRecord = { ...lastDonationRecord, dbId: saved.id };
@@ -762,6 +857,26 @@ function bindEvents(): void {
   totalAmountEl?.addEventListener("input", renderAll);
   assetSelectEl?.addEventListener("change", renderAll);
   complianceCheckEl?.addEventListener("change", evaluateExecuteState);
+  [
+    preflightRealNameEl,
+    preflightPurposeEl,
+    preflightAssetSourceEl,
+    preflightRelatedPartyEl,
+    preflightExchangeNoticeEl,
+    preflightProofConsentEl,
+  ].forEach((element) => {
+    element?.addEventListener("input", updatePreflightState);
+    element?.addEventListener("change", updatePreflightState);
+  });
+  preflightCloseBtnEl?.addEventListener("click", closePreflightModal);
+  preflightCancelBtnEl?.addEventListener("click", closePreflightModal);
+  preflightModalEl?.addEventListener("click", (event) => {
+    if (event.target === preflightModalEl) closePreflightModal();
+  });
+  preflightConfirmBtnEl?.addEventListener("click", () => {
+    closePreflightModal();
+    void submitDonation();
+  });
   taxDonorTypeEl?.addEventListener("change", () => {
     renderTaxFormState();
     resetTaxResult();
@@ -792,7 +907,7 @@ function bindEvents(): void {
   });
   connectBtnEl?.addEventListener("click", () => void connectWallet());
   disconnectBtnEl?.addEventListener("click", disconnectWallet);
-  executeBtnEl?.addEventListener("click", () => void submitDonation());
+  executeBtnEl?.addEventListener("click", openPreflightModal);
 }
 
 async function init(): Promise<void> {

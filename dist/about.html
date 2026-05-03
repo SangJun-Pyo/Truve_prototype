@@ -1,40 +1,120 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Truve | 서비스 소개</title>
-    <script type="module" crossorigin src="/assets/about-CjEI9Scg.js"></script>
+    <script type="module" crossorigin src="/assets/about-DwvgujPS.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-N-DOuI4P.js">
     <link rel="modulepreload" crossorigin href="/assets/nav-Br5_uZS3.js">
-    <link rel="stylesheet" crossorigin href="/assets/styles-UEy4Nfgd.css">
+    <link rel="stylesheet" crossorigin href="/assets/styles-zSAEe-X7.css">
   </head>
   <body>
     <main class="app-shell">
       <div id="top-nav"></div>
 
-      <header class="page-header">
-        <h1>Truve 시스템 소개</h1>
-        <p class="subtitle">기부 결제부터 증빙, 커뮤니티 거버넌스까지 한 흐름으로 연결합니다.</p>
+      <header class="page-header about-hero">
+        <p class="summary-kicker">XRPL Credential 기반 가상자산 기부 인프라</p>
+        <h1>Truve</h1>
+        <p class="subtitle">Make crypto giving simple, verifiable, and tax-ready.</p>
+        <p class="about-lead">
+          Truve는 가상자산 기부를 쉽고 빠르게 만들고, 그 기부가 세무·감사 가능한 증빙으로 이어지도록 돕는 XRPL 기반 기부 인프라입니다.
+        </p>
       </header>
 
+      <section class="about-section card">
+        <h2>Why Truve</h2>
+        <p>
+          가상자산을 보유한 기부자는 많지만 실제 기부 경험은 아직 불편합니다. 어떤 재단에 기부할 수 있는지 찾기 어렵고,
+          기부 시점의 원화 가치, 세무 참고 지표, 영수증 발급, 증빙 보관까지 모두 따로 확인해야 합니다.
+        </p>
+        <p>
+          재단도 지갑 개설만으로는 충분하지 않습니다. 어떤 자산을 받을지, 기부 시점 가치를 어떻게 산정할지,
+          환전·정산 내역을 어떻게 보관할지, 세무법인과 감사인이 무엇을 기준으로 검증할지에 대한 운영 인프라가 필요합니다.
+        </p>
+        <p>Truve는 이 끊어진 기부 흐름을 하나로 연결합니다.</p>
+      </section>
+
       <section class="page-grid page-grid--two">
-        <article class="card">
-          <h3 class="section-title">1. 기부 설계</h3>
-          <p class="section-desc">재단 탐색에서 원하는 재단을 담고 비율을 직접 조정해 포트폴리오를 만듭니다.</p>
+        <article class="card about-section">
+          <h2>Problem</h2>
+          <p>
+            현재 가상자산 기부 시장은 수요가 없는 것이 아니라, 기부자·재단·세무 검증자 사이의 운영 레일이 없는 상태입니다.
+          </p>
+          <ul class="about-list">
+            <li>기부자는 원하는 재단을 찾고, 세무 참고 지표를 확인하고, 쉽게 기부하고 싶어합니다.</li>
+            <li>재단은 가상자산 기부를 받고 싶지만, 수령·평가·증빙·관리 시스템이 부족합니다.</li>
+            <li>세무법인과 회계법인은 거래 해시, 기준가, 환전 내역, 재단 승인 상태를 수작업으로 검토해야 합니다.</li>
+            <li>기업은 ESG/CSR 기부를 외부 검증 가능한 증빙으로 남기기 어렵습니다.</li>
+          </ul>
         </article>
-        <article class="card">
-          <h3 class="section-title">2. XRPL 기록</h3>
-          <p class="section-desc">Xaman으로 서명한 트랜잭션을 XRPL Testnet에 기록해 증빙 가능성을 높입니다.</p>
+
+        <article class="card about-section">
+          <h2>Solution</h2>
+          <p>
+            Truve는 기부자에게 쉬운 기부 경험을, 재단에게 가상자산 기부 관리 인프라를, 세무법인과 기업에게 검증 가능한 증빙 레이어를 제공합니다.
+          </p>
+          <p>
+            기부자는 재단을 탐색하고 기부 목적과 세무 참고 지표를 확인한 뒤, RLUSD·USDC 등 스테이블코인으로 재단에 직접 기부합니다.
+          </p>
+          <p>
+            재단은 Truve 대시보드에서 기부 내역, 캠페인별 수령액, 기부 시점 원화 환산액, 홈택스 입력용 데이터, 증빙 발급 상태를 관리합니다.
+          </p>
         </article>
-        <article class="card">
-          <h3 class="section-title">3. Proof NFT</h3>
-          <p class="section-desc">기부 후속 증명을 NFT 형태로 확장할 수 있도록 민팅 구조를 준비해 둡니다.</p>
+      </section>
+
+      <section class="about-section card">
+        <h2>XRPL Credential</h2>
+        <p>
+          Truve의 핵심은 기부 내역을 단순한 DB 기록이 아니라 검증 가능한 Donation Credential로 바꾸는 것입니다.
+        </p>
+        <div class="about-role-grid">
+          <div><strong>재단</strong><span>Credential 발급자</span></div>
+          <div><strong>기부자</strong><span>Credential 보유자</span></div>
+          <div><strong>세무법인·감사인</strong><span>Credential 검증자</span></div>
+          <div><strong>Truve</strong><span>기부·증빙·검증 인프라 제공자</span></div>
+        </div>
+        <p>
+          기부금은 Truve를 거치지 않고 재단에 직접 전달됩니다. Truve는 해당 거래를 기반으로 Evidence Package를 생성하고,
+          재단은 이를 XRPL XLS-70 Donation Credential로 발급합니다.
+        </p>
+        <p>즉, Truve는 돈을 움직이는 플랫폼이 아니라 기부가 끝까지 증명되도록 만드는 인프라입니다.</p>
+      </section>
+
+      <section class="page-grid page-grid--two">
+        <article class="card about-section">
+          <h2>Why XRPL</h2>
+          <ul class="about-list">
+            <li><strong>Payment</strong> 기부자에서 재단으로 스테이블코인 직접 송금</li>
+            <li><strong>TrustLine</strong> 재단이 수령 가능한 자산 관리</li>
+            <li><strong>DestinationTag</strong> 캠페인별 기부금 구분</li>
+            <li><strong>Memo</strong> receipt_id, evidence_hash 등 증빙 식별자 기록</li>
+            <li><strong>XLS-70 Credential</strong> 기부 사실 발급·보유·검증</li>
+          </ul>
+          <p>
+            중앙화 DB만으로는 모든 참여자가 Truve의 데이터를 믿어야 합니다. XRPL 기반 Credential 구조에서는 재단이 발급한 기부 증빙을 외부에서도 검증할 수 있습니다.
+          </p>
         </article>
-        <article class="card">
-          <h3 class="section-title">4. 거버넌스 참여</h3>
-          <p class="section-desc">기부자의 참여 이력을 기반으로 재단/커뮤니티 의사결정에 연결합니다.</p>
+
+        <article class="card about-section">
+          <h2>Business Model</h2>
+          <ol class="about-list">
+            <li><strong>재단 관리 SaaS</strong> 수령 관리, 캠페인별 내역, 원화 환산액, 홈택스 입력용 데이터 정리</li>
+            <li><strong>세무법인·회계법인 검증 콘솔</strong> 거래 해시, 평가액, 재단 승인 상태, Donation Credential 검증</li>
+            <li><strong>기업 ESG/CSR 리포트</strong> 기업 기부 리포트, Proof Link, 감사·IR용 증빙 패키지</li>
+          </ol>
+          <p>Truve의 수익 모델은 기부금 수수료가 아니라 B2B 인프라 구독입니다.</p>
         </article>
+      </section>
+
+      <section class="about-section card about-goal">
+        <h2>Goal</h2>
+        <p>
+          Truve의 목표는 하나의 기부 플랫폼을 만드는 것이 아닙니다. 기부자는 더 쉽게 기부하고, 재단은 더 쉽게 가상자산 기부를 받고,
+          세무법인과 감사인은 더 쉽게 검증할 수 있는 가상자산 기부 시장의 운영 인프라를 만드는 것입니다.
+        </p>
+        <p>기부는 쉬워지고, 증빙은 Credential이 되며, 신뢰는 XRPL 위에서 검증됩니다.</p>
+        <strong>Trust &amp; Give, Truve.</strong>
       </section>
     </main>
 

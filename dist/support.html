@@ -1,63 +1,107 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Truve | Support</title>
-    <style>
-      .support-wrap {
-        display: grid;
-        gap: 14px;
-      }
-      .support-card {
-        background: #fff;
-        border: 1px solid #eceef2;
-        border-radius: 16px;
-        padding: 16px;
-      }
-      .support-card h3 {
-        margin: 0 0 6px;
-        font-size: 16px;
-      }
-      .support-card p {
-        margin: 0;
-        color: #8a8d93;
-        font-size: 14px;
-      }
-    </style>
-    <script type="module" crossorigin src="/assets/support-DNHcotxW.js"></script>
+    <title>Truve | 지원 센터</title>
+    <script type="module" crossorigin src="/assets/support-BT1F7Ptf.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-N-DOuI4P.js">
     <link rel="modulepreload" crossorigin href="/assets/nav-Br5_uZS3.js">
-    <link rel="stylesheet" crossorigin href="/assets/styles-UEy4Nfgd.css">
+    <link rel="stylesheet" crossorigin href="/assets/styles-zSAEe-X7.css">
   </head>
   <body>
     <main class="app-shell">
       <div id="top-nav"></div>
 
       <header class="page-header">
-        <h1>Truve Support</h1>
-        <p class="subtitle">프로토타입 사용 중 필요한 안내와 빠른 점검 항목을 제공합니다.</p>
+        <h1>지원 센터</h1>
+        <p class="subtitle">Truve 프로토타입 이용 안내, 기부 전 확인 사항, 개인정보 및 사전 고지사항을 제공합니다.</p>
       </header>
 
-      <section class="support-wrap">
-        <article class="support-card">
-          <h3>지갑 연결이 안 될 때</h3>
-          <p>로컬은 API 서버(8787)와 Vite proxy를 확인하고, 배포 환경은 VITE_API_BASE_URL, FRONTEND_ORIGIN, XAMAN_API_KEY/SECRET을 함께 확인해 주세요.</p>
+      <section class="support-policy-grid">
+        <article id="privacy" class="card policy-card">
+          <p class="summary-kicker">Privacy</p>
+          <h2>개인정보처리방침</h2>
+          <p>
+            Truve는 기부 전 확인 과정에서 입력되는 실명 확인 정보 등 민감할 수 있는 원문 정보를 온체인에 기록하지 않습니다.
+            프로토타입에서는 결제 검증을 위해 지갑 주소, 트랜잭션 해시, 기부 금액, 선택 재단, receipt_id, evidence_hash,
+            compliance_hash 등 최소한의 증빙 데이터를 사용합니다.
+          </p>
+          <p>
+            실명 확인 값은 검증용 해시 생성에만 사용되며, XRPL Memo에는 개인정보 원문이 아닌 식별 해시만 포함됩니다.
+            실제 서비스 전환 시에는 개인정보 수집 항목, 보관 기간, 파기 절차, 제3자 제공 여부를 별도 약관으로 고지합니다.
+          </p>
         </article>
-        <article class="support-card">
-          <h3>기부 실행 후 확인 방법</h3>
-          <p>기부 후 표시되는 TX Hash를 XRPL Testnet Explorer에서 조회하면 검증 상태를 바로 확인할 수 있습니다.</p>
+
+        <article id="exchange-notice" class="card policy-card">
+          <p class="summary-kicker">Exchange-Based Giving</p>
+          <h2>거래소 기반 기부 및 사전 고지사항</h2>
+          <p>
+            Truve는 가상자산 기부자가 KYC가 완료된 거래소 또는 본인 관리 지갑에서 기부하는 것을 전제로 MVP를 검증합니다.
+            기부자는 본인이 기부 자산의 정당한 소유자이며, 해당 자산이 불법 행위, 제재 대상, 도난 자산, 자금세탁 의심 거래와 관련이 없음을 확인해야 합니다.
+          </p>
+          <p>
+            거래소 출금 방식으로 기부하는 경우 거래소 정책, 네트워크 수수료, 출금 지연, 송금 실패 가능성은 각 거래소 및 네트워크 상태에 따라 달라질 수 있습니다.
+            기부 실행 전 수신 네트워크, 자산 종류, 수신 주소, TrustLine 상태를 반드시 확인해야 합니다.
+          </p>
         </article>
-        <article class="support-card">
-          <h3>데이터가 이상할 때</h3>
-          <p>목업 단계에서는 localStorage 상태가 남아 있을 수 있어, 장바구니/지갑 상태 초기화 후 다시 테스트해 주세요.</p>
+
+        <article id="pre-donation" class="card policy-card">
+          <p class="summary-kicker">Before Donation</p>
+          <h2>기부 전 확인 안내 고지사항</h2>
+          <p>
+            Truve는 기부 실행 전 실명 확인, 기부 목적, 가상자산 출처, 특수관계성, 거래소 기반 기부 및 사전 고지 동의를 확인합니다.
+            이 절차는 기부자의 의사와 기부 목적을 명확히 하고, 향후 세무·감사 검토에 필요한 Evidence Package를 구성하기 위한 참고 절차입니다.
+          </p>
+          <p>
+            기부 전 확인 정보는 법적·세무적 확정 판단이 아니며, 실제 세액공제, 손금산입, 영수증 인정 여부는 기부금 종류,
+            재단 자격, 기부자의 재무 상황, 관련 법령과 세무 전문가 검토에 따라 달라질 수 있습니다.
+          </p>
         </article>
-        <article class="support-card">
-          <h3>문의 및 피드백</h3>
-          <p>데모 이슈나 개선 요청은 프로젝트 리포지토리 이슈 또는 운영 채널로 전달해 주세요.</p>
+
+        <article id="credential" class="card policy-card">
+          <p class="summary-kicker">Proof & Credential</p>
+          <h2>Proof 및 Credential 안내</h2>
+          <p>
+            Truve Proof는 공식 영수증 자체가 아니라, XRPL 거래 해시와 기부 증빙 식별자를 연결하는 검증용 증빙 레이어입니다.
+            향후 재단이 발급하는 XRPL XLS-70 Donation Credential은 기부 사실을 외부 검증자가 확인할 수 있도록 돕는 증빙 수단으로 설계됩니다.
+          </p>
+          <p>
+            Truve는 기부금을 보관하거나 중개하는 수탁자가 아니라, 기부자와 재단 사이의 직접 송금 이후 증빙 생성과 검증을 돕는 인프라 제공자를 지향합니다.
+          </p>
         </article>
       </section>
+
+      <section class="card mt-16">
+        <h2 class="section-title">빠른 점검</h2>
+        <div class="support-check-list">
+          <div><strong>지갑 연결</strong><span>Xaman Testnet 계정과 API 서버 연결 상태를 확인합니다.</span></div>
+          <div><strong>TrustLine</strong><span>RLUSD 또는 USDC 수령 전 해당 issuer TrustLine이 열려 있어야 합니다.</span></div>
+          <div><strong>기부 검증</strong><span>기부 후 TX Hash를 XRPL Testnet Explorer와 Truve Proof 페이지에서 확인합니다.</span></div>
+          <div><strong>세무 참고</strong><span>절세 시뮬레이션은 참고용이며 정확한 산정은 세무 전문가 상담이 필요합니다.</span></div>
+        </div>
+      </section>
     </main>
+
+    <footer class="site-footer">
+      <div class="site-footer-inner">
+        <div>
+          <strong class="footer-brand">Truve</strong>
+          <p>XRPL Credential 기반 가상자산 기부 인프라</p>
+          <p>대표자명: 김상진 <span>|</span> 사업자등록번호: 000-00-00000 <span>|</span> 주소: 서울특별시 강남구 임시주소 123</p>
+          <p>전화번호: 02-000-0000 <span>|</span> 이메일: contact@truve.foundation</p>
+        </div>
+        <div class="footer-bottom">
+          <span>© TRUVE. ALL RIGHTS RESERVED.</span>
+          <nav class="footer-links" aria-label="정책 링크">
+            <a href="#privacy">개인정보처리방침</a>
+            <a href="#exchange-notice">거래소 기반 기부 및 사전 고지사항</a>
+            <a href="#pre-donation">기부 전 확인 안내 고지사항</a>
+            <a href="#credential">Proof 및 Credential 안내</a>
+          </nav>
+        </div>
+      </div>
+    </footer>
 
   </body>
 </html>

@@ -705,6 +705,57 @@ input::placeholder {
   box-shadow: none;
 }
 
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.42);
+  backdrop-filter: blur(8px);
+}
+
+.modal-panel {
+  width: min(720px, 100%);
+  max-height: min(860px, calc(100vh - 40px));
+  overflow: auto;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.22);
+}
+
+.preflight-panel {
+  display: grid;
+  gap: 18px;
+}
+
+.preflight-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.preflight-checks {
+  display: grid;
+  gap: 10px;
+}
+
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: var(--text-primary);
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+}
+
 .microcopy {
   color: var(--text-secondary);
   font-size: 12px;
@@ -1026,6 +1077,162 @@ input::placeholder {
   font-size: 16px;
 }
 
+.about-hero {
+  display: grid;
+  gap: 10px;
+}
+
+.about-lead {
+  max-width: 900px;
+  color: var(--text-primary);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.65;
+}
+
+.about-section {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.about-section h2,
+.policy-card h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.about-section p,
+.policy-card p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.8;
+}
+
+.about-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.about-role-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.about-role-grid div {
+  display: grid;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  background: var(--bg-app);
+}
+
+.about-role-grid span {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.about-goal strong {
+  font-size: 22px;
+  color: var(--brand-orange);
+}
+
+.support-policy-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.policy-card {
+  display: grid;
+  gap: 12px;
+}
+
+.support-check-list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.support-check-list div {
+  display: grid;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  background: var(--bg-app);
+}
+
+.support-check-list span {
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.site-footer {
+  margin-top: 48px;
+  background: #111;
+  color: #7f8794;
+}
+
+.site-footer-inner {
+  width: min(1200px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 48px 0 36px;
+}
+
+.footer-brand {
+  display: block;
+  margin-bottom: 28px;
+  color: #aeb6c2;
+  font-size: 18px;
+}
+
+.site-footer p {
+  margin: 0 0 10px;
+  font-size: 13px;
+}
+
+.site-footer p span {
+  margin: 0 14px;
+  color: #505865;
+}
+
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 46px;
+  padding-top: 26px;
+  border-top: 1px solid #262626;
+  font-size: 12px;
+}
+
+.footer-links {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.footer-links a {
+  color: #e5e7eb;
+  font-weight: 800;
+}
+
+.footer-links a:first-child {
+  color: #ff3b30;
+}
+
 .section-desc {
   margin: 6px 0 0;
   font-size: 13px;
@@ -1274,6 +1481,25 @@ input::placeholder {
 
   .allocation-controls {
     grid-template-columns: 34px minmax(0, 1fr) 34px 62px;
+  }
+
+  .preflight-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .about-role-grid,
+  .support-policy-grid,
+  .support-check-list {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-bottom {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .footer-links {
+    justify-content: flex-start;
   }
 
   .tax-form {

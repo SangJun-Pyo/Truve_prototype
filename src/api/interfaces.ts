@@ -77,6 +77,11 @@ export interface DonationRecord {
   foundationWallet?: string;
   proofMintStatus?: "none" | "requested" | "recorded";
   proofMintTxHash?: string;
+  xrplAccount?: string;
+  complianceHash?: string;
+  compliancePurpose?: string;
+  assetSource?: string;
+  relatedParty?: string;
 }
 
 export interface DonationReceipt {

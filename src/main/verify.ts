@@ -1,4 +1,5 @@
 import { createRepositories } from "../api/provider";
+import { fetchDbDonationByTx, type DbDonation } from "../services/db";
 import { listLocalDonations, type LocalDonationRecord } from "../services/donations";
 import { getTestnetExplorerLink } from "../services/xrpl";
 import { renderTopNav } from "../shared/nav";
@@ -15,7 +16,8 @@ function getLookupId(): string {
   const pathParts = window.location.pathname.split("/").filter(Boolean);
   const verifyIndex = pathParts.findIndex((part) => part === "verify");
   const fromPath = verifyIndex >= 0 ? pathParts[verifyIndex + 1] : "";
-  const fromQuery = new URLSearchParams(window.location.search).get("receipt_id") ?? "";
+  const params = new URLSearchParams(window.location.search);
+  const fromQuery = params.get("receipt_id") ?? params.get("id") ?? "";
   return decodeURIComponent(fromPath || fromQuery || "").trim();
 }
 
@@ -37,6 +39,35 @@ function matchesLookup(donation: LocalDonationRecord, lookupId: string): boolean
     donation.id === lookupId ||
     donation.dbId === lookupId
   );
+}
+
+function mapDbDonation(d: DbDonation): LocalDonationRecord {
+  const allocationPayload = d.allocations as any;
+  const allocations = Array.isArray(allocationPayload) ? allocationPayload : (allocationPayload?.items ?? []);
+  const meta = allocationPayload?.meta ?? {};
+  return {
+    id: d.id,
+    userId: d.userId,
+    donatedAt: d.donatedAt,
+    amountKrw: d.amountKrw,
+    allocations,
+    paymentStatus: d.paymentStatus as LocalDonationRecord["paymentStatus"],
+    proofStatus: d.proofStatus as LocalDonationRecord["proofStatus"],
+    nftStatus: d.nftStatus as LocalDonationRecord["nftStatus"],
+    settlementStatus: d.settlementStatus as LocalDonationRecord["settlementStatus"],
+    txHash: d.txHash ?? undefined,
+    proofNftId: d.proofNftId ?? undefined,
+    explorerUrl: d.explorerUrl ?? undefined,
+    validationStatus: d.validationStatus as LocalDonationRecord["validationStatus"],
+    receiptId: d.receiptId ?? meta.receiptId ?? undefined,
+    evidenceHash: d.evidenceHash ?? meta.evidenceHash ?? undefined,
+    complianceHash: d.complianceHash ?? meta.complianceHash ?? undefined,
+    asset: d.asset ?? meta.asset ?? undefined,
+    amountAsset: d.amountAsset ?? meta.amountAsset ?? undefined,
+    proofMintStatus: d.txHash ? "recorded" : "none",
+    source: "local",
+    dbId: d.id,
+  };
 }
 
 function renderDonation(donation: LocalDonationRecord): void {
@@ -82,6 +113,11 @@ async function init(): Promise<void> {
   const donation = records.find((item) => matchesLookup(item, lookupId));
 
   if (!donation) {
+    const dbDonation = await fetchDbDonationByTx(lookupId);
+    if (dbDonation) {
+      renderDonation(mapDbDonation(dbDonation));
+      return;
+    }
     setStatus("NOT FOUND", true);
     if (resultEl) {
       resultEl.innerHTML = `

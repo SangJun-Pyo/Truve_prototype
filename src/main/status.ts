@@ -1,7 +1,12 @@
 import { createRepositories } from "../api/provider";
 import { API_BASE } from "../services/apiBase";
 import { fetchDbDonations, patchDbDonation, upsertDbUser } from "../services/db";
-import { mergeDonationRecords, upsertLocalDonation, type LocalDonationRecord } from "../services/donations";
+import {
+  listWalletLocalDonations,
+  mergeDonationRecords,
+  upsertLocalDonation,
+  type LocalDonationRecord,
+} from "../services/donations";
 import { requestProofNftMintScaffold } from "../services/proofNft";
 import { clearWalletSession, getWalletSession, setWalletSession } from "../services/wallet";
 import { createSignInPayload, waitForPayloadResolution } from "../services/xaman";
@@ -359,13 +364,26 @@ async function requestReceiptForDonation(donationId: string): Promise<void> {
   }
 }
 
+function openProofForDonation(donationId: string): void {
+  const donation = currentDonations.find((item) => item.id === donationId || item.dbId === donationId);
+  if (!donation?.txHash) {
+    setReceiptStatus("검증 가능한 트랜잭션 해시가 없습니다.", true);
+    return;
+  }
+  const proofKey = donation.txHash ?? donation.receiptId ?? donation.evidenceHash;
+  window.open(`./verify.html?id=${encodeURIComponent(proofKey)}`, "_blank", "noreferrer");
+}
+
 function mapDbDonation(d: Awaited<ReturnType<typeof fetchDbDonations>>[number]): LocalDonationRecord {
+  const allocationPayload = d.allocations as any;
+  const allocations = Array.isArray(allocationPayload) ? allocationPayload : (allocationPayload?.items ?? []);
+  const meta = allocationPayload?.meta ?? {};
   return {
     id: d.id,
     userId: d.userId,
     donatedAt: d.donatedAt,
     amountKrw: d.amountKrw,
-    allocations: d.allocations as LocalDonationRecord["allocations"],
+    allocations: allocations as LocalDonationRecord["allocations"],
     paymentStatus: d.paymentStatus as LocalDonationRecord["paymentStatus"],
     proofStatus: d.proofStatus as LocalDonationRecord["proofStatus"],
     nftStatus: d.nftStatus as LocalDonationRecord["nftStatus"],
@@ -374,6 +392,12 @@ function mapDbDonation(d: Awaited<ReturnType<typeof fetchDbDonations>>[number]):
     proofNftId: d.proofNftId ?? undefined,
     explorerUrl: d.explorerUrl ?? undefined,
     validationStatus: d.validationStatus as LocalDonationRecord["validationStatus"],
+    receiptId: d.receiptId ?? meta.receiptId ?? undefined,
+    evidenceHash: d.evidenceHash ?? meta.evidenceHash ?? undefined,
+    complianceHash: d.complianceHash ?? meta.complianceHash ?? undefined,
+    asset: d.asset ?? meta.asset ?? undefined,
+    amountAsset: d.amountAsset ?? meta.amountAsset ?? undefined,
+    proofMintStatus: d.txHash ? "recorded" : "none",
     source: "local",
     dbId: d.id,
   };
@@ -449,11 +473,11 @@ function renderTable(): void {
         : "-";
       const proofStatus =
         donation.proofMintStatus === "recorded"
-          ? "요청 기록 완료"
+          ? "Proof ready"
           : donation.proofMintStatus === "requested"
             ? "요청됨"
             : donation.nftStatus === "minted"
-              ? "발행 완료"
+              ? "Proof ready"
               : "대기";
       return `
         <tr>
@@ -464,7 +488,7 @@ function renderTable(): void {
           <td>${txLink}</td>
           <td>
             <button class="btn btn-secondary receipt-request-btn" type="button" data-receipt-id="${donation.id}" ${donation.txHash ? "" : "disabled"}>
-              ${proofStatus === "대기" ? "요청" : "다시 요청"}
+              ${proofStatus === "대기" ? "대기" : "Proof 보기"}
             </button>
           </td>
         </tr>
@@ -481,7 +505,7 @@ function renderTable(): void {
           <th>정산/검증</th>
           <th>Proof 상태</th>
           <th>트랜잭션</th>
-          <th>Proof 요청</th>
+          <th>Proof</th>
         </tr>
       </thead>
       <tbody>${rows}</tbody>
@@ -490,7 +514,7 @@ function renderTable(): void {
   tableEl.querySelectorAll<HTMLButtonElement>(".receipt-request-btn").forEach((button) => {
     button.addEventListener("click", () => {
       const id = button.dataset.receiptId;
-      if (id) void requestReceiptForDonation(id);
+      if (id) openProofForDonation(id);
     });
   });
 }
@@ -504,11 +528,17 @@ async function init(): Promise<void> {
   const dbDonations = wallet ? (await fetchDbDonations(wallet.account)).map(mapDbDonation) : [];
   renderWalletSyncState(dbDonations.length);
 
-  const merged = mergeDonationRecords(baseDonations, USER_ID);
-  const dbIds = new Set(dbDonations.map((d) => d.id));
-  currentDonations = [...dbDonations, ...merged.filter((d) => !dbIds.has(d.dbId ?? "") && !dbIds.has(d.id))].sort((a, b) =>
-    a.donatedAt < b.donatedAt ? 1 : -1,
-  );
+  if (wallet) {
+    const walletLocal = listWalletLocalDonations(USER_ID, wallet.account);
+    const dbIds = new Set(dbDonations.map((d) => d.id));
+    const dbTxHashes = new Set(dbDonations.map((d) => d.txHash).filter(Boolean));
+    const localOnly = walletLocal.filter(
+      (d) => !dbIds.has(d.dbId ?? "") && !dbIds.has(d.id) && !dbTxHashes.has(d.txHash ?? ""),
+    );
+    currentDonations = [...dbDonations, ...localOnly].sort((a, b) => (a.donatedAt < b.donatedAt ? 1 : -1));
+  } else {
+    currentDonations = mergeDonationRecords(baseDonations, USER_ID);
+  }
 
   totalDonatedForTax = currentDonations.reduce((sum, item) => sum + item.amountKrw, 0);
   renderTaxFormState();

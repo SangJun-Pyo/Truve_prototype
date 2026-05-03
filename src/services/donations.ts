@@ -27,6 +27,12 @@ export function listLocalDonations(userId: string): LocalDonationRecord[] {
   return loadStoredDonations().filter((item) => item.userId === userId);
 }
 
+export function listWalletLocalDonations(userId: string, xrplAccount: string): LocalDonationRecord[] {
+  return loadStoredDonations().filter(
+    (item) => item.userId === userId && item.xrplAccount === xrplAccount,
+  );
+}
+
 export function upsertLocalDonation(record: LocalDonationRecord): void {
   const records = loadStoredDonations();
   const index = records.findIndex((item) => item.id === record.id);

@@ -1,71 +1,215 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Truve | 기부 탐색</title>
-    <script type="module" crossorigin src="/assets/styles-BzChqKUB.js"></script>
-    <script type="module" crossorigin src="/assets/provider-BW_KG98z.js"></script>
-    <script type="module" crossorigin src="/assets/cart-poU_UKBB.js"></script>
-    <script type="module" crossorigin src="/assets/nav-CMc74gyL.js"></script>
-    <script type="module" crossorigin src="/assets/foundations-BwfCJvZ0.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/styles-OiM_4i1h.css">
+    <title>Truve | 기부하기</title>
+    <script type="module" crossorigin src="/assets/foundations-1pOGucdt.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/cart-DQyj-aMq.js">
+    <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-iJ-6Fn-a.js">
+    <link rel="modulepreload" crossorigin href="/assets/wallet-BizwjWsR.js">
+    <link rel="modulepreload" crossorigin href="/assets/donations-D7ZvcxFw.js">
+    <link rel="modulepreload" crossorigin href="/assets/nav-DrZOEPA-.js">
+    <link rel="stylesheet" crossorigin href="/assets/styles-CgcgR-_Y.css">
   </head>
   <body>
     <main class="app-shell">
       <div id="top-nav"></div>
 
       <header class="page-header">
-        <h1>기부 탐색</h1>
-        <p class="subtitle">마음에 드는 재단을 선택하고 장바구니에 담아 기부를 설계하세요.</p>
+        <h1>기부하기</h1>
+        <p class="subtitle">재단과 ETF 묶음을 고르고, 비율·자산·영수증 발급까지 한 화면에서 준비하세요.</p>
       </header>
 
-      <section class="controls-bar">
-        <div class="search-wrapper">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-          <label class="field">
-            <input id="search-input" type="search" placeholder="재단명, 설명, 태그 검색" />
-          </label>
-        </div>
-        <div class="tabs">
-          <button id="tab-foundation" class="tab-btn active" type="button">단일 재단</button>
-          <button id="tab-bundle" class="tab-btn" type="button">ETF 묶음</button>
-        </div>
-      </section>
+      <div class="donation-workspace">
+        <section class="donation-explorer">
+          <section class="controls-bar">
+            <div class="search-wrapper">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <label class="field">
+                <input id="search-input" type="search" placeholder="재단명, 설명, 태그 검색" />
+              </label>
+            </div>
+            <div class="tabs">
+              <button id="tab-foundation" class="tab-btn active" type="button">단일 재단</button>
+              <button id="tab-bundle" class="tab-btn" type="button">ETF 묶음</button>
+            </div>
+          </section>
 
-      <section class="controls-bar controls-bar--sub">
-        <label class="field field-inline">
-          <span>카테고리</span>
-          <div class="select-wrapper">
-            <select id="category-select">
-              <option value="">전체</option>
-              <option value="climate">환경</option>
-              <option value="education">아동/교육</option>
-              <option value="health">의료</option>
-              <option value="animal">동물</option>
-              <option value="humanitarian">긴급구호</option>
-            </select>
-          </div>
-        </label>
-      </section>
+          <section class="controls-bar controls-bar--sub">
+            <label class="field field-inline">
+              <span>카테고리</span>
+              <div class="select-wrapper">
+                <select id="category-select">
+                  <option value="">전체</option>
+                  <option value="climate">환경</option>
+                  <option value="education">아동/교육</option>
+                  <option value="health">의료</option>
+                  <option value="animal">동물</option>
+                  <option value="humanitarian">긴급구호</option>
+                </select>
+              </div>
+            </label>
+          </section>
 
-      <div id="foundations-grid" class="grid foundation-grid"></div>
-      <div id="bundles-grid" class="grid foundation-grid hidden"></div>
+          <div id="foundations-grid" class="grid foundation-grid"></div>
+          <div id="bundles-grid" class="grid foundation-grid hidden"></div>
+        </section>
+
+        <aside class="donation-console" aria-label="기부 실행 패널">
+          <section class="summary-card">
+            <div class="summary-head">
+              <div>
+                <p class="summary-kicker">Donation Portfolio</p>
+                <h2 class="summary-title">실행 요약</h2>
+              </div>
+              <span id="cart-count" class="cart-count-chip">0</span>
+            </div>
+
+            <div class="summary-section">
+              <label class="section-label" for="asset-select">기부 자산</label>
+              <div class="select-wrapper">
+                <select id="asset-select">
+                  <option value="XRP">XRP</option>
+                  <option value="RLUSD">RLUSD</option>
+                  <option value="USDC">USDC on XRPL</option>
+                </select>
+              </div>
+              <p id="asset-help" class="microcopy">XRP는 Xaman Testnet 결제 데모를 바로 실행할 수 있습니다.</p>
+            </div>
+
+            <div class="summary-section">
+              <label class="section-label" for="total-amount">총 기부 금액</label>
+              <div class="amount-input-group">
+                <input type="number" id="total-amount" value="100" min="1" />
+                <span id="amount-unit">XRP</span>
+              </div>
+              <div id="amount-krw-estimate" class="conversion-box">예상 원화 환산액: 100,000 KRW</div>
+              <div class="quick-amounts">
+                <button class="quick-btn" data-add="10" type="button">+10</button>
+                <button class="quick-btn" data-add="25" type="button">+25</button>
+                <button class="quick-btn" data-add="50" type="button">+50</button>
+                <button class="quick-btn" data-add="100" type="button">+100</button>
+              </div>
+            </div>
+
+            <div class="summary-section">
+              <div class="section-label">선택한 재단</div>
+              <div id="items-container" class="selected-list"></div>
+            </div>
+
+            <div class="summary-section">
+              <label class="section-label">분배 미리보기</label>
+              <div class="preview-list" id="preview-list"></div>
+            </div>
+
+            <div class="validation-box success" id="validation-box">
+              <span>총 비율</span>
+              <span id="validation-total">100%</span>
+            </div>
+
+            <div class="tax-card">
+              <div class="row-between">
+                <span class="section-label">절세 효과 참고 시뮬레이션</span>
+                <span id="tax-source-badge" class="status-badge success">READY</span>
+              </div>
+
+              <div class="tax-form">
+                <label class="field">
+                  <span>기부자 유형</span>
+                  <select id="tax-donor-type">
+                    <option value="개인">개인</option>
+                    <option value="법인">법인</option>
+                  </select>
+                </label>
+                <label id="tax-income-field" class="field">
+                  <span>연 소득 구간</span>
+                  <select id="tax-income-range">
+                    <option value="5천만원_이하">5천만원 이하</option>
+                    <option value="5천만~1.5억">5천만~1.5억</option>
+                    <option value="1.5억_이상">1.5억 이상</option>
+                  </select>
+                </label>
+                <label id="tax-profit-field" class="field hidden">
+                  <span>연 영업이익 구간</span>
+                  <select id="tax-profit-range">
+                    <option value="2억_이하">2억 이하</option>
+                    <option value="2억~200억">2억~200억</option>
+                    <option value="200억_이상">200억 이상</option>
+                  </select>
+                </label>
+                <label id="tax-donation-type-field" class="field hidden">
+                  <span>기부금 종류</span>
+                  <select id="tax-donation-type">
+                    <option value="지정기부금">지정기부금</option>
+                    <option value="법정기부금">법정기부금</option>
+                    <option value="일반기부금">일반기부금</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="tax-result">
+                <div class="onchain-row"><span>기부 예정액</span><strong id="tax-donation-amount">100,000 KRW</strong></div>
+                <div class="onchain-row"><span>예상 세액공제 범위</span><strong id="tax-deduction-range">계산 대기</strong></div>
+                <div class="onchain-row"><span>실질 기부 비용</span><strong id="tax-real-cost">-</strong></div>
+              </div>
+
+              <p id="tax-explanation" class="microcopy">기부 금액과 기부자 유형을 선택한 뒤 참고 추정치를 확인하세요.</p>
+              <p id="tax-law" class="microcopy">관련 법령: -</p>
+              <p class="tax-disclaimer">
+                본 시뮬레이션은 일반적인 평균값 기반 추정치이며, 실제 세액공제 효과는 귀사의 당해 연도 재무 상황,
+                기부금 종류(지정/법정/일반), 손금산입 한도에 따라 달라질 수 있습니다. 정확한 산정은 반드시 세무 전문가 상담을 받으시기 바랍니다.
+              </p>
+              <div class="action-row">
+                <button id="tax-calc-btn" class="ghost-btn" type="button">절세 추정 계산</button>
+                <button id="tax-partner-btn" class="ghost-btn" type="button">세무 파트너 상담 연결</button>
+              </div>
+            </div>
+
+            <div class="onchain-card">
+              <div class="onchain-row"><span>Network</span><span>XRPL Testnet</span></div>
+              <div class="onchain-row"><span>Wallet</span><span id="wallet-status" class="status-badge error">NOT CONNECTED</span></div>
+              <div class="onchain-row"><span>Address</span><span id="wallet-address">-</span></div>
+              <div class="onchain-row"><span>Balance</span><span id="wallet-balance">-</span></div>
+              <div class="onchain-row"><span>Destination</span><span id="donation-destination">-</span></div>
+              <div class="onchain-row"><span>Memo</span><span>campaign_id · kyc_hash · receipt</span></div>
+              <div class="onchain-row"><span>Status</span><span id="donation-tx-status">대기</span></div>
+            </div>
+
+            <label class="check-row">
+              <input id="compliance-check" type="checkbox" />
+              <span>거래소 KYC 지갑 사용, 허용 자산 기부, NFT/PDF 영수증 발급 구조를 확인했습니다.</span>
+            </label>
+
+            <div class="receipt-card">
+              <strong>Receipt NFT + PDF 영수증</strong>
+              <p class="microcopy">기부 완료 후 내 기부 현황에서 XRPL 트랜잭션 기반 영수증/NFT 요청을 진행할 수 있습니다.</p>
+              <a class="text-link" href="./status.html">내 기부 현황으로 이동</a>
+            </div>
+
+            <div class="action-row">
+              <button id="xaman-connect-btn" class="ghost-btn" type="button">Xaman 연결</button>
+              <button id="xaman-disconnect-btn" class="ghost-btn" type="button">연결 해제</button>
+            </div>
+            <div id="xaman-qr-wrap" class="xaman-qr-wrap"></div>
+
+            <button class="cta-btn" id="execute-btn" disabled type="button">Xaman으로 기부 실행</button>
+
+            <div class="action-row">
+              <button id="rebalance-btn" class="ghost-btn" type="button">균등 배분</button>
+              <button id="clear-btn" class="ghost-btn" type="button">비우기</button>
+            </div>
+
+            <div id="donation-tx-result" class="card-desc">아직 제출된 트랜잭션이 없습니다.</div>
+          </section>
+        </aside>
+      </div>
+
+      <div id="fly-layer" class="fly-layer" aria-hidden="true"></div>
     </main>
-
-    <a id="cart-fab" class="cart-container floating-cart" href="./donation.html" aria-label="기부 장바구니">
-      <svg class="cart-icon" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-        <line x1="3" y1="6" x2="21" y2="6"></line>
-        <path d="M16 10a4 4 0 0 1-8 0"></path>
-      </svg>
-      <div id="cart-count" class="cart-badge">0</div>
-    </a>
-
-    <div id="fly-layer" class="fly-layer" aria-hidden="true"></div>
 
   </body>
 </html>

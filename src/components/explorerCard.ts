@@ -13,11 +13,11 @@ export function categoryToKorean(category: Foundation["category"]): string {
 
 function getVisualColors(category: Foundation["category"]): [string, string] {
   const map: Record<Foundation["category"], [string, string]> = {
-    climate: ["#D6E4FF", "#ADC8FF"],
-    education: ["#FFF1B8", "#FFD666"],
-    health: ["#FFEBE6", "#FFBDAD"],
-    animal: ["#E0F2FE", "#BAE6FD"],
-    humanitarian: ["#F3E8FF", "#D8B4FE"],
+    climate: ["#FFF0E5", "#FDBA74"],
+    education: ["#F8FAFC", "#CBD5E1"],
+    health: ["#FFE4E6", "#FDA4AF"],
+    animal: ["#ECFEFF", "#67E8F9"],
+    humanitarian: ["#EEF2FF", "#A5B4FC"],
   };
   return map[category];
 }

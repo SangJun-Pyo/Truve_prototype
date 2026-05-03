@@ -11,32 +11,32 @@ export const routes: Record<AppRouteKey, AppRoute> = {
   donation: {
     key: "donation",
     path: "/donation",
-    title: "Donation Builder",
-    navLabel: "Donation",
+    title: "기부하기",
+    navLabel: "기부하기",
   },
   foundations: {
     key: "foundations",
     path: "/foundations",
-    title: "Foundation Explorer",
-    navLabel: "Foundations",
+    title: "기부하기",
+    navLabel: "기부하기",
   },
   about: {
     key: "about",
     path: "/about",
-    title: "About Truve",
-    navLabel: "About",
+    title: "서비스 소개",
+    navLabel: "서비스 소개",
   },
   governance: {
     key: "governance",
     path: "/governance",
-    title: "Governance Voting",
-    navLabel: "Governance",
+    title: "거버넌스",
+    navLabel: "거버넌스",
   },
   status: {
     key: "status",
     path: "/status",
-    title: "My Donation Status",
-    navLabel: "Status",
+    title: "내 기부 현황",
+    navLabel: "내 기부 현황",
   },
 };
 

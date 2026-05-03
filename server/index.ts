@@ -9,11 +9,16 @@ const prisma = new PrismaClient();
 
 const app = express();
 const port = Number(process.env.API_PORT ?? process.env.PORT ?? 8787);
-const frontendOrigin = process.env.FRONTEND_ORIGIN ?? "http://localhost:5173";
+const frontendOrigins = (process.env.FRONTEND_ORIGIN ?? "http://localhost:5173")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 const isProd = process.env.NODE_ENV === "production";
 const xrplTestnetWs = process.env.XRPL_TESTNET_WS ?? "wss://s.altnet.rippletest.net:51233";
 const xamanApiKey = process.env.XAMAN_API_KEY;
 const xamanApiSecret = process.env.XAMAN_API_SECRET;
+const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
+const anthropicModel = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-5";
 const fallbackDonationDestination =
   process.env.XRPL_TESTNET_DONATION_DESTINATION ?? "rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe";
 const fallbackGovernanceDestination =
@@ -21,7 +26,13 @@ const fallbackGovernanceDestination =
 
 app.use(
   cors({
-    origin: frontendOrigin,
+    origin(origin, callback) {
+      if (!origin || frontendOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error(`CORS origin is not allowed: ${origin}`));
+    },
     credentials: false,
   }),
 );
@@ -67,8 +78,136 @@ function mapPayloadCreateResponse(payload: any) {
   };
 }
 
+type TaxDonorType = "개인" | "법인";
+type TaxSimulationInput = {
+  donor_type: TaxDonorType;
+  annual_income_range?: "5천만원_이하" | "5천만~1.5억" | "1.5억_이상";
+  annual_profit_range?: "2억_이하" | "2억~200억" | "200억_이상";
+  donation_type?: "지정기부금" | "법정기부금" | "일반기부금";
+  donation_amount: number;
+};
+
+function extractJsonObject(text: string): string {
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start === -1 || end === -1 || end <= start) {
+    throw new Error("AI 응답에서 JSON을 찾지 못했습니다.");
+  }
+  return text.slice(start, end + 1);
+}
+
+function normalizeTaxSimulationInput(input: any): TaxSimulationInput {
+  const donorType = input?.donor_type === "법인" ? "법인" : "개인";
+  const donationAmount = Number(input?.donation_amount);
+  if (!Number.isFinite(donationAmount) || donationAmount <= 0) {
+    throw new Error("donation_amount는 0보다 큰 숫자여야 합니다.");
+  }
+
+  return {
+    donor_type: donorType,
+    annual_income_range: input?.annual_income_range,
+    annual_profit_range: input?.annual_profit_range,
+    donation_type: input?.donation_type,
+    donation_amount: Math.round(donationAmount),
+  };
+}
+
+function fallbackTaxSimulation(input: TaxSimulationInput) {
+  const amount = input.donation_amount;
+  const rate =
+    input.donor_type === "개인"
+      ? input.annual_income_range === "1.5억_이상"
+        ? [0.18, 0.28]
+        : input.annual_income_range === "5천만~1.5억"
+          ? [0.16, 0.24]
+          : [0.13, 0.2]
+      : input.donation_type === "법정기부금"
+        ? [0.18, 0.28]
+        : input.donation_type === "일반기부금"
+          ? [0.08, 0.16]
+          : [0.12, 0.22];
+
+  return {
+    estimated_deduction_min: Math.round(amount * rate[0]),
+    estimated_deduction_max: Math.round(amount * rate[1]),
+    explanation:
+      input.donor_type === "법인"
+        ? "법인 기부금은 기부금 종류와 손금산입 한도, 당해 연도 이익 규모에 따라 효과가 달라지는 참고용 추정치입니다."
+        : "개인 기부자는 소득 구간과 공제 한도에 따라 실제 공제 효과가 달라지는 참고용 추정치입니다.",
+    applicable_law: input.donor_type === "법인" ? "법인세법 제24조" : "소득세법 제34조 및 조세특례제한법 관련 규정",
+    disclaimer: "정확한 산정은 세무사 상담 필요",
+    source: "fallback",
+  };
+}
+
+async function calculateTaxSimulationWithAnthropic(input: TaxSimulationInput) {
+  if (!anthropicApiKey) {
+    return fallbackTaxSimulation(input);
+  }
+
+  const prompt = `
+당신은 한국 세법 참고 정보를 안내하는 도우미입니다.
+다음 기부 정보를 바탕으로 일반적인 평균 세액공제 효과를 추정하되,
+반드시 "참고용 추정치"임을 명시하고 정확한 수치 단정은 피하세요.
+
+입력:
+- 기부자 유형: ${input.donor_type}
+- 기부 금액: ${input.donation_amount.toLocaleString()} KRW
+- ${
+    input.donor_type === "법인"
+      ? `연 영업이익 구간: ${input.annual_profit_range}, 기부금 종류: ${input.donation_type}`
+      : `연 소득 구간: ${input.annual_income_range}`
+  }
+
+출력은 아래 JSON 객체만 반환하세요.
+{
+  "estimated_deduction_min": 숫자,
+  "estimated_deduction_max": 숫자,
+  "explanation": "300자 이내 설명",
+  "applicable_law": "관련 법령 명시",
+  "disclaimer": "정확한 산정은 세무사 상담 필요"
+}
+  `;
+
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": anthropicApiKey,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({
+      model: anthropicModel,
+      max_tokens: 1000,
+      messages: [{ role: "user", content: prompt }],
+    }),
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Anthropic API 오류: ${response.status} ${text}`);
+  }
+
+  const data = await response.json();
+  const text = Array.isArray(data?.content)
+    ? data.content.map((part: any) => (part?.type === "text" ? part.text : "")).join("\n")
+    : "";
+  const parsed = JSON.parse(extractJsonObject(text));
+  return { ...parsed, source: "anthropic" };
+}
+
 app.get("/api/health", (_req, res) => {
   res.json({ ok: true, service: "truve-api" });
+});
+
+app.post("/api/tax-sim/calculate", async (req, res) => {
+  try {
+    const input = normalizeTaxSimulationInput(req.body);
+    const result = await calculateTaxSimulationWithAnthropic(input);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error instanceof Error ? error.message : "절세 시뮬레이션 실패" });
+  }
 });
 
 app.post("/api/xaman/signin", async (_req, res) => {

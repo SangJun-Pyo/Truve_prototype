@@ -1,10 +1,10 @@
 ﻿import type { DonationBundle, Foundation } from "../api";
 
 const BUNDLE_COLORS: Array<[string, string]> = [
-  ["#E8F5E9", "#C8E6C9"],
-  ["#F3E8FF", "#D8B4FE"],
-  ["#FFEFD5", "#FFD6A5"],
-  ["#E6F4FF", "#C5E2FF"],
+  ["#FFF0E5", "#FDBA74"],
+  ["#F8FAFC", "#CBD5E1"],
+  ["#EEF2FF", "#A5B4FC"],
+  ["#ECFEFF", "#67E8F9"],
 ];
 
 export function renderBundleCard(bundle: DonationBundle, foundations: Foundation[]): string {

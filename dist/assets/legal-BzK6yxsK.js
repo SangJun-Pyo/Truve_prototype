@@ -1,0 +1,1 @@
+import{t as e}from"./nav-DjQuHpP8.js";var t=document.getElementById(`top-nav`);t&&(t.innerHTML=e(``));

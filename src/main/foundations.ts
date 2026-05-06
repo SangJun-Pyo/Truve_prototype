@@ -328,7 +328,7 @@ function renderSelectedItems(): void {
   if (!itemsContainerEl) return;
   const items = getCartView();
   if (items.length === 0) {
-    itemsContainerEl.innerHTML = `<div class="empty-state">왼쪽에서 재단 또는 ETF 묶음을 선택하세요.</div>`;
+    itemsContainerEl.innerHTML = `<div class="empty-state">왼쪽에서 재단 또는 추천 포트폴리오를 선택하세요.</div>`;
     return;
   }
 

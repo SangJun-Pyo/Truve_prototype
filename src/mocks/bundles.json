@@ -1,33 +1,90 @@
 [
   {
-    "id": "bdl_balanced-impact",
-    "name": "균형 임팩트 40/30/30",
-    "summary": "환경·교육·긴급구호를 균형 있게 담은 기본 번들",
+    "id": "bdl-balanced-impact",
+    "name": "균형 기부 포트폴리오",
+    "summary": "보건복지, 긴급구호, 교육, 동물보호를 고르게 담은 기본 추천 조합입니다.",
     "theme": "balanced",
     "allocations": [
-      { "foundationId": "fnd_green-earth", "ratioPct": 40 },
-      { "foundationId": "fnd_next-class", "ratioPct": 30 },
-      { "foundationId": "fnd_relief-now", "ratioPct": 30 }
+      {
+        "foundationId": "fnd-dd215e1a57",
+        "ratioPct": 25
+      },
+      {
+        "foundationId": "fnd-58f2390d09",
+        "ratioPct": 25
+      },
+      {
+        "foundationId": "fnd-8e12bf11c5",
+        "ratioPct": 25
+      },
+      {
+        "foundationId": "fnd-4696a39e95",
+        "ratioPct": 25
+      }
     ]
   },
   {
-    "id": "bdl_climate-focus",
-    "name": "환경 집중 70/30",
-    "summary": "기후·해양 복원 중심의 환경 특화 번들",
-    "theme": "climate",
+    "id": "bdl-health-recovery",
+    "name": "의료·회복 포트폴리오",
+    "summary": "환자 치료비, 의료 접근성, 건강 회복 목적의 모금 캠페인 중심 조합입니다.",
+    "theme": "health",
     "allocations": [
-      { "foundationId": "fnd_green-earth", "ratioPct": 70 },
-      { "foundationId": "fnd_blue-ocean", "ratioPct": 30 }
+      {
+        "foundationId": "fnd-dd215e1a57",
+        "ratioPct": 34
+      },
+      {
+        "foundationId": "fnd-0dd420ce0d",
+        "ratioPct": 33
+      },
+      {
+        "foundationId": "fnd-e159db0b73",
+        "ratioPct": 33
+      }
     ]
   },
   {
-    "id": "bdl_local-care",
-    "name": "로컬 케어 50/50",
-    "summary": "국내 교육/동물 복지 중심의 로컬 번들",
-    "theme": "local",
+    "id": "bdl-emergency-relief",
+    "name": "긴급구호 포트폴리오",
+    "summary": "재난, 국제구제, 취약계층 지원 캠페인을 중심으로 구성한 조합입니다.",
+    "theme": "relief",
     "allocations": [
-      { "foundationId": "fnd_next-class", "ratioPct": 50 },
-      { "foundationId": "fnd_animal-care", "ratioPct": 50 }
+      {
+        "foundationId": "fnd-58f2390d09",
+        "ratioPct": 34
+      },
+      {
+        "foundationId": "fnd-659e84dadd",
+        "ratioPct": 33
+      },
+      {
+        "foundationId": "fnd-1ac533cd19",
+        "ratioPct": 33
+      }
+    ]
+  },
+  {
+    "id": "bdl-local-care",
+    "name": "지역 돌봄 포트폴리오",
+    "summary": "국내 지역 기반의 복지·돌봄·동물보호 캠페인을 함께 담았습니다.",
+    "theme": "local-care",
+    "allocations": [
+      {
+        "foundationId": "fnd-dd215e1a57",
+        "ratioPct": 25
+      },
+      {
+        "foundationId": "fnd-4696a39e95",
+        "ratioPct": 25
+      },
+      {
+        "foundationId": "fnd-8e12bf11c5",
+        "ratioPct": 25
+      },
+      {
+        "foundationId": "fnd-108f4931c0",
+        "ratioPct": 25
+      }
     ]
   }
 ]

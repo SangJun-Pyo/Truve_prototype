@@ -1,13 +1,12 @@
 import { createRepositories } from "../api/provider";
 import { API_BASE } from "../services/apiBase";
-import { fetchDbDonations, patchDbDonation, upsertDbUser } from "../services/db";
+import { fetchDbDonations, upsertDbUser } from "../services/db";
 import {
   listWalletLocalDonations,
   mergeDonationRecords,
   upsertLocalDonation,
   type LocalDonationRecord,
 } from "../services/donations";
-import { requestProofNftMintScaffold } from "../services/proofNft";
 import { clearWalletSession, getWalletSession, setWalletSession } from "../services/wallet";
 import { createSignInPayload, waitForPayloadResolution } from "../services/xaman";
 import { renderTopNav } from "../shared/nav";
@@ -91,7 +90,7 @@ function stepToKorean(step: string): string {
     pending: "대기",
     failed: "실패",
     recorded: "증빙 기록",
-    minted: "Proof 기록 완료",
+    minted: "Evidence 기록 완료",
     scheduled: "정산 예정",
     done: "정산 완료",
     error: "오류",
@@ -327,51 +326,14 @@ function bindEvents(): void {
   refreshBtnEl?.addEventListener("click", () => void init());
 }
 
-async function requestReceiptForDonation(donationId: string): Promise<void> {
-  const wallet = getWalletSession();
-  const donation = currentDonations.find((item) => item.id === donationId || item.dbId === donationId);
-  if (!wallet) {
-    setReceiptStatus("먼저 Xaman 지갑을 연결해 주세요.", true);
-    return;
-  }
-  if (!donation?.txHash) {
-    setReceiptStatus("트랜잭션 해시가 있는 기부 이력만 Proof 요청을 진행할 수 있습니다.", true);
-    return;
-  }
-  try {
-    setReceiptStatus("Proof 요청 서명 대기 중...");
-    const result = await requestProofNftMintScaffold({ account: wallet.account, donationId: donation.id, donationTxHash: donation.txHash });
-    if (!result.txHash) {
-      setReceiptStatus("Proof 요청이 취소되었습니다.", true);
-      return;
-    }
-    const next: LocalDonationRecord = {
-      ...donation,
-      proofMintStatus: result.validated ? "recorded" : "requested",
-      proofMintTxHash: result.txHash,
-      nftStatus: result.validated ? "minted" : "pending",
-      proofStatus: "recorded",
-      proofNftId: result.validated ? `proof_req_${Date.now()}` : donation.proofNftId,
-    };
-    upsertLocalDonation(next);
-    if (next.dbId) {
-      void patchDbDonation(next.dbId, { nftStatus: next.nftStatus, proofStatus: "recorded", proofNftId: next.proofNftId ?? null });
-    }
-    setReceiptStatus(`Proof 요청 완료: ${result.txHash}`);
-    await init();
-  } catch (error) {
-    setReceiptStatus(error instanceof Error ? error.message : "Proof 요청 실패", true);
-  }
-}
-
-function openProofForDonation(donationId: string): void {
+function openVerificationForDonation(donationId: string): void {
   const donation = currentDonations.find((item) => item.id === donationId || item.dbId === donationId);
   if (!donation?.txHash) {
     setReceiptStatus("검증 가능한 트랜잭션 해시가 없습니다.", true);
     return;
   }
-  const proofKey = donation.txHash ?? donation.receiptId ?? donation.evidenceHash;
-  window.open(`./verify.html?id=${encodeURIComponent(proofKey)}`, "_blank", "noreferrer");
+  const verificationKey = donation.receiptId ?? donation.evidenceHash ?? donation.txHash;
+  window.open(`./verify.html?id=${encodeURIComponent(verificationKey)}`, "_blank", "noreferrer");
 }
 
 function mapDbDonation(d: Awaited<ReturnType<typeof fetchDbDonations>>[number]): LocalDonationRecord {
@@ -397,7 +359,24 @@ function mapDbDonation(d: Awaited<ReturnType<typeof fetchDbDonations>>[number]):
     complianceHash: d.complianceHash ?? meta.complianceHash ?? undefined,
     asset: d.asset ?? meta.asset ?? undefined,
     amountAsset: d.amountAsset ?? meta.amountAsset ?? undefined,
-    proofMintStatus: d.txHash ? "recorded" : "none",
+    proofMintStatus:
+      meta.credential?.status === "accepted"
+        ? "credential_accepted"
+        : meta.credential?.status === "accept_pending"
+          ? "credential_accept_pending"
+          : meta.credential?.status === "failed"
+            ? "credential_failed"
+            : d.txHash
+              ? "evidence_ready"
+              : "none",
+    credentialIssuer: meta.credential?.issuer ?? undefined,
+    credentialType: meta.credential?.credentialType ?? undefined,
+    credentialUri: meta.credential?.uri ?? undefined,
+    credentialIssueTxHash: meta.credential?.issueTxHash ?? undefined,
+    credentialIssueExplorerUrl: meta.credential?.issueExplorerUrl ?? undefined,
+    credentialAcceptTxHash: meta.credential?.acceptTxHash ?? undefined,
+    credentialAcceptExplorerUrl: meta.credential?.acceptExplorerUrl ?? undefined,
+    credentialStatus: meta.credential?.status ?? undefined,
     source: "local",
     dbId: d.id,
   };
@@ -408,7 +387,7 @@ function renderSummary(profileName: string, tier: string, walletDbCount: number)
   const wallet = getWalletSession();
   const total = currentDonations.reduce((sum, item) => sum + item.amountKrw, 0);
   const onchainCount = currentDonations.filter((item) => Boolean(item.txHash)).length;
-  const proofReadyCount = currentDonations.filter((item) => item.proofStatus === "recorded" || item.nftStatus === "minted").length;
+  const evidenceReadyCount = currentDonations.filter((item) => Boolean(item.txHash || item.evidenceHash)).length;
   const assetTotals = currentDonations.reduce<Record<string, number>>((totals, item) => {
     const asset = item.asset ?? "KRW";
     totals[asset] = (totals[asset] ?? 0) + (item.amountAsset ?? item.amountKrw);
@@ -433,7 +412,7 @@ function renderSummary(profileName: string, tier: string, walletDbCount: number)
     <div class="summary-box">
       <div class="summary-label">온체인 기록</div>
       <div class="summary-value">${onchainCount}건</div>
-      <div class="trust mt-12">Proof ready ${proofReadyCount}건</div>
+      <div class="trust mt-12">Evidence ready ${evidenceReadyCount}건</div>
     </div>
     <div class="summary-box">
       <div class="summary-label">등급</div>
@@ -455,8 +434,8 @@ function renderTimeline(): void {
             <span class="badge">${formatDate(donation.donatedAt)}</span>
           </div>
           <div class="trust mt-12">1) ${stepToKorean(donation.paymentStatus)}</div>
-          <div class="trust">2) ${stepToKorean(donation.proofStatus)}</div>
-          <div class="trust">3) ${stepToKorean(donation.nftStatus)}</div>
+          <div class="trust">2) Evidence ${donation.evidenceHash ? "ready" : stepToKorean(donation.proofStatus)}</div>
+          <div class="trust">3) Credential ${donation.credentialStatus ?? "pending"}</div>
           <div class="trust">4) ${stepToKorean(donation.settlementStatus)} · 검증 ${donation.validationStatus ?? "-"}</div>
         </article>
       `,
@@ -472,13 +451,15 @@ function renderTable(): void {
         ? `<a class="text-link" href="https://testnet.xrpl.org/transactions/${donation.txHash}" target="_blank" rel="noreferrer">${donation.txHash}</a>`
         : "-";
       const proofStatus =
-        donation.proofMintStatus === "recorded"
-          ? "Proof ready"
-          : donation.proofMintStatus === "requested"
-            ? "요청됨"
-            : donation.nftStatus === "minted"
-              ? "Proof ready"
-              : "대기";
+        donation.proofMintStatus === "credential_accepted"
+          ? "Credential issued"
+          : donation.proofMintStatus === "credential_accept_pending"
+            ? "Credential accept pending"
+            : donation.proofMintStatus === "credential_failed"
+              ? "Credential failed"
+              : donation.proofMintStatus === "evidence_ready" || donation.txHash
+                ? "Evidence ready"
+                : "Pending";
       return `
         <tr>
           <td>${formatDate(donation.donatedAt)}</td>
@@ -488,7 +469,7 @@ function renderTable(): void {
           <td>${txLink}</td>
           <td>
             <button class="btn btn-secondary receipt-request-btn" type="button" data-receipt-id="${donation.id}" ${donation.txHash ? "" : "disabled"}>
-              ${proofStatus === "대기" ? "대기" : "Proof 보기"}
+              ${proofStatus === "Pending" ? "대기" : "검증 보기"}
             </button>
           </td>
         </tr>
@@ -503,9 +484,9 @@ function renderTable(): void {
           <th>일시</th>
           <th>금액</th>
           <th>정산/검증</th>
-          <th>Proof 상태</th>
+          <th>Credential 상태</th>
           <th>트랜잭션</th>
-          <th>Proof</th>
+          <th>검증</th>
         </tr>
       </thead>
       <tbody>${rows}</tbody>
@@ -514,7 +495,7 @@ function renderTable(): void {
   tableEl.querySelectorAll<HTMLButtonElement>(".receipt-request-btn").forEach((button) => {
     button.addEventListener("click", () => {
       const id = button.dataset.receiptId;
-      if (id) openProofForDonation(id);
+      if (id) openVerificationForDonation(id);
     });
   });
 }

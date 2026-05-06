@@ -75,13 +75,21 @@ export interface DonationRecord {
   network?: "testnet";
   destinationAddress?: string;
   foundationWallet?: string;
-  proofMintStatus?: "none" | "requested" | "recorded";
+  proofMintStatus?: "none" | "evidence_ready" | "credential_issued" | "credential_accept_pending" | "credential_accepted" | "credential_failed";
   proofMintTxHash?: string;
   xrplAccount?: string;
   complianceHash?: string;
   compliancePurpose?: string;
   assetSource?: string;
   relatedParty?: string;
+  credentialIssuer?: string;
+  credentialType?: string;
+  credentialUri?: string;
+  credentialIssueTxHash?: string;
+  credentialIssueExplorerUrl?: string;
+  credentialAcceptTxHash?: string;
+  credentialAcceptExplorerUrl?: string;
+  credentialStatus?: "issued" | "accept_pending" | "accepted" | "failed";
 }
 
 export interface DonationReceipt {

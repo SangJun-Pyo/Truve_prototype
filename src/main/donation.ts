@@ -508,7 +508,7 @@ async function requestProofNft(): Promise<void> {
   }
 
   try {
-    proofNftStatusEl.textContent = "Proof NFT 요청 생성 중...";
+    proofNftStatusEl.textContent = "Evidence 검증 요청 생성 중...";
     const result = await requestProofNftMintScaffold({
       account: wallet.account,
       donationId: lastDonationRecord.id,
@@ -517,7 +517,7 @@ async function requestProofNft(): Promise<void> {
 
     const next = {
       ...lastDonationRecord,
-      proofMintStatus: result.validated ? ("recorded" as const) : ("requested" as const),
+      proofMintStatus: result.validated ? ("credential_accepted" as const) : ("credential_accept_pending" as const),
       proofMintTxHash: result.txHash,
       nftStatus: result.validated ? ("minted" as const) : ("pending" as const),
       proofNftId: result.validated ? `proof_req_${Date.now()}` : undefined,
@@ -535,7 +535,7 @@ async function requestProofNft(): Promise<void> {
     }
 
     renderTxResult(next);
-    proofNftStatusEl.textContent = result.txHash ? `Proof NFT 요청 완료: ${result.txHash}` : "Proof NFT 요청 취소";
+    proofNftStatusEl.textContent = result.txHash ? `Evidence 검증 요청 완료: ${result.txHash}` : "Evidence 검증 요청 취소";
   } catch (error) {
     proofNftStatusEl.textContent = error instanceof Error ? error.message : "요청 실패";
   }

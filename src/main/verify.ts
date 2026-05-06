@@ -64,7 +64,24 @@ function mapDbDonation(d: DbDonation): LocalDonationRecord {
     complianceHash: d.complianceHash ?? meta.complianceHash ?? undefined,
     asset: d.asset ?? meta.asset ?? undefined,
     amountAsset: d.amountAsset ?? meta.amountAsset ?? undefined,
-    proofMintStatus: d.txHash ? "recorded" : "none",
+    proofMintStatus:
+      meta.credential?.status === "accepted"
+        ? "credential_accepted"
+        : meta.credential?.status === "accept_pending"
+          ? "credential_accept_pending"
+          : meta.credential?.status === "failed"
+            ? "credential_failed"
+            : d.txHash
+              ? "evidence_ready"
+              : "none",
+    credentialIssuer: meta.credential?.issuer ?? undefined,
+    credentialType: meta.credential?.credentialType ?? undefined,
+    credentialUri: meta.credential?.uri ?? undefined,
+    credentialIssueTxHash: meta.credential?.issueTxHash ?? undefined,
+    credentialIssueExplorerUrl: meta.credential?.issueExplorerUrl ?? undefined,
+    credentialAcceptTxHash: meta.credential?.acceptTxHash ?? undefined,
+    credentialAcceptExplorerUrl: meta.credential?.acceptExplorerUrl ?? undefined,
+    credentialStatus: meta.credential?.status ?? undefined,
     source: "local",
     dbId: d.id,
   };
@@ -88,10 +105,19 @@ function renderDonation(donation: LocalDonationRecord): void {
         <div class="onchain-row"><span>Network</span><strong>${donation.network ?? "testnet"}</strong></div>
         <div class="onchain-row"><span>Destination</span><strong>${donation.destinationAddress ?? donation.foundationWallet ?? "-"}</strong></div>
         <div class="onchain-row"><span>TX Hash</span><strong>${donation.txHash ?? "-"}</strong></div>
+        <div class="onchain-row"><span>Evidence</span><strong>${donation.evidenceHash ? "ready" : "pending"}</strong></div>
+        <div class="onchain-row"><span>XLS-70 Credential</span><strong>${donation.credentialStatus ?? "not issued"}</strong></div>
+        <div class="onchain-row"><span>Credential Issuer</span><strong>${donation.credentialIssuer ?? "-"}</strong></div>
+        <div class="onchain-row"><span>Credential Type</span><strong>${donation.credentialType ?? "-"}</strong></div>
       </div>
       ${
         explorer
           ? `<a class="ghost-btn mt-12" href="${explorer}" target="_blank" rel="noreferrer">Open XRPL Testnet Explorer</a>`
+          : ""
+      }
+      ${
+        donation.credentialAcceptExplorerUrl
+          ? `<a class="ghost-btn mt-12" href="${donation.credentialAcceptExplorerUrl}" target="_blank" rel="noreferrer">Open CredentialAccept TX</a>`
           : ""
       }
     </article>

@@ -9,7 +9,7 @@ var e=[{id:`foundations`,label:`기부하기`,href:`./foundations.html`},{id:`st
         </span>
         <span class="brand">Truve</span>
       </a>
-      <p class="sub-copy">Crypto donation receipts on XRPL</p>
+      <p class="sub-copy">XRPL Donation Credential infrastructure</p>
       <nav class="tab-nav" aria-label="Main Navigation">
         ${e.map(e=>`<a class="${e.id===t?`tab-link is-active`:`tab-link`}" href="${e.href}">${e.label}</a>`).join(``)}
       </nav>

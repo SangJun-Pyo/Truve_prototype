@@ -3,7 +3,7 @@ import type { DonationBundle, Foundation } from "../api";
 import { createRepositories } from "../api/provider";
 import { renderBundleCard } from "../components/bundleCard";
 import { categoryToKorean, renderFoundationCard } from "../components/explorerCard";
-import { saveDbDonation, upsertDbUser } from "../services/db";
+import { saveDbDonation, upsertDbUser, type DonationCredentialMeta } from "../services/db";
 import {
   addFoundationToCart,
   addManyFoundationsToCart,
@@ -16,6 +16,7 @@ import {
   saveCartState,
   updateCartRatio,
 } from "../services/cart";
+import { issueDonationCredential } from "../services/credentials";
 import { upsertLocalDonation, type LocalDonationRecord } from "../services/donations";
 import { API_BASE } from "../services/apiBase";
 import { clearWalletSession, getWalletSession, setWalletSession } from "../services/wallet";
@@ -619,9 +620,21 @@ function renderTxResult(record: LocalDonationRecord | null): void {
     return;
   }
   const explorer = record.explorerUrl ?? (record.txHash ? getTestnetExplorerLink(record.txHash) : "-");
-  txResultEl.innerHTML = record.txHash
-    ? `TX: <a class="text-link" href="${explorer}" target="_blank" rel="noreferrer">${record.txHash}</a> (${record.validationStatus ?? "-"})`
-    : "트랜잭션 정보 없음";
+  if (!record.txHash) {
+    txResultEl.textContent = "트랜잭션 정보 없음";
+    return;
+  }
+  const credentialLink =
+    record.credentialAcceptExplorerUrl ?? (record.credentialAcceptTxHash ? getTestnetExplorerLink(record.credentialAcceptTxHash) : "");
+  txResultEl.innerHTML = `
+    <div>Payment TX: <a class="text-link" href="${explorer}" target="_blank" rel="noreferrer">${record.txHash}</a> (${record.validationStatus ?? "-"})</div>
+    <div>Evidence: ${record.evidenceHash ? "ready" : "pending"}</div>
+    <div>Credential: ${record.credentialStatus ?? "pending"}${
+      credentialLink
+        ? ` · <a class="text-link" href="${credentialLink}" target="_blank" rel="noreferrer">CredentialAccept TX</a>`
+        : ""
+    }</div>
+  `;
 }
 
 function normalizeRatiosEqual(): void {
@@ -767,7 +780,41 @@ async function submitDonation(): Promise<void> {
     setTxStatus("검증 대기", false);
     const validated = await waitForTxValidation(signed.txHash);
     const validationStatus = validated.validated ? "validated" : "signed";
-    setTxStatus(`완료 (${validationStatus})`, false);
+    setTxStatus(`Evidence ready (${validationStatus})`, false);
+
+    let credentialMeta: DonationCredentialMeta | null = null;
+    try {
+      setTxStatus("XLS-70 Credential 발급 중", false);
+      const issuedCredential = await issueDonationCredential({
+        subject: wallet.account,
+        receiptId,
+        evidenceHash,
+        txHash: signed.txHash,
+      });
+      renderQrcode(issuedCredential.accept.qrPngUrl, issuedCredential.accept.deepLink);
+      setTxStatus("XLS-70 Credential 수락 서명 대기", false);
+      const accepted = await waitForPayloadResolution(issuedCredential.accept.uuid);
+      credentialMeta = {
+        issuer: issuedCredential.issuer,
+        credentialType: issuedCredential.credentialType,
+        uri: issuedCredential.uri,
+        issueTxHash: issuedCredential.issueTxHash,
+        issueExplorerUrl: issuedCredential.issueExplorerUrl,
+        acceptTxHash: accepted.txHash ?? null,
+        acceptExplorerUrl: accepted.txHash ? getTestnetExplorerLink(accepted.txHash) : null,
+        status: accepted.signed && accepted.txHash ? "accepted" : "accept_pending",
+      };
+      setTxStatus(
+        credentialMeta.status === "accepted" ? "XLS-70 Credential accepted" : "XLS-70 Credential accept pending",
+        false,
+      );
+    } catch (credentialError) {
+      credentialMeta = { status: "failed" };
+      setTxStatus(
+        `Evidence ready · Credential failed (${credentialError instanceof Error ? credentialError.message : "unknown"})`,
+        true,
+      );
+    }
 
     const amountKrw = getDonationAmountKrw();
     const donationRecord: LocalDonationRecord = {
@@ -795,7 +842,22 @@ async function submitDonation(): Promise<void> {
       network: "testnet",
       destinationAddress: donationDestination.address,
       foundationWallet: donationDestination.address,
-      proofMintStatus: "recorded",
+      proofMintStatus:
+        credentialMeta?.status === "accepted"
+          ? "credential_accepted"
+          : credentialMeta?.status === "accept_pending"
+            ? "credential_accept_pending"
+            : credentialMeta?.status === "failed"
+              ? "credential_failed"
+              : "evidence_ready",
+      credentialIssuer: credentialMeta?.issuer,
+      credentialType: credentialMeta?.credentialType,
+      credentialUri: credentialMeta?.uri,
+      credentialIssueTxHash: credentialMeta?.issueTxHash ?? undefined,
+      credentialIssueExplorerUrl: credentialMeta?.issueExplorerUrl ?? undefined,
+      credentialAcceptTxHash: credentialMeta?.acceptTxHash ?? undefined,
+      credentialAcceptExplorerUrl: credentialMeta?.acceptExplorerUrl ?? undefined,
+      credentialStatus: credentialMeta?.status,
       source: "local",
     };
 
@@ -813,6 +875,7 @@ async function submitDonation(): Promise<void> {
       complianceHash: compliance.complianceHash,
       asset,
       amountAsset: amount,
+      credential: credentialMeta ?? undefined,
     }).then((saved) => {
       if (saved && lastDonationRecord) {
         lastDonationRecord = { ...lastDonationRecord, dbId: saved.id };

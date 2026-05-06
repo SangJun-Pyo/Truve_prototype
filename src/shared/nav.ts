@@ -30,7 +30,7 @@ export function renderTopNav(activeTabId: string): string {
         </span>
         <span class="brand">Truve</span>
       </a>
-      <p class="sub-copy">Crypto donation receipts on XRPL</p>
+      <p class="sub-copy">XRPL Donation Credential infrastructure</p>
       <nav class="tab-nav" aria-label="Main Navigation">
         ${links}
       </nav>

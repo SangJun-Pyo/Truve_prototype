@@ -27,6 +27,10 @@ const fallbackDonationDestination =
   process.env.XRPL_TESTNET_DONATION_DESTINATION ?? "rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe";
 const fallbackGovernanceDestination =
   process.env.XRPL_TESTNET_GOVERNANCE_DESTINATION ?? "rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe";
+const credentialIssuerAddress =
+  process.env.XRPL_TESTNET_CREDENTIAL_ISSUER_ADDRESS ?? process.env.XRPL_TESTNET_RLUSD_ISSUER_ADDRESS ?? "";
+const credentialIssuerSeed =
+  process.env.XRPL_TESTNET_CREDENTIAL_ISSUER_SEED ?? process.env.XRPL_TESTNET_RLUSD_ISSUER_SEED ?? "";
 const issuedAssetConfig = {
   RLUSD: {
     label: "RLUSD",
@@ -125,6 +129,17 @@ function getFaucetIssuer(asset: keyof typeof issuedAssetConfig) {
   };
 }
 
+function getCredentialIssuer() {
+  if (!credentialIssuerAddress || !credentialIssuerSeed) {
+    throw new Error("Credential issuer address/seed is not configured.");
+  }
+  const wallet = Wallet.fromSeed(credentialIssuerSeed);
+  if (wallet.address !== credentialIssuerAddress) {
+    throw new Error("Credential issuer seed does not match issuer address.");
+  }
+  return wallet;
+}
+
 function requireAdminSecret(req: express.Request): void {
   if (!adminSecret) {
     throw new Error("ADMIN_SECRET is not configured.");
@@ -216,6 +231,140 @@ function normalizeIssuerOpsInput(input: any) {
 
   return {
     currency: currency as keyof typeof issuedAssetConfig,
+  };
+}
+
+function normalizeCredentialIssueInput(input: any) {
+  const subject = String(input?.subject ?? input?.xrplAccount ?? "").trim();
+  const receiptId = String(input?.receiptId ?? "").trim();
+  const evidenceHash = String(input?.evidenceHash ?? "").trim();
+  const txHash = String(input?.txHash ?? "").trim();
+
+  if (xrplNetwork !== "testnet") {
+    throw new Error("Credential issuance is blocked because XRPL_NETWORK is not testnet.");
+  }
+  if (!isValidClassicAddress(subject)) {
+    throw new Error("subject must be a valid XRPL classic address.");
+  }
+  if (!receiptId || receiptId.length > 80) {
+    throw new Error("receiptId is required and must be 80 characters or fewer.");
+  }
+  if (!evidenceHash || evidenceHash.length > 128) {
+    throw new Error("evidenceHash is required and must be 128 characters or fewer.");
+  }
+  if (!txHash || txHash.length > 128) {
+    throw new Error("txHash is required and must be 128 characters or fewer.");
+  }
+
+  return { subject, receiptId, evidenceHash, txHash };
+}
+
+function makeCredentialType(receiptId: string): string {
+  const compactReceipt = receiptId.replace(/[^A-Za-z0-9_-]/g, "").slice(-36);
+  return toHex(`TRUVE_DONATION:${compactReceipt}`).slice(0, 128);
+}
+
+function makeCredentialUri(input: { receiptId: string; evidenceHash: string; txHash: string }): string {
+  const uri = `truve:donation:${input.receiptId}:${input.evidenceHash.slice(0, 24)}:${input.txHash.slice(0, 16)}`;
+  return toHex(uri).slice(0, 512);
+}
+
+function fromHex(input: string): string {
+  return Buffer.from(input, "hex").toString("utf8");
+}
+
+function getTxJson(result: any) {
+  return result?.tx_json ?? result?.tx ?? result;
+}
+
+function getTxResultCode(result: any): string | undefined {
+  return result?.meta?.TransactionResult ?? result?.metaData?.TransactionResult ?? result?.engine_result;
+}
+
+function getPaymentAmountValue(amount: any): number {
+  if (typeof amount === "string") {
+    return Number(amount) / 1_000_000;
+  }
+  return Number(amount?.value);
+}
+
+function getMemoPayload(txJson: any): any | null {
+  const memos = Array.isArray(txJson?.Memos) ? txJson.Memos : [];
+  for (const item of memos) {
+    const memo = item?.Memo ?? {};
+    const memoType = typeof memo.MemoType === "string" ? fromHex(memo.MemoType) : "";
+    if (memoType !== "TRUVE_DONATION") continue;
+    const memoData = typeof memo.MemoData === "string" ? fromHex(memo.MemoData) : "";
+    try {
+      return JSON.parse(memoData);
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+async function verifyDonationPaymentForCredential(
+  client: Client,
+  input: ReturnType<typeof normalizeCredentialIssueInput>,
+) {
+  const tx = await client.request({
+    command: "tx",
+    transaction: input.txHash,
+  });
+  const result = tx.result as any;
+  const txJson = getTxJson(result);
+  const engineResult = getTxResultCode(result);
+
+  if (!result?.validated) {
+    throw new Error("Credential issuance requires a validated XRPL payment transaction.");
+  }
+  if (engineResult && engineResult !== "tesSUCCESS") {
+    throw new Error(`Credential issuance blocked because payment result is ${engineResult}.`);
+  }
+  if (txJson?.TransactionType !== "Payment") {
+    throw new Error("Credential issuance requires a Payment transaction.");
+  }
+  if (txJson?.Account !== input.subject) {
+    throw new Error("Credential subject must match the payment sender.");
+  }
+  if (txJson?.Destination !== fallbackDonationDestination) {
+    throw new Error("Payment destination does not match the configured Truve testnet donation destination.");
+  }
+
+  const memo = getMemoPayload(txJson);
+  if (!memo) {
+    throw new Error("TRUVE_DONATION memo is required before issuing a Donation Credential.");
+  }
+  if (memo.receipt_id !== input.receiptId) {
+    throw new Error("receiptId does not match the payment memo.");
+  }
+  if (memo.evidence_hash !== input.evidenceHash) {
+    throw new Error("evidenceHash does not match the payment memo.");
+  }
+  if (!memo.compliance_hash) {
+    throw new Error("compliance_hash is required in the payment memo.");
+  }
+
+  const amount = txJson?.Amount;
+  if (!amount || typeof amount === "string") {
+    throw new Error("Donation Credential issuance requires an issued currency payment.");
+  }
+  const asset = Object.entries(issuedAssetConfig).find(([, config]) => {
+    return toXrplCurrencyCode(config.currency) === amount.currency && config.issuer === amount.issuer;
+  });
+  if (!asset) {
+    throw new Error("Payment asset must be configured RLUSD or USDC.");
+  }
+  if (getPaymentAmountValue(amount) <= 0) {
+    throw new Error("Payment amount must be greater than 0.");
+  }
+
+  return {
+    memo,
+    asset: asset[0],
+    amount: String(amount.value),
+    destination: txJson.Destination,
   };
 }
 
@@ -728,6 +877,81 @@ app.post("/api/xaman/memo", async (req, res) => {
   }
 });
 
+app.post("/api/credentials/issue", async (req, res) => {
+  const client = new Client(xrplTestnetWss);
+
+  try {
+    const input = normalizeCredentialIssueInput(req.body);
+    const issuer = getCredentialIssuer();
+    const credentialType = makeCredentialType(input.receiptId);
+    const uri = makeCredentialUri(input);
+    let issueTxHash: string | null = null;
+    let issueValidated = false;
+    let issueAlreadyExists = false;
+
+    await client.connect();
+    const verifiedPayment = await verifyDonationPaymentForCredential(client, input);
+    const tx = {
+      TransactionType: "CredentialCreate",
+      Account: issuer.address,
+      Subject: input.subject,
+      CredentialType: credentialType,
+      URI: uri,
+    } as any;
+    const prepared = await client.autofill(tx);
+    const signed = issuer.sign(prepared);
+    const submitted = await client.submitAndWait(signed.tx_blob);
+    const result = submitted.result as any;
+    const engineResult = result?.engine_result ?? result?.meta?.TransactionResult;
+
+    if (engineResult === "tecDUPLICATE") {
+      issueAlreadyExists = true;
+    } else if (engineResult && engineResult !== "tesSUCCESS") {
+      throw new Error(`XRPL CredentialCreate failed: ${engineResult}`);
+    } else {
+      issueTxHash = signed.hash;
+      issueValidated = Boolean(result?.validated);
+    }
+
+    const acceptPayload = await callXaman("/payload", {
+      method: "POST",
+      body: JSON.stringify({
+        txjson: {
+          TransactionType: "CredentialAccept",
+          Account: input.subject,
+          Issuer: issuer.address,
+          CredentialType: credentialType,
+        },
+        options: { submit: true, force_network: "TESTNET" },
+      }),
+    });
+
+    res.json({
+      ok: true,
+      issuer: issuer.address,
+      subject: input.subject,
+      credentialType,
+      uri,
+      issueTxHash,
+      issueValidated,
+      issueAlreadyExists,
+      issueExplorerUrl: issueTxHash ? `https://testnet.xrpl.org/transactions/${issueTxHash}` : null,
+      verifiedPayment,
+      accept: mapPayloadCreateResponse(acceptPayload),
+      message:
+        "XLS-70 CredentialCreate submitted. The donor must sign CredentialAccept in Xaman to make it valid.",
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: error instanceof Error ? error.message : "Credential issuance failed.",
+    });
+  } finally {
+    if (client.isConnected()) {
+      await client.disconnect();
+    }
+  }
+});
+
 app.get("/api/xaman/payload/:uuid", async (req, res) => {
   try {
     const payload = await callXaman(`/payload/${req.params.uuid}`, { method: "GET" });
@@ -939,8 +1163,19 @@ app.post("/api/db/users", async (req, res) => {
 // ── DB: 기부 기록 저장 ─────────────────────────────────────────────────
 app.post("/api/db/donations", async (req, res) => {
   try {
-    const { xrplAccount, amountKrw, allocations, txHash, explorerUrl, receiptId, evidenceHash, complianceHash, asset, amountAsset } =
-      req.body ?? {};
+    const {
+      xrplAccount,
+      amountKrw,
+      allocations,
+      txHash,
+      explorerUrl,
+      receiptId,
+      evidenceHash,
+      complianceHash,
+      asset,
+      amountAsset,
+      credential,
+    } = req.body ?? {};
     if (!xrplAccount || !amountKrw || !allocations) {
       res.status(400).json({ error: "xrplAccount, amountKrw, allocations는 필수입니다." });
       return;
@@ -955,7 +1190,32 @@ app.post("/api/db/donations", async (req, res) => {
         where: { userId: user.id, txHash },
       });
       if (existing) {
-        res.json(existing);
+        const existingAllocations = existing.allocations as any;
+        const existingItems = Array.isArray(existingAllocations)
+          ? existingAllocations
+          : (existingAllocations?.items ?? allocations);
+        const existingMeta = Array.isArray(existingAllocations) ? {} : (existingAllocations?.meta ?? {});
+        const updated = await prisma.donation.update({
+          where: { id: existing.id },
+          data: {
+            amountKrw: Number(amountKrw),
+            allocations: {
+              items: existingItems,
+              meta: {
+                ...existingMeta,
+                receiptId: receiptId ?? existingMeta.receiptId ?? null,
+                evidenceHash: evidenceHash ?? existingMeta.evidenceHash ?? null,
+                complianceHash: complianceHash ?? existingMeta.complianceHash ?? null,
+                asset: asset ?? existingMeta.asset ?? null,
+                amountAsset: amountAsset ?? existingMeta.amountAsset ?? null,
+                credential: credential ?? existingMeta.credential ?? null,
+              },
+            },
+            explorerUrl: explorerUrl ?? existing.explorerUrl,
+            validationStatus: txHash ? "validated" : existing.validationStatus,
+          },
+        });
+        res.json(updated);
         return;
       }
     }
@@ -967,6 +1227,7 @@ app.post("/api/db/donations", async (req, res) => {
         complianceHash: complianceHash ?? null,
         asset: asset ?? null,
         amountAsset: amountAsset ?? null,
+        credential: credential ?? null,
       },
     };
     const donation = await prisma.donation.create({
@@ -1016,12 +1277,63 @@ app.get("/api/db/donation-by-tx/:txHash", async (req, res) => {
   }
 });
 
-// ── DB: 기부 상태 업데이트 (NFT 민팅 후 등) ───────────────────────────
+app.get("/api/db/donation-lookup/:id", async (req, res) => {
+  try {
+    const lookupId = req.params.id;
+    const direct = await prisma.donation.findFirst({
+      where: {
+        OR: [{ id: lookupId }, { txHash: lookupId }],
+      },
+      orderBy: { donatedAt: "desc" },
+    });
+    if (direct) {
+      res.json(direct);
+      return;
+    }
+
+    const recent = await prisma.donation.findMany({
+      orderBy: { donatedAt: "desc" },
+      take: 250,
+    });
+    const donation = recent.find((item) => {
+      const payload = item.allocations as any;
+      const meta = Array.isArray(payload) ? {} : (payload?.meta ?? {});
+      return meta.receiptId === lookupId || meta.evidenceHash === lookupId || meta.complianceHash === lookupId;
+    });
+    if (!donation) {
+      res.status(404).json({ error: "Donation not found" });
+      return;
+    }
+    res.json(donation);
+  } catch (error) {
+    res.status(500).json({ error: error instanceof Error ? error.message : "Donation lookup failed" });
+  }
+});
+
+// ── DB: 기부 상태 업데이트 (Evidence/Credential 상태 등) ─────────────
 app.patch("/api/db/donations/:id", async (req, res) => {
   try {
+    const allowedKeys = [
+      "paymentStatus",
+      "proofStatus",
+      "nftStatus",
+      "settlementStatus",
+      "txHash",
+      "proofNftId",
+      "explorerUrl",
+      "validationStatus",
+      "allocations",
+    ];
+    const data = Object.fromEntries(
+      Object.entries(req.body ?? {}).filter(([key]) => allowedKeys.includes(key)),
+    );
+    if (Object.keys(data).length === 0) {
+      res.status(400).json({ error: "No supported donation fields to update." });
+      return;
+    }
     const donation = await prisma.donation.update({
       where: { id: req.params.id },
-      data: req.body,
+      data,
     });
     res.json(donation);
   } catch (error) {

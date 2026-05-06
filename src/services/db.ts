@@ -20,6 +20,18 @@ export interface DbDonation {
   complianceHash?: string | null;
   asset?: "XRP" | "RLUSD" | "USDC" | null;
   amountAsset?: number | null;
+  credential?: DonationCredentialMeta | null;
+}
+
+export interface DonationCredentialMeta {
+  issuer?: string;
+  credentialType?: string;
+  uri?: string;
+  issueTxHash?: string | null;
+  issueExplorerUrl?: string | null;
+  acceptTxHash?: string | null;
+  acceptExplorerUrl?: string | null;
+  status?: "issued" | "accept_pending" | "accepted" | "failed";
 }
 
 export interface DbVoteTally {
@@ -55,6 +67,7 @@ export async function saveDbDonation(params: {
   complianceHash?: string;
   asset?: "XRP" | "RLUSD" | "USDC";
   amountAsset?: number;
+  credential?: DonationCredentialMeta;
 }): Promise<DbDonation | null> {
   try {
     const res = await post("/donations", params);
@@ -89,7 +102,7 @@ export async function fetchDbDonations(xrplAccount: string): Promise<DbDonation[
 
 export async function fetchDbDonationByTx(txHash: string): Promise<DbDonation | null> {
   try {
-    const res = await fetch(`${BASE}/donation-by-tx/${encodeURIComponent(txHash)}`);
+    const res = await fetch(`${BASE}/donation-lookup/${encodeURIComponent(txHash)}`);
     if (!res.ok) return null;
     return res.json() as Promise<DbDonation>;
   } catch {

@@ -197,14 +197,18 @@ async function init(): Promise<void> {
     return;
   }
 
-  const nftCount = donations.filter((item) => item.nftStatus === "minted" && item.proofNftId).length;
-  const eligible = nftCount > 0;
+  const credentialCount = donations.filter((item) =>
+    item.proofMintStatus === "credential_accepted" ||
+    item.proofMintStatus === "credential_issued" ||
+    Boolean(item.txHash || item.evidenceHash),
+  ).length;
+  const eligible = credentialCount > 0;
   const weight = TIER_WEIGHT[profile.tier] ?? 1;
 
   eligibilityEl.className = eligible ? "notice" : "notice error";
   eligibilityEl.innerHTML = eligible
-    ? `투표 가능: ${profile.displayName} · NFT ${nftCount}개 보유 · 티어 <strong>${profile.tier.toUpperCase()}</strong> · 가중치 <strong>${weight}표</strong>`
-    : `투표 불가: Proof NFT 보유가 확인되지 않았습니다. 기부 후 NFT를 발급받아 참여해주세요.`;
+    ? `투표 가능: ${profile.displayName} · Evidence/Credential ${credentialCount}건 · 티어 <strong>${profile.tier.toUpperCase()}</strong> · 가중치 <strong>${weight}표</strong>`
+    : `투표 불가: 검증 가능한 Evidence 또는 Donation Credential이 확인되지 않았습니다. 기부 완료 후 참여해주세요.`;
 
   const candidates = foundations.filter((foundation) =>
     ["fnd_truve-community", "fnd_green-earth", "fnd_next-class", "fnd_relief-now"].includes(foundation.id),

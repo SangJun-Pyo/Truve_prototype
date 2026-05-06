@@ -1,0 +1,30 @@
+/* empty css               */import"./modulepreload-polyfill-CfRWewTA.js";import{t as e}from"./provider-wBI-_yYj.js";import{r as t,u as n}from"./db-Bb3MhysS.js";import{t as r}from"./donations-Yv8Ifjw3.js";import{a as i}from"./xrpl-BHSRxYyM.js";import{t as a}from"./nav-CA1dGXY3.js";var o=`usr_demo_001`,s=document.getElementById(`top-nav`);s&&(s.innerHTML=a(`status`));var c=document.getElementById(`verify-status`),l=document.getElementById(`verify-result`);function u(){let e=window.location.pathname.split(`/`).filter(Boolean),t=e.findIndex(e=>e===`verify`),n=t>=0?e[t+1]:``,r=new URLSearchParams(window.location.search),i=r.get(`receipt_id`)??r.get(`id`)??``;return decodeURIComponent(n||i||``).trim()}function d(e,t=!1){c&&(c.textContent=e,c.className=t?`status-badge error`:`status-badge success`)}function f(e){return`${Math.round(e).toLocaleString(`ko-KR`)} KRW`}function p(e,t){return e.receiptId===t||e.evidenceHash===t||e.txHash===t||e.id===t||e.dbId===t}function m(e){let t=e.allocations,n=Array.isArray(t)?t:t?.items??[],r=t?.meta??{};return{id:e.id,userId:e.userId,xrplAccount:e.xrplAccount??void 0,donatedAt:e.donatedAt,amountKrw:e.amountKrw,allocations:n,paymentStatus:e.paymentStatus,proofStatus:e.proofStatus,nftStatus:e.nftStatus,settlementStatus:e.settlementStatus,txHash:e.txHash??void 0,proofNftId:e.proofNftId??void 0,explorerUrl:e.explorerUrl??void 0,validationStatus:e.validationStatus,receiptId:e.receiptId??r.receiptId??void 0,evidenceHash:e.evidenceHash??r.evidenceHash??void 0,complianceHash:e.complianceHash??r.complianceHash??void 0,asset:e.asset??r.asset??void 0,amountAsset:e.amountAsset??r.amountAsset??void 0,proofMintStatus:r.credential?.status===`accepted`?`credential_accepted`:r.credential?.status===`accept_pending`?`credential_accept_pending`:r.credential?.status===`failed`?`credential_failed`:e.txHash?`evidence_ready`:`none`,credentialIssuer:r.credential?.issuer??void 0,credentialType:r.credential?.credentialType??void 0,credentialUri:r.credential?.uri??void 0,credentialIssueTxHash:r.credential?.issueTxHash??void 0,credentialIssueExplorerUrl:r.credential?.issueExplorerUrl??void 0,credentialAcceptTxHash:r.credential?.acceptTxHash??void 0,credentialAcceptExplorerUrl:r.credential?.acceptExplorerUrl??void 0,credentialStatus:r.credential?.status??void 0,source:`local`,dbId:e.id}}async function h(e){if(!e.xrplAccount||!e.credentialIssuer||!e.credentialType)return null;try{let t=new URLSearchParams({subject:e.xrplAccount,issuer:e.credentialIssuer,credentialType:e.credentialType});return await(await fetch(`${n}/api/xrpl/credential?${t.toString()}`)).json()}catch(e){return{exists:!1,accepted:!1,error:e instanceof Error?e.message:`Credential lookup failed`}}}async function g(e){if(!l)return;let t=e.explorerUrl??(e.txHash?i(e.txHash):``);l.innerHTML=`<p class="microcopy">Checking XRPL payment and Credential state...</p>`;let n=await h(e),r=n?.exists?n.accepted?`accepted on ledger`:`issued, waiting for accept`:n?`not found on ledger`:`not issued`;d(n?.accepted?`CREDENTIAL VERIFIED`:e.validationStatus===`validated`?`EVIDENCE VERIFIED`:`RECORDED`),l.innerHTML=`
+    <article class="timeline-item">
+      <div class="row-between">
+        <strong>${e.receiptId??e.id}</strong>
+        <span class="badge">${e.validationStatus??`recorded`}</span>
+      </div>
+      <div class="onchain-card mt-12">
+        <div class="onchain-row"><span>Receipt ID</span><strong>${e.receiptId??e.id}</strong></div>
+        <div class="onchain-row"><span>Evidence Hash</span><strong>${e.evidenceHash??`not recorded`}</strong></div>
+        <div class="onchain-row"><span>Amount</span><strong>${e.amountAsset?`${e.amountAsset} ${e.asset}`:f(e.amountKrw)}</strong></div>
+        <div class="onchain-row"><span>KRW Estimate</span><strong>${f(e.amountKrw)}</strong></div>
+        <div class="onchain-row"><span>Network</span><strong>${e.network??`testnet`}</strong></div>
+        <div class="onchain-row"><span>Destination</span><strong>${e.destinationAddress??e.foundationWallet??`-`}</strong></div>
+        <div class="onchain-row"><span>TX Hash</span><strong>${e.txHash??`-`}</strong></div>
+        <div class="onchain-row"><span>Evidence</span><strong>${e.evidenceHash?`ready`:`pending`}</strong></div>
+        <div class="onchain-row"><span>XLS-70 Credential</span><strong>${e.credentialStatus??`not issued`}</strong></div>
+        <div class="onchain-row"><span>Ledger Credential</span><strong>${r}</strong></div>
+        <div class="onchain-row"><span>Credential Issuer</span><strong>${e.credentialIssuer??`-`}</strong></div>
+        <div class="onchain-row"><span>Credential Type</span><strong>${e.credentialType??`-`}</strong></div>
+        <div class="onchain-row"><span>Credential Ledger ID</span><strong>${n?.index??`-`}</strong></div>
+        <div class="onchain-row"><span>Credential Previous TX</span><strong>${n?.previousTxId??`-`}</strong></div>
+      </div>
+      ${t?`<a class="ghost-btn mt-12" href="${t}" target="_blank" rel="noreferrer">Open XRPL Testnet Explorer</a>`:``}
+      ${e.credentialAcceptExplorerUrl?`<a class="ghost-btn mt-12" href="${e.credentialAcceptExplorerUrl}" target="_blank" rel="noreferrer">Open CredentialAccept TX</a>`:``}
+      ${n?.error?`<p class="tax-disclaimer mt-12">Credential ledger lookup: ${n.error}</p>`:``}
+    </article>
+  `}async function _(){let n=u();if(!n){d(`NO ID`,!0),l&&(l.innerHTML=`<p class="tax-disclaimer">Missing receipt_id. Use /verify/{receipt_id}.</p>`);return}let i=await(await e()).donationRepository.listDonationsByUser(o),a=[...r(o),...i.map(e=>({...e,source:`mock`}))].find(e=>p(e,n));if(!a){let e=await t(n);if(e){await g(m(e));return}d(`NOT FOUND`,!0),l&&(l.innerHTML=`
+        <p class="tax-disclaimer">No local prototype proof found for ${n}.</p>
+        <p class="microcopy">This prototype verifies local/browser and demo records. Deployed verification should use the production proof database.</p>
+      `);return}await g(a)}_();

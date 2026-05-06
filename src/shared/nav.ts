@@ -22,9 +22,10 @@ export function renderTopNav(activeTabId: string): string {
     <header class="app-header glass-nav">
       <a class="brand-lockup" href="./foundations.html" aria-label="Truve home">
         <span class="brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24">
-            <path d="M12 3 3 8l9 5 9-5-9-5Z"></path>
-            <path d="M3 16l9 5 9-5M3 11.5l9 5 9-5"></path>
+          <svg viewBox="0 0 32 32">
+            <path class="logo-layer logo-layer-top" d="M16 7 6 12.2 16 17.4 26 12.2 16 7Z"></path>
+            <path class="logo-layer logo-layer-mid" d="M7.5 17.4 16 21.8 24.5 17.4"></path>
+            <path class="logo-layer logo-layer-bottom" d="M8.5 22 16 25.8 23.5 22"></path>
           </svg>
         </span>
         <span class="brand">Truve</span>

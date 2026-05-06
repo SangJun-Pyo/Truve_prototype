@@ -1,0 +1,1 @@
+/* empty css               */import"./modulepreload-polyfill-CfRWewTA.js";import{t as e}from"./nav-CA1dGXY3.js";var t=document.getElementById(`top-nav`);t&&(t.innerHTML=e(`about`));

@@ -115,22 +115,30 @@ body::before {
 }
 
 .brand-lockup:hover .brand-mark {
-  background: var(--brand-orange);
-  color: #fff;
+  background: var(--accent-black);
+  transform: translateY(-1px);
 }
 
 .brand-mark svg {
-  width: 19px;
-  height: 19px;
-  fill: currentColor;
+  width: 24px;
+  height: 24px;
 }
 
-.brand-mark svg path + path {
+.brand-mark .logo-layer-top {
+  fill: var(--brand-orange);
+}
+
+.brand-mark .logo-layer-mid,
+.brand-mark .logo-layer-bottom {
   fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
+  stroke: #ffffff;
+  stroke-width: 3;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.brand-mark .logo-layer-bottom {
+  stroke: #b8c0cc;
 }
 
 .brand {

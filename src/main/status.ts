@@ -46,6 +46,13 @@ const taxPartnerBtnEl = document.getElementById("status-tax-partner-btn") as HTM
 const taxScenarioSliderEl = document.getElementById("tax-scenario-slider") as HTMLInputElement | null;
 const taxScenarioLabelEl = document.getElementById("tax-scenario-label");
 const taxScenarioChartEl = document.getElementById("tax-scenario-chart");
+const portfolioTotalAmountEl = document.getElementById("portfolio-total-amount");
+const impactMainNumberEl = document.getElementById("impact-main-number");
+const impactGrowthBadgeEl = document.getElementById("impact-growth-badge");
+const impactChartAreaEl = document.getElementById("impact-chart-area");
+const impactChartLabelsEl = document.getElementById("impact-chart-labels");
+const tokenDistributionEl = document.getElementById("token-distribution");
+const credentialListEl = document.getElementById("credential-list");
 
 let totalDonatedForTax = 0;
 let currentDonations: LocalDonationRecord[] = [];
@@ -72,6 +79,15 @@ function formatCompactKrw(value: number): string {
   if (value >= 100_000_000) return `${(value / 100_000_000).toFixed(1)}억`;
   if (value >= 10_000) return `${Math.round(value / 10_000).toLocaleString("ko-KR")}만`;
   return value.toLocaleString("ko-KR");
+}
+
+function formatAssetAmount(value: number): string {
+  return value.toLocaleString("ko-KR", { maximumFractionDigits: 6 });
+}
+
+function shortHash(value?: string): string {
+  if (!value) return "-";
+  return `${value.slice(0, 6)}...${value.slice(-4)}`;
 }
 
 function formatDate(iso: string): string {
@@ -383,7 +399,6 @@ function mapDbDonation(d: Awaited<ReturnType<typeof fetchDbDonations>>[number]):
 }
 
 function renderSummary(profileName: string, tier: string, walletDbCount: number): void {
-  if (!summaryEl) return;
   const wallet = getWalletSession();
   const total = currentDonations.reduce((sum, item) => sum + item.amountKrw, 0);
   const onchainCount = currentDonations.filter((item) => Boolean(item.txHash)).length;
@@ -393,53 +408,143 @@ function renderSummary(profileName: string, tier: string, walletDbCount: number)
     totals[asset] = (totals[asset] ?? 0) + (item.amountAsset ?? item.amountKrw);
     return totals;
   }, {});
-  const assetSummary = Object.entries(assetTotals)
-    .slice(0, 3)
-    .map(([asset, amount]) => `${asset} ${Math.round(amount * 100) / 100}`)
-    .join(" · ");
 
-  summaryEl.innerHTML = `
-    <div class="summary-box">
-      <div class="summary-label">연결 지갑</div>
-      <div class="summary-value">${wallet ? `${wallet.account.slice(0, 6)}...${wallet.account.slice(-4)}` : "미연결"}</div>
-      <div class="trust mt-12">${wallet ? `DB 동기화 ${walletDbCount}건` : "Xaman 연결 시 지갑 기준 기록 표시"}</div>
-    </div>
-    <div class="summary-box">
-      <div class="summary-label">누적 기부금</div>
-      <div class="summary-value">${formatKrwPlain(total)}</div>
-      <div class="trust mt-12">${assetSummary || "기부 자산 데이터 없음"}</div>
-    </div>
-    <div class="summary-box">
-      <div class="summary-label">온체인 기록</div>
-      <div class="summary-value">${onchainCount}건</div>
-      <div class="trust mt-12">Evidence ready ${evidenceReadyCount}건</div>
-    </div>
-    <div class="summary-box">
-      <div class="summary-label">등급</div>
-      <div class="summary-value">${tier.toUpperCase()}</div>
-      <div class="trust mt-12">${profileName}</div>
-    </div>
-  `;
+  if (portfolioTotalAmountEl) portfolioTotalAmountEl.textContent = formatKrwPlain(total);
+  if (impactMainNumberEl) impactMainNumberEl.textContent = formatKrwPlain(total);
+  if (impactGrowthBadgeEl) {
+    const growth = currentDonations.length > 1 ? "+10%" : "+0%";
+    impactGrowthBadgeEl.textContent = `↑ ${growth}`;
+  }
+
+  if (summaryEl) {
+    summaryEl.innerHTML = `
+      <article class="portfolio-stat-card">
+        <span>연결 지갑</span>
+        <strong>${wallet ? `${wallet.account.slice(0, 6)}...${wallet.account.slice(-4)}` : "미연결"}</strong>
+        <p>${wallet ? `DB 동기화 ${walletDbCount}건` : "Xaman 연결 시 지갑 기준 기록 표시"}</p>
+      </article>
+      <article class="portfolio-stat-card">
+        <span>온체인 기록</span>
+        <strong>${onchainCount}건</strong>
+        <p>Evidence ready ${evidenceReadyCount}건</p>
+      </article>
+      <article class="portfolio-stat-card">
+        <span>등급</span>
+        <strong>${tier.toUpperCase()}</strong>
+        <p>${profileName}</p>
+      </article>
+    `;
+  }
+
+  renderImpactChart();
+  renderTokenDistribution(assetTotals);
+  renderCredentialList();
+}
+
+function renderImpactChart(): void {
+  if (!impactChartAreaEl || !impactChartLabelsEl) return;
+  const monthly = new Array(7).fill(0);
+  const now = new Date();
+  currentDonations.forEach((donation) => {
+    const donatedAt = new Date(donation.donatedAt);
+    const diff =
+      (now.getFullYear() - donatedAt.getFullYear()) * 12 +
+      (now.getMonth() - donatedAt.getMonth());
+    const index = 6 - diff;
+    if (index >= 0 && index < monthly.length) monthly[index] += donation.amountKrw;
+  });
+  const fallback = [40, 60, 50, 30, 45, 85, 65];
+  const max = Math.max(...monthly, 1);
+
+  impactChartAreaEl.innerHTML = monthly
+    .map((amount, index) => {
+      const height = amount > 0 ? Math.max(18, Math.round((amount / max) * 85)) : fallback[index];
+      const activeClass = index === 5 || amount === max ? "solid" : "striped";
+      const indicator = activeClass === "solid" ? `<span class="bar-indicator"></span>` : "";
+      return `<div class="bar-wrapper">${indicator}<div class="bar ${activeClass}" style="height:${height}%"></div></div>`;
+    })
+    .join("");
+
+  impactChartLabelsEl.innerHTML = Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(now.getFullYear(), now.getMonth() - (6 - index), 1);
+    return `<span>${date.toLocaleDateString("en-US", { month: "short" })}</span>`;
+  }).join("");
+}
+
+function renderTokenDistribution(assetTotals: Record<string, number>): void {
+  if (!tokenDistributionEl) return;
+  const entries = Object.entries(assetTotals).filter(([, amount]) => amount > 0);
+  const total = entries.reduce((sum, [, amount]) => sum + amount, 0);
+  if (entries.length === 0 || total <= 0) {
+    tokenDistributionEl.innerHTML = `<p class="muted-text">아직 표시할 자산 분포가 없습니다.</p>`;
+    return;
+  }
+
+  tokenDistributionEl.innerHTML = entries
+    .map(([asset, amount], index) => {
+      const pct = Math.round((amount / total) * 100);
+      return `
+        <div class="token-row">
+          <div class="row-between">
+            <span>${asset}</span>
+            <strong>${formatAssetAmount(amount)}</strong>
+          </div>
+          <div class="token-bar"><span class="${index === 0 ? "blue" : "dark"}" style="width:${Math.max(3, pct)}%"></span></div>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function renderCredentialList(): void {
+  if (!credentialListEl) return;
+  const credentials = currentDonations.filter((donation) => Boolean(donation.txHash || donation.evidenceHash)).slice(0, 3);
+  if (credentials.length === 0) {
+    credentialListEl.innerHTML = `<p class="muted-text">Evidence가 준비되면 Credential 상태가 여기에 표시됩니다.</p>`;
+    return;
+  }
+
+  credentialListEl.innerHTML = credentials
+    .map((donation) => {
+      const status = donation.credentialStatus ?? (donation.txHash ? "evidence_ready" : "pending");
+      return `
+        <article class="credential-mini-card">
+          <div class="credential-icon">✓</div>
+          <div>
+            <strong>${donation.receiptId ?? "Donation Evidence"}</strong>
+            <span>${status} · ${shortHash(donation.txHash ?? donation.evidenceHash)}</span>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
 }
 
 function renderTimeline(): void {
   if (!timelineEl) return;
-  timelineEl.innerHTML = currentDonations
-    .slice(0, 3)
-    .map(
-      (donation) => `
-        <article class="timeline-item">
-          <div class="row-between">
-            <strong>${formatKrw(donation.amountKrw)}</strong>
-            <span class="badge">${formatDate(donation.donatedAt)}</span>
+  const items = currentDonations.slice(0, 4);
+  if (items.length === 0) {
+    timelineEl.innerHTML = `<div class="empty-state">아직 기부 기록이 없습니다.</div>`;
+    return;
+  }
+
+  timelineEl.innerHTML = items
+    .map((donation) => {
+      const amount = donation.asset
+        ? `${formatAssetAmount(donation.amountAsset ?? 0)} ${donation.asset}`
+        : formatKrwPlain(donation.amountKrw);
+      const proof = donation.txHash ?? donation.evidenceHash;
+      return `
+        <article class="portfolio-list-item">
+          <div class="portfolio-avatar">${(donation.asset ?? "T").slice(0, 2)}</div>
+          <div class="portfolio-list-info">
+            <strong>${donation.receiptId ?? "Donation Evidence"}</strong>
+            <span>${formatDate(donation.donatedAt)} · <em>${shortHash(proof)}</em></span>
           </div>
-          <div class="trust mt-12">1) ${stepToKorean(donation.paymentStatus)}</div>
-          <div class="trust">2) Evidence ${donation.evidenceHash ? "ready" : stepToKorean(donation.proofStatus)}</div>
-          <div class="trust">3) Credential ${donation.credentialStatus ?? "pending"}</div>
-          <div class="trust">4) ${stepToKorean(donation.settlementStatus)} · 검증 ${donation.validationStatus ?? "-"}</div>
+          <div class="portfolio-list-amount">+${amount}</div>
         </article>
-      `,
-    )
+      `;
+    })
     .join("");
 }
 

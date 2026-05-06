@@ -56,14 +56,14 @@
             <div class="foundation-admin-head">
               <div>
                 <h3>${e.name}</h3>
-                <p class="microcopy">${e.region} · ${e.walletAddress}</p>
+                <p class="microcopy">${e.region} / ${e.walletAddress}</p>
               </div>
               <span class="status-badge ${n===`approved`?`success`:`error`}">${n.toUpperCase()}</span>
             </div>
             <div class="trustline-pills">${te(r)}</div>
             <div class="result-row">
               <span>Audit</span>
-              <strong>${e.trustMetrics.verificationLevel} · ${e.trustMetrics.proofCoveragePct}% proof · ${e.trustMetrics.auditedAt}</strong>
+              <strong>${e.trustMetrics.verificationLevel} / ${e.trustMetrics.proofCoveragePct}% data / ${e.trustMetrics.auditedAt}</strong>
             </div>
             <div class="foundation-admin-actions">
               <button class="ghost-btn foundation-review-btn" data-foundation-id="${e.id}" data-status="approved" type="button">Approve</button>

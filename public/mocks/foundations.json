@@ -1,40 +1,249 @@
 [
   {
-    "id": "fnd-dd215e1a57",
-    "name": "재단법인 사랑의장기기증운동본부",
-    "category": "health",
+    "id": "fnd-2aaedf20bf",
+    "name": "사단법인 굿네이버스 인터내셔날",
+    "category": "education",
     "region": "서울",
     "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
-    "description": "저소득층 장기부전 환자 치료비 및 수술비, 건강 및 일상회복과 자립을 돕는 장기이식 통합지원",
+    "description": "1. 국내/해외 사업 및 긴급구호 현장에서의 아동권리 지원 및 보호를 위한 전문 복지사업 수행 2. 지역사회 변화 및 성장을 위한 지역개발사업 및 옹호 활동 3. 더불어 사는 사회적 가치 및 나눔문화 확산",
     "tags": [
-      "보건복지",
-      "전국 단위",
-      "모집중"
-    ],
-    "trustMetrics": {
-      "auditedAt": "2026-04-01",
-      "proofCoveragePct": 89,
-      "updateCadenceDays": 14,
-      "verificationLevel": "basic"
-    }
-  },
-  {
-    "id": "fnd-4696a39e95",
-    "name": "사단법인 꽃과냥이 쉼터",
-    "category": "animal",
-    "region": "경상남도",
-    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
-    "description": "고양이와의 동행, 길고양이 및 유기묘 구조, 보호단체",
-    "tags": [
-      "기타",
+      "국제구제",
       "전국",
       "모집중"
     ],
     "trustMetrics": {
-      "auditedAt": "2026-04-06",
-      "proofCoveragePct": 88,
+      "auditedAt": "2025-12-10",
+      "proofCoveragePct": 98,
       "updateCadenceDays": 14,
-      "verificationLevel": "basic"
+      "verificationLevel": "premium"
+    }
+  },
+  {
+    "id": "fnd-2660c8a992",
+    "name": "사회복지법인 굿네이버스",
+    "category": "education",
+    "region": "서울",
+    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
+    "description": "아동의 권리보호 및 권익증진을 위한 다양한 사업 추진",
+    "tags": [
+      "자선",
+      "전국",
+      "모집중"
+    ],
+    "trustMetrics": {
+      "auditedAt": "2025-11-25",
+      "proofCoveragePct": 98,
+      "updateCadenceDays": 14,
+      "verificationLevel": "premium"
+    }
+  },
+  {
+    "id": "fnd-1a50065e7c",
+    "name": "사단법인굿피플인터내셔널",
+    "category": "climate",
+    "region": "서울",
+    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
+    "description": "보건의료사업, 식수위생사업, 소득증대사업, 위기가정지원사업, 인도적지원사업",
+    "tags": [
+      "국제구제",
+      "전국",
+      "모집중"
+    ],
+    "trustMetrics": {
+      "auditedAt": "2025-11-03",
+      "proofCoveragePct": 98,
+      "updateCadenceDays": 14,
+      "verificationLevel": "premium"
+    }
+  },
+  {
+    "id": "fnd-58f2390d09",
+    "name": "재단법인 플랜 한국위원회",
+    "category": "education",
+    "region": "경기도",
+    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
+    "description": "국내·해외지원사업",
+    "tags": [
+      "국제구제",
+      "전국",
+      "모집중"
+    ],
+    "trustMetrics": {
+      "auditedAt": "2025-06-09",
+      "proofCoveragePct": 98,
+      "updateCadenceDays": 14,
+      "verificationLevel": "premium"
+    }
+  },
+  {
+    "id": "fnd-b67ba7bacf",
+    "name": "대한적십자사",
+    "category": "humanitarian",
+    "region": "강원",
+    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
+    "description": "취약계층 지원 및 재난 구호 등 국내외 인도주의 활동을 위한 재원 마련",
+    "tags": [
+      "재난구휼",
+      "국내외",
+      "모집중"
+    ],
+    "trustMetrics": {
+      "auditedAt": "2025-12-02",
+      "proofCoveragePct": 98,
+      "updateCadenceDays": 14,
+      "verificationLevel": "premium"
+    }
+  },
+  {
+    "id": "fnd-81e0506942",
+    "name": "대한적십자사 강원특별자치도지사",
+    "category": "humanitarian",
+    "region": "강원",
+    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
+    "description": "국내 취약계층 지원 및 재난구호 등을 위한 재원 마련",
+    "tags": [
+      "재난구휼",
+      "국내",
+      "모집중"
+    ],
+    "trustMetrics": {
+      "auditedAt": "2026-03-16",
+      "proofCoveragePct": 98,
+      "updateCadenceDays": 14,
+      "verificationLevel": "premium"
+    }
+  },
+  {
+    "id": "fnd-7c9127448e",
+    "name": "대한적십자사 경기도지사",
+    "category": "humanitarian",
+    "region": "경기도",
+    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
+    "description": "경기도내 취약계층 지원 및 적십자 구호 활동 전개",
+    "tags": [
+      "자선",
+      "전국",
+      "모집중"
+    ],
+    "trustMetrics": {
+      "auditedAt": "2026-03-25",
+      "proofCoveragePct": 98,
+      "updateCadenceDays": 14,
+      "verificationLevel": "premium"
+    }
+  },
+  {
+    "id": "fnd-999e7aa25a",
+    "name": "대한적십자사 경상남도지사",
+    "category": "climate",
+    "region": "경상남도",
+    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
+    "description": "경남적십자 소외계층 지원 및 사회재난 구호 기부금품 모집",
+    "tags": [
+      "재난구휼",
+      "전국",
+      "모집중"
+    ],
+    "trustMetrics": {
+      "auditedAt": "2025-07-17",
+      "proofCoveragePct": 98,
+      "updateCadenceDays": 14,
+      "verificationLevel": "premium"
+    }
+  },
+  {
+    "id": "fnd-198542c6e8",
+    "name": "대한적십자사 대구광역시지사",
+    "category": "humanitarian",
+    "region": "대구",
+    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
+    "description": "국내 취약계층 지원 및 재난구호 등을 위한 재원 마련",
+    "tags": [
+      "재난구휼",
+      "전국",
+      "모집중"
+    ],
+    "trustMetrics": {
+      "auditedAt": "2025-12-30",
+      "proofCoveragePct": 98,
+      "updateCadenceDays": 14,
+      "verificationLevel": "premium"
+    }
+  },
+  {
+    "id": "fnd-aba683237b",
+    "name": "대한적십자사 대전세종지사",
+    "category": "health",
+    "region": "대전",
+    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
+    "description": "구호사업, 국민 보건 및 사회복지에 관한 사업 재원 마련",
+    "tags": [
+      "재난구휼",
+      "국내",
+      "모집중"
+    ],
+    "trustMetrics": {
+      "auditedAt": "2026-01-02",
+      "proofCoveragePct": 98,
+      "updateCadenceDays": 14,
+      "verificationLevel": "premium"
+    }
+  },
+  {
+    "id": "fnd-aaf6a4ea31",
+    "name": "대한적십자사 부산광역시지사",
+    "category": "health",
+    "region": "부산",
+    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
+    "description": "취약계층(위기가정) 지원 및 지역사회 복지 증진 사업을 위한 모금",
+    "tags": [
+      "보건복지",
+      "전국",
+      "모집중"
+    ],
+    "trustMetrics": {
+      "auditedAt": "2025-12-06",
+      "proofCoveragePct": 98,
+      "updateCadenceDays": 14,
+      "verificationLevel": "premium"
+    }
+  },
+  {
+    "id": "fnd-865167af70",
+    "name": "대한적십자사 서울특별시지사",
+    "category": "humanitarian",
+    "region": "서울",
+    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
+    "description": "대한적십자사 서울지사는 생명을 보호하고 고통을 경감하기 위한 국제적십자사 운동체입니다.",
+    "tags": [
+      "재난구휼",
+      "전국",
+      "모집중"
+    ],
+    "trustMetrics": {
+      "auditedAt": "2026-03-23",
+      "proofCoveragePct": 98,
+      "updateCadenceDays": 14,
+      "verificationLevel": "premium"
+    }
+  },
+  {
+    "id": "fnd-c0e1b185cf",
+    "name": "대한적십자사 울산광역시지사",
+    "category": "humanitarian",
+    "region": "전국",
+    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
+    "description": "울산적십자사 자연재해 및 사회적 재난 구호를 위한 기부금품 모집",
+    "tags": [
+      "재난구휼",
+      "전국",
+      "모집중"
+    ],
+    "trustMetrics": {
+      "auditedAt": "2026-01-28",
+      "proofCoveragePct": 98,
+      "updateCadenceDays": 14,
+      "verificationLevel": "premium"
     }
   },
   {
@@ -51,142 +260,66 @@
     ],
     "trustMetrics": {
       "auditedAt": "2026-04-09",
-      "proofCoveragePct": 90,
+      "proofCoveragePct": 98,
       "updateCadenceDays": 14,
       "verificationLevel": "premium"
     }
   },
   {
-    "id": "fnd-108f4931c0",
-    "name": "사단법인 한반도 인권과 통일을 위한 변호사 모임",
-    "category": "education",
-    "region": "서울",
-    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
-    "description": "자유민주주의 및 법치주의 구현과 북한의 인권 개선과 성공적인 통 일을 위한 활동을 하는 단체의 목적상 필요한 사업",
-    "tags": [
-      "국제교류협력",
-      "전국",
-      "모집중"
-    ],
-    "trustMetrics": {
-      "auditedAt": "2025-05-15",
-      "proofCoveragePct": 94,
-      "updateCadenceDays": 14,
-      "verificationLevel": "verified"
-    }
-  },
-  {
-    "id": "fnd-00d1ab0a5f",
-    "name": "천사들의모임",
-    "category": "animal",
-    "region": "국내외",
-    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
-    "description": "유기동물들의 처우 개선",
-    "tags": [
-      "기타",
-      "전국, 해외",
-      "모집중"
-    ],
-    "trustMetrics": {
-      "auditedAt": "2025-05-16",
-      "proofCoveragePct": 88,
-      "updateCadenceDays": 14,
-      "verificationLevel": "basic"
-    }
-  },
-  {
-    "id": "fnd-801c896e0d",
-    "name": "사단법인 한국뇌졸중의학연구원",
-    "category": "education",
-    "region": "서울",
-    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
-    "description": "뇌혈관 질환 연구 및 학술활동 지원사업",
-    "tags": [
-      "보건복지",
-      "전국",
-      "모집중"
-    ],
-    "trustMetrics": {
-      "auditedAt": "2025-05-19",
-      "proofCoveragePct": 96,
-      "updateCadenceDays": 14,
-      "verificationLevel": "verified"
-    }
-  },
-  {
-    "id": "fnd-0dd420ce0d",
-    "name": "사회복지법인 대한예수교장로회 실로암시각장애인복지회",
-    "category": "health",
-    "region": "서울",
-    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
-    "description": "시각장애인의 의료적 개안수술 지원",
-    "tags": [
-      "보건복지",
-      "전국",
-      "모집중"
-    ],
-    "trustMetrics": {
-      "auditedAt": "2025-05-27",
-      "proofCoveragePct": 91,
-      "updateCadenceDays": 14,
-      "verificationLevel": "basic"
-    }
-  },
-  {
-    "id": "fnd-85b5acadf1",
-    "name": "재단법인 행복나눔재단",
-    "category": "climate",
-    "region": "서울",
-    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
-    "description": "사회적 약자의 권익 신장, 환경 보전, 보건·복지 증진, 시민참여·자원봉사 등 건전한 시민사회 구축, 천재지변이나 그 밖에 이에 준하는 재난의 구휼을 위한 사업(국내복지사업), 국제적으로 행하여지는 구제사업(해외복지사업) 을 비롯한 종합복지사업 지원",
-    "tags": [
-      "보건복지",
-      "전국",
-      "모집중"
-    ],
-    "trustMetrics": {
-      "auditedAt": "2025-05-30",
-      "proofCoveragePct": 91,
-      "updateCadenceDays": 14,
-      "verificationLevel": "premium"
-    }
-  },
-  {
-    "id": "fnd-58f2390d09",
-    "name": "재단법인 플랜 한국위원회",
+    "id": "fnd-eaf3dff327",
+    "name": "대한적십자사 충청남도지사",
     "category": "humanitarian",
-    "region": "경기도",
+    "region": "충청남도",
     "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
-    "description": "국내·해외지원사업",
+    "description": "2026년 대한적십자사 충청남도지사 재난지원 및 구호사업 기부금품 모집",
     "tags": [
-      "국제구제",
+      "재난구휼",
       "전국",
       "모집중"
     ],
     "trustMetrics": {
-      "auditedAt": "2025-06-09",
-      "proofCoveragePct": 96,
+      "auditedAt": "2026-01-06",
+      "proofCoveragePct": 98,
       "updateCadenceDays": 14,
-      "verificationLevel": "verified"
+      "verificationLevel": "premium"
     }
   },
   {
-    "id": "fnd-e159db0b73",
-    "name": "재단법인 한국기증자유가족지원본부",
-    "category": "health",
-    "region": "서울",
+    "id": "fnd-0e1f02713c",
+    "name": "대한적십자사광주전남지사",
+    "category": "humanitarian",
+    "region": "광주",
     "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
-    "description": "장기기증자 유가족 지원사업",
+    "description": "국내 취약계층 지원 및 재난구호 등을 위한 재원 마련",
     "tags": [
-      "보건복지",
+      "재난구휼",
+      "국내",
+      "모집중"
+    ],
+    "trustMetrics": {
+      "auditedAt": "2025-07-08",
+      "proofCoveragePct": 98,
+      "updateCadenceDays": 14,
+      "verificationLevel": "premium"
+    }
+  },
+  {
+    "id": "fnd-ae487690e3",
+    "name": "대한적십자사인천지사",
+    "category": "humanitarian",
+    "region": "인천",
+    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
+    "description": "인천시 관내 취약계층 지원 및 적십자 구호 활동 전개",
+    "tags": [
+      "재난구휼",
       "전국",
       "모집중"
     ],
     "trustMetrics": {
-      "auditedAt": "2025-06-12",
-      "proofCoveragePct": 93,
+      "auditedAt": "2026-03-05",
+      "proofCoveragePct": 98,
       "updateCadenceDays": 14,
-      "verificationLevel": "verified"
+      "verificationLevel": "premium"
     }
   },
   {
@@ -203,26 +336,121 @@
     ],
     "trustMetrics": {
       "auditedAt": "2025-06-12",
-      "proofCoveragePct": 91,
+      "proofCoveragePct": 98,
       "updateCadenceDays": 14,
       "verificationLevel": "premium"
     }
   },
   {
-    "id": "fnd-39c460d4eb",
-    "name": "사단법인 한국핀테크지원센터",
-    "category": "education",
+    "id": "fnd-85b5acadf1",
+    "name": "재단법인 행복나눔재단",
+    "category": "climate",
     "region": "서울",
     "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
-    "description": "1. 사업화에 어려움을 겪는 핀테크 스타트업 지원 2. 핀테크 조사연구·교육·정보 제공 사업",
+    "description": "사회적 약자의 권익 신장, 환경 보전, 보건·복지 증진, 시민참여·자원봉사 등 건전한 시민사회 구축, 천재지변이나 그 밖에 이에 준하는 재난의 구휼을 위한 사업(국내복지사업), 국제적으로 행하여지는 구제사업(해외복지사업) 을 비롯한 종합복지사업 지원",
     "tags": [
-      "경제활동",
+      "보건복지",
       "전국",
       "모집중"
     ],
     "trustMetrics": {
-      "auditedAt": "2025-06-16",
-      "proofCoveragePct": 95,
+      "auditedAt": "2025-05-30",
+      "proofCoveragePct": 98,
+      "updateCadenceDays": 14,
+      "verificationLevel": "premium"
+    }
+  },
+  {
+    "id": "fnd-9a0f9b0a35",
+    "name": "재단법인 굿네이버스 미래재단",
+    "category": "education",
+    "region": "전국",
+    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
+    "description": "시민사회구축 ??? ??? ?? ?? ?? ?????.",
+    "tags": [
+      "시민사회구축",
+      "전국",
+      "단체정보"
+    ],
+    "trustMetrics": {
+      "auditedAt": "2026-05-06",
+      "proofCoveragePct": 84,
+      "updateCadenceDays": 30,
+      "verificationLevel": "verified"
+    }
+  },
+  {
+    "id": "fnd-dd215e1a57",
+    "name": "재단법인 사랑의장기기증운동본부",
+    "category": "health",
+    "region": "서울",
+    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
+    "description": "저소득층 장기부전 환자 치료비 및 수술비, 건강 및 일상회복과 자립을 돕는 장기이식 통합지원",
+    "tags": [
+      "보건복지",
+      "전국 단위",
+      "모집중"
+    ],
+    "trustMetrics": {
+      "auditedAt": "2026-04-01",
+      "proofCoveragePct": 98,
+      "updateCadenceDays": 14,
+      "verificationLevel": "premium"
+    }
+  },
+  {
+    "id": "fnd-0dd420ce0d",
+    "name": "사회복지법인 대한예수교장로회 실로암시각장애인복지회",
+    "category": "health",
+    "region": "서울",
+    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
+    "description": "시각장애인의 의료적 개안수술 지원",
+    "tags": [
+      "보건복지",
+      "전국",
+      "모집중"
+    ],
+    "trustMetrics": {
+      "auditedAt": "2025-05-27",
+      "proofCoveragePct": 98,
+      "updateCadenceDays": 14,
+      "verificationLevel": "premium"
+    }
+  },
+  {
+    "id": "fnd-801c896e0d",
+    "name": "사단법인 한국뇌졸중의학연구원",
+    "category": "education",
+    "region": "서울",
+    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
+    "description": "뇌혈관 질환 연구 및 학술활동 지원사업",
+    "tags": [
+      "보건복지",
+      "전국",
+      "모집중"
+    ],
+    "trustMetrics": {
+      "auditedAt": "2025-05-19",
+      "proofCoveragePct": 98,
+      "updateCadenceDays": 14,
+      "verificationLevel": "premium"
+    }
+  },
+  {
+    "id": "fnd-4696a39e95",
+    "name": "사단법인 꽃과냥이 쉼터",
+    "category": "animal",
+    "region": "경상남도",
+    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
+    "description": "고양이와의 동행, 길고양이 및 유기묘 구조, 보호단체",
+    "tags": [
+      "기타",
+      "전국",
+      "모집중"
+    ],
+    "trustMetrics": {
+      "auditedAt": "2026-04-06",
+      "proofCoveragePct": 98,
       "updateCadenceDays": 14,
       "verificationLevel": "premium"
     }
@@ -241,85 +469,9 @@
     ],
     "trustMetrics": {
       "auditedAt": "2025-06-16",
-      "proofCoveragePct": 92,
-      "updateCadenceDays": 14,
-      "verificationLevel": "verified"
-    }
-  },
-  {
-    "id": "fnd-785ad9918d",
-    "name": "사회복지법인 한국사회복지관협회",
-    "category": "health",
-    "region": "서울",
-    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
-    "description": "저소득층 및 지역사회 주민의 복지증진을 위한 지원금 마련",
-    "tags": [
-      "보건복지",
-      "전국",
-      "모집중"
-    ],
-    "trustMetrics": {
-      "auditedAt": "2025-06-17",
-      "proofCoveragePct": 88,
+      "proofCoveragePct": 98,
       "updateCadenceDays": 14,
       "verificationLevel": "premium"
-    }
-  },
-  {
-    "id": "fnd-3d362f0c6e",
-    "name": "사단법인 월드프렌즈",
-    "category": "education",
-    "region": "제주",
-    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
-    "description": "저소득층여아생리대 지원 및 장애아동기저귀 지원",
-    "tags": [
-      "자선",
-      "전국",
-      "모집중"
-    ],
-    "trustMetrics": {
-      "auditedAt": "2025-06-18",
-      "proofCoveragePct": 89,
-      "updateCadenceDays": 14,
-      "verificationLevel": "basic"
-    }
-  },
-  {
-    "id": "fnd-1798dfd68d",
-    "name": "재단법인 한국농어촌희망재단",
-    "category": "education",
-    "region": "서울",
-    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
-    "description": "◦ 농어업·농어촌의 지속 가능한 발전을 위한 장학·교육·복지·문화 등 사회공헌사업 지원 - 농어업인의 삶의 질 향상을 위한 교육·문화·복지 프로그램 운영 - 농어업 인력 육성과 교육비 부담 완화를 위한 장학금 지원 및 국내외 연수 추진 - 농산물 산지 출하자, 소비자 등과의 상생 협력을 위한 지...",
-    "tags": [
-      "교육문화과학",
-      "전국",
-      "모집중"
-    ],
-    "trustMetrics": {
-      "auditedAt": "2025-07-22",
-      "proofCoveragePct": 91,
-      "updateCadenceDays": 14,
-      "verificationLevel": "premium"
-    }
-  },
-  {
-    "id": "fnd-659e84dadd",
-    "name": "사단법인 아크",
-    "category": "humanitarian",
-    "region": "경기도",
-    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
-    "description": "식용으로 길러지다 구조된 구조견의 케어 및 입양 지원",
-    "tags": [
-      "기타",
-      "전국",
-      "모집중"
-    ],
-    "trustMetrics": {
-      "auditedAt": "2025-07-21",
-      "proofCoveragePct": 89,
-      "updateCadenceDays": 14,
-      "verificationLevel": "basic"
     }
   },
   {
@@ -336,123 +488,199 @@
     ],
     "trustMetrics": {
       "auditedAt": "2025-04-17",
-      "proofCoveragePct": 94,
+      "proofCoveragePct": 98,
       "updateCadenceDays": 14,
       "verificationLevel": "premium"
     }
   },
   {
-    "id": "fnd-df65a8428d",
-    "name": "사단법인 한국소방단체총연합회",
-    "category": "humanitarian",
-    "region": "서울",
+    "id": "fnd-9b3ab8a4fe",
+    "name": "(사)대한산업보건협회",
+    "category": "education",
+    "region": "충청북도",
     "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
-    "description": "소방관련 물품지원 및 소방인의 권익신장을 위한 활동 지원",
+    "description": "- 안전중심의 산업보건문화 조성 - 자발적인 헌혈 참여 문화 확산 - 사각지대 보건의료안전망 구축",
     "tags": [
-      "권익신장",
+      "보건복지",
       "전국",
       "모집중"
     ],
     "trustMetrics": {
-      "auditedAt": "2025-04-14",
-      "proofCoveragePct": 91,
+      "auditedAt": "2026-01-08",
+      "proofCoveragePct": 98,
       "updateCadenceDays": 14,
-      "verificationLevel": "basic"
+      "verificationLevel": "premium"
     }
   },
   {
-    "id": "fnd-e26eb64fd5",
-    "name": "사단법인 한국제이티에스",
-    "category": "humanitarian",
-    "region": "서울",
-    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
-    "description": "북한 및 국내외 인도적 지원과 개발협력 기금 마련",
-    "tags": [
-      "국제구제",
-      "전국",
-      "모집중"
-    ],
-    "trustMetrics": {
-      "auditedAt": "2025-04-14",
-      "proofCoveragePct": 94,
-      "updateCadenceDays": 14,
-      "verificationLevel": "verified"
-    }
-  },
-  {
-    "id": "fnd-f9fb200dd1",
-    "name": "재단법인 이랜드재단",
+    "id": "fnd-a82ac1aeab",
+    "name": "(사)더숲",
     "category": "climate",
+    "region": "전북특별자치도",
+    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
+    "description": "푸른 전주 만들기를 위한 식목 사업 및 시민 캠페인과 교육 사업을 위한 모금",
+    "tags": [
+      "환경보전",
+      "전주시",
+      "모집중"
+    ],
+    "trustMetrics": {
+      "auditedAt": "2026-01-14",
+      "proofCoveragePct": 98,
+      "updateCadenceDays": 14,
+      "verificationLevel": "premium"
+    }
+  },
+  {
+    "id": "fnd-f6f8c0b06b",
+    "name": "(사)더함께새희망",
+    "category": "humanitarian",
     "region": "서울",
     "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
-    "description": "·가정밖청소년, 다문화청소년 지원사업 - 주거비, 생계비, 치료비, 교육비가 필요한 대상자 가정을 발굴하여 긴급 지원을 실시함 - 사각지대 다음세대 지원기관 운영비(아웃리치, 사례관리, 기관운영) 지원 · 해외 빈곤소외계층 지원 - 저개발국가 환경개선 및 삶의 질 향상을 위한 생활, 의료 지원 ...",
+    "description": "국내취약계층 및 북한이탈주민 지원사업, 기타시설지원사업",
+    "tags": [
+      "기타",
+      "전국",
+      "모집중"
+    ],
+    "trustMetrics": {
+      "auditedAt": "2025-11-27",
+      "proofCoveragePct": 98,
+      "updateCadenceDays": 14,
+      "verificationLevel": "premium"
+    }
+  },
+  {
+    "id": "fnd-40ff790184",
+    "name": "(사)동물보호단체 다솜",
+    "category": "animal",
+    "region": "서울",
+    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
+    "description": "유기동물 구조 및 입양, 보호를 위한 기부모금",
+    "tags": [
+      "보건복지",
+      "전국",
+      "모집중"
+    ],
+    "trustMetrics": {
+      "auditedAt": "2025-12-14",
+      "proofCoveragePct": 98,
+      "updateCadenceDays": 14,
+      "verificationLevel": "premium"
+    }
+  },
+  {
+    "id": "fnd-a112e5df1b",
+    "name": "(사)따뜻한 한반도 사랑의 연탄나눔운동",
+    "category": "humanitarian",
+    "region": "서울",
+    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
+    "description": "국내외 에너지취약계층의 따뜻한 겨울나기를 위한 물품지원 등 종합적인 에너지복지사업을 위해 기부금품을 모집하고자 함",
     "tags": [
       "자선",
       "전국",
       "모집중"
     ],
     "trustMetrics": {
-      "auditedAt": "2025-04-09",
-      "proofCoveragePct": 97,
+      "auditedAt": "2025-12-17",
+      "proofCoveragePct": 98,
       "updateCadenceDays": 14,
-      "verificationLevel": "verified"
+      "verificationLevel": "premium"
     }
   },
   {
-    "id": "fnd-3b9b999fad",
-    "name": "사단법인경상남도박정희대통령기념사업회",
+    "id": "fnd-52239c78a0",
+    "name": "(사)비글구조네트워크",
+    "category": "animal",
+    "region": "충청남도",
+    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
+    "description": "실험 동물과 유기견 구조 및 입양 사업, 사설 동물 보호소 및 개인 구조자 지원",
+    "tags": [
+      "기타",
+      "전국",
+      "모집중"
+    ],
+    "trustMetrics": {
+      "auditedAt": "2025-11-26",
+      "proofCoveragePct": 98,
+      "updateCadenceDays": 14,
+      "verificationLevel": "premium"
+    }
+  },
+  {
+    "id": "fnd-3f31ac459b",
+    "name": "(사)빵이랑 떡이랑",
     "category": "education",
-    "region": "경상남도",
+    "region": "충청남도",
     "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
-    "description": "박정희 대통령의 정신을 계승·발전시키기 위한 추모·기념사업을 추진하며, 그의 정신을 반영한 바람직한 지도자상 교육을 실시하고, 창원국가산업단지의 발전 방안을 토론·연구하는 활동을 수행합니다.",
+    "description": "- 취약계층, 복지시설 빵, 떡, 반찬지원 및 구호사업(독거어르신, 조손가정, 결손가정, 다문화가정, 저소득 취약계층, 장애인 등) 빵, 떡, 밑반찬을 만들어 전달",
     "tags": [
       "기타",
       "전국",
       "모집중"
     ],
     "trustMetrics": {
-      "auditedAt": "2025-04-01",
-      "proofCoveragePct": 97,
+      "auditedAt": "2026-01-28",
+      "proofCoveragePct": 98,
       "updateCadenceDays": 14,
-      "verificationLevel": "verified"
+      "verificationLevel": "premium"
     }
   },
   {
-    "id": "fnd-d39a7d00cc",
-    "name": "사단법인 동물보호단체 행강",
-    "category": "animal",
+    "id": "fnd-40f7d15a20",
+    "name": "(사)사랑의 후원회",
+    "category": "education",
     "region": "경기도",
     "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
-    "description": "유기동물 구조, 보호, 입양을 통한 동물복지 개선 사업",
+    "description": "소외계층(장애인, 홀몸어르신, 수급자어르신) 위문공연, 다문화 가정 돕기, 무료급식 나눔, 천재지변 이재민 돕기 등 공익사업 추진",
     "tags": [
-      "기타",
+      "보건복지",
       "전국",
       "모집중"
     ],
     "trustMetrics": {
-      "auditedAt": "2025-03-28",
-      "proofCoveragePct": 89,
+      "auditedAt": "2026-01-08",
+      "proofCoveragePct": 98,
       "updateCadenceDays": 14,
-      "verificationLevel": "basic"
+      "verificationLevel": "premium"
     }
   },
   {
-    "id": "fnd-e04b0e96e0",
-    "name": "사단법인 따뜻한 공존",
-    "category": "animal",
-    "region": "경기도",
+    "id": "fnd-72dd0c5b2e",
+    "name": "(사)인간성회복운동추진협의회",
+    "category": "education",
+    "region": "서울",
     "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
-    "description": "길고양이 구조 및 치료, 보호 활동과 유기 고양이 구조 및 치료, 보호, 입양 등을 위한 센터를 운영하며, 길고양이와 유기 고양이의 생명을 보호하고, 길고양이에 대한 인식 개선 활동을 통하여 고양이와 인간의 조화롭고 따뜻한 공존을 그 목적으로 한다.",
+    "description": "사랑의 일기장 300만부 보내기 범국민 운동 • 아동·청소년의 정서적 성장 및 건전한 인성 함양을 위한 공익사업 수행",
     "tags": [
-      "기타",
+      "교육문화과학",
       "전국",
       "모집중"
     ],
     "trustMetrics": {
-      "auditedAt": "2025-07-18",
-      "proofCoveragePct": 92,
+      "auditedAt": "2026-02-13",
+      "proofCoveragePct": 98,
       "updateCadenceDays": 14,
-      "verificationLevel": "verified"
+      "verificationLevel": "premium"
+    }
+  },
+  {
+    "id": "fnd-6f4e13be09",
+    "name": "(사)푸른익산가꾸기운동본부",
+    "category": "climate",
+    "region": "전북특별자치도",
+    "walletAddress": "ragkA1Swi7Y6mJHXf97QUqKXBm99uGkcVX",
+    "description": "지구의 온난화로 인한 도시열섬현상을 최소화하고 미세먼지 저감을 위한 나무심기운동을 시민의 자발적인 기부금품 모집을 통하여 숲을 조성하고 시민의 건강한 삶 확보",
+    "tags": [
+      "환경보전",
+      "익산시",
+      "모집중"
+    ],
+    "trustMetrics": {
+      "auditedAt": "2025-12-31",
+      "proofCoveragePct": 98,
+      "updateCadenceDays": 14,
+      "verificationLevel": "premium"
     }
   }
 ]

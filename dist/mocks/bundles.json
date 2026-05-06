@@ -1,20 +1,20 @@
 [
   {
     "id": "bdl-balanced-impact",
-    "name": "균형 기부 포트폴리오",
-    "summary": "보건복지, 긴급구호, 교육, 동물보호를 고르게 담은 기본 추천 조합입니다.",
+    "name": "?? ?? ?????",
+    "summary": "????, ????, ??, ????? ??? ?? ?? ?? ?????.",
     "theme": "balanced",
     "allocations": [
       {
-        "foundationId": "fnd-dd215e1a57",
+        "foundationId": "fnd-aba683237b",
         "ratioPct": 25
       },
       {
-        "foundationId": "fnd-58f2390d09",
+        "foundationId": "fnd-b67ba7bacf",
         "ratioPct": 25
       },
       {
-        "foundationId": "fnd-8e12bf11c5",
+        "foundationId": "fnd-2aaedf20bf",
         "ratioPct": 25
       },
       {
@@ -25,64 +25,64 @@
   },
   {
     "id": "bdl-health-recovery",
-    "name": "의료·회복 포트폴리오",
-    "summary": "환자 치료비, 의료 접근성, 건강 회복 목적의 모금 캠페인 중심 조합입니다.",
+    "name": "????? ?????",
+    "summary": "?? ???, ?? ???, ?? ?? ??? ?? ??? ?? ?????.",
     "theme": "health",
     "allocations": [
       {
-        "foundationId": "fnd-dd215e1a57",
+        "foundationId": "fnd-aba683237b",
         "ratioPct": 34
       },
       {
-        "foundationId": "fnd-0dd420ce0d",
+        "foundationId": "fnd-aaf6a4ea31",
         "ratioPct": 33
       },
       {
-        "foundationId": "fnd-e159db0b73",
+        "foundationId": "fnd-dd215e1a57",
         "ratioPct": 33
       }
     ]
   },
   {
     "id": "bdl-emergency-relief",
-    "name": "긴급구호 포트폴리오",
-    "summary": "재난, 국제구제, 취약계층 지원 캠페인을 중심으로 구성한 조합입니다.",
+    "name": "???? ?????",
+    "summary": "??, ????, ???? ?? ???? ???? ??? ?????.",
     "theme": "relief",
     "allocations": [
       {
-        "foundationId": "fnd-58f2390d09",
+        "foundationId": "fnd-b67ba7bacf",
         "ratioPct": 34
       },
       {
-        "foundationId": "fnd-659e84dadd",
+        "foundationId": "fnd-81e0506942",
         "ratioPct": 33
       },
       {
-        "foundationId": "fnd-1ac533cd19",
+        "foundationId": "fnd-7c9127448e",
         "ratioPct": 33
       }
     ]
   },
   {
     "id": "bdl-local-care",
-    "name": "지역 돌봄 포트폴리오",
-    "summary": "국내 지역 기반의 복지·돌봄·동물보호 캠페인을 함께 담았습니다.",
+    "name": "?? ?? ?????",
+    "summary": "?? ?? ??? ?????????? ???? ?? ?????.",
     "theme": "local-care",
     "allocations": [
       {
-        "foundationId": "fnd-dd215e1a57",
+        "foundationId": "fnd-2aaedf20bf",
         "ratioPct": 25
       },
       {
-        "foundationId": "fnd-4696a39e95",
+        "foundationId": "fnd-2660c8a992",
         "ratioPct": 25
       },
       {
-        "foundationId": "fnd-8e12bf11c5",
+        "foundationId": "fnd-1a50065e7c",
         "ratioPct": 25
       },
       {
-        "foundationId": "fnd-108f4931c0",
+        "foundationId": "fnd-58f2390d09",
         "ratioPct": 25
       }
     ]

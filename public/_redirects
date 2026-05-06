@@ -1,8 +1,4 @@
-/ /foundations 302
-/donation /foundations 302
-/privacy /privacy.html 200
-/exchange-notice /exchange-notice.html 200
-/pre-donation-notice /pre-donation-notice.html 200
-/credential-notice /credential-notice.html 200
+/ /foundations.html 302
+/donation /foundations.html 302
 /support /credential-notice.html 302
 /verify/* /verify.html 200

@@ -37,7 +37,7 @@ import{a as e,c as t,d as n,i as r,l as i,n as a,o,r as s,s as ee,t as c,u as l}
         <p class="card-desc">${e.description}</p>
         <div class="card-footer">
           <div class="metric">
-            <span class="metric-label">투명성</span>
+            <span class="metric-label">데이터 완성도</span>
             <span class="metric-value">${e.trustMetrics.proofCoveragePct}%</span>
           </div>
           <button class="add-btn add-to-cart-btn ${t?`is-added`:``}" aria-label="장바구니 담기" data-add-id="${e.id}" ${t?`disabled`:``} type="button">

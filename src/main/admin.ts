@@ -414,14 +414,14 @@ async function renderFoundationDashboard(): Promise<void> {
             <div class="foundation-admin-head">
               <div>
                 <h3>${foundation.name}</h3>
-                <p class="microcopy">${foundation.region} · ${foundation.walletAddress}</p>
+                <p class="microcopy">${foundation.region} / ${foundation.walletAddress}</p>
               </div>
               <span class="status-badge ${review === "approved" ? "success" : "error"}">${review.toUpperCase()}</span>
             </div>
             <div class="trustline-pills">${renderTrustLinePills(trustlines)}</div>
             <div class="result-row">
               <span>Audit</span>
-              <strong>${foundation.trustMetrics.verificationLevel} · ${foundation.trustMetrics.proofCoveragePct}% proof · ${foundation.trustMetrics.auditedAt}</strong>
+              <strong>${foundation.trustMetrics.verificationLevel} / ${foundation.trustMetrics.proofCoveragePct}% data / ${foundation.trustMetrics.auditedAt}</strong>
             </div>
             <div class="foundation-admin-actions">
               <button class="ghost-btn foundation-review-btn" data-foundation-id="${foundation.id}" data-status="approved" type="button">Approve</button>

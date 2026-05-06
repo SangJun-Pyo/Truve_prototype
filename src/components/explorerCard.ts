@@ -38,7 +38,7 @@ export function renderFoundationCard(foundation: Foundation, alreadyInCart: bool
         <p class="card-desc">${foundation.description}</p>
         <div class="card-footer">
           <div class="metric">
-            <span class="metric-label">투명성</span>
+            <span class="metric-label">데이터 완성도</span>
             <span class="metric-value">${foundation.trustMetrics.proofCoveragePct}%</span>
           </div>
           <button class="add-btn add-to-cart-btn ${alreadyInCart ? "is-added" : ""}" aria-label="장바구니 담기" data-add-id="${foundation.id}" ${

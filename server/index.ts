@@ -1015,6 +1015,66 @@ app.get("/api/xrpl/tx/:hash", async (req, res) => {
   }
 });
 
+app.get("/api/xrpl/credential", async (req, res) => {
+  const subject = String(req.query.subject ?? "").trim();
+  const issuer = String(req.query.issuer ?? "").trim();
+  const credentialType = String(req.query.credentialType ?? req.query.credential_type ?? "").trim();
+  const client = new Client(xrplTestnetWs);
+
+  try {
+    if (!isValidClassicAddress(subject) || !isValidClassicAddress(issuer) || !credentialType) {
+      res.status(400).json({
+        exists: false,
+        accepted: false,
+        error: "subject, issuer, and credentialType are required.",
+      });
+      return;
+    }
+
+    await client.connect();
+    const credential = await client.request({
+      command: "ledger_entry",
+      ledger_index: "validated",
+      credential: {
+        subject,
+        issuer,
+        credential_type: credentialType,
+      },
+    } as any);
+    const node = (credential.result as any)?.node ?? (credential.result as any)?.entry ?? credential.result;
+    const flags = Number(node?.Flags ?? 0);
+
+    res.json({
+      exists: true,
+      accepted: Boolean(flags & 65536),
+      subject,
+      issuer,
+      credentialType,
+      flags,
+      ledgerIndex: (credential.result as any)?.ledger_index,
+      index: node?.index,
+      previousTxId: node?.PreviousTxnID,
+      uri: node?.URI ?? null,
+      raw: node,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Credential lookup failed";
+    const notFound = /entryNotFound|objectNotFound|not found/i.test(message);
+    res.status(notFound ? 404 : 500).json({
+      exists: false,
+      accepted: false,
+      subject,
+      issuer,
+      credentialType,
+      error: message,
+    });
+  } finally {
+    if (client.isConnected()) {
+      await client.disconnect();
+    }
+  }
+});
+
 app.get("/api/xrpl/account/:address", async (req, res) => {
   const address = req.params.address;
   const client = new Client(xrplTestnetWs);
@@ -1285,15 +1345,17 @@ app.get("/api/db/donation-lookup/:id", async (req, res) => {
         OR: [{ id: lookupId }, { txHash: lookupId }],
       },
       orderBy: { donatedAt: "desc" },
+      include: { user: { select: { xrplAccount: true, displayName: true } } },
     });
     if (direct) {
-      res.json(direct);
+      res.json({ ...direct, xrplAccount: direct.user.xrplAccount, userDisplayName: direct.user.displayName, user: undefined });
       return;
     }
 
     const recent = await prisma.donation.findMany({
       orderBy: { donatedAt: "desc" },
       take: 250,
+      include: { user: { select: { xrplAccount: true, displayName: true } } },
     });
     const donation = recent.find((item) => {
       const payload = item.allocations as any;
@@ -1304,9 +1366,43 @@ app.get("/api/db/donation-lookup/:id", async (req, res) => {
       res.status(404).json({ error: "Donation not found" });
       return;
     }
-    res.json(donation);
+    res.json({ ...donation, xrplAccount: donation.user.xrplAccount, userDisplayName: donation.user.displayName, user: undefined });
   } catch (error) {
     res.status(500).json({ error: error instanceof Error ? error.message : "Donation lookup failed" });
+  }
+});
+
+app.get("/api/admin/donations", async (req, res) => {
+  try {
+    requireAdminSecret(req);
+    const limit = Math.min(Math.max(Number(req.query.limit ?? 50), 1), 200);
+    const donations = await prisma.donation.findMany({
+      orderBy: { donatedAt: "desc" },
+      take: limit,
+      include: { user: { select: { xrplAccount: true, displayName: true } } },
+    });
+    res.json({
+      donations: donations.map((donation) => ({
+        ...donation,
+        xrplAccount: donation.user.xrplAccount,
+        userDisplayName: donation.user.displayName,
+        user: undefined,
+      })),
+    });
+  } catch (error) {
+    const statusCode = (error as Error & { statusCode?: number })?.statusCode ?? 500;
+    res.status(statusCode).json({ error: error instanceof Error ? error.message : "Admin donation lookup failed" });
+  }
+});
+
+app.delete("/api/admin/donations/:id", async (req, res) => {
+  try {
+    requireAdminSecret(req);
+    await prisma.donation.delete({ where: { id: req.params.id } });
+    res.json({ ok: true, id: req.params.id });
+  } catch (error) {
+    const statusCode = (error as Error & { statusCode?: number })?.statusCode ?? 500;
+    res.status(statusCode).json({ error: error instanceof Error ? error.message : "Admin donation delete failed" });
   }
 });
 

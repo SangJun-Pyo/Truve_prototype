@@ -1,4 +1,5 @@
 import { API_BASE } from "../services/apiBase";
+import { deleteAdminDonation, fetchAdminDonations, type DbDonationAdminRow } from "../services/db";
 import { renderTopNav } from "../shared/nav";
 
 const ADMIN_SECRET_STORAGE_KEY = "truve_admin_secret";
@@ -30,6 +31,8 @@ const auditStatusEl = document.getElementById("audit-status") as HTMLSelectEleme
 const auditNoteEl = document.getElementById("audit-note") as HTMLInputElement | null;
 const auditLogListEl = document.getElementById("audit-log-list");
 const exportAuditBtnEl = document.getElementById("export-audit-btn") as HTMLButtonElement | null;
+const donationListEl = document.getElementById("admin-donation-list");
+const refreshDonationsBtnEl = document.getElementById("refresh-donations-btn") as HTMLButtonElement | null;
 
 const FOUNDATION_REVIEW_STORAGE_KEY = "truve_foundation_review_status";
 const FOUNDATION_AUDIT_STORAGE_KEY = "truve_foundation_audit_log_v1";
@@ -112,6 +115,10 @@ interface AuditEvent {
   evidenceHash: string;
   note: string;
   recordedAt: string;
+}
+
+function getAdminSecret(): string {
+  return secretEl?.value.trim() ?? "";
 }
 
 function setStatus(label: string, isError = false): void {
@@ -235,6 +242,90 @@ function renderAuditLog(): void {
       `,
     )
     .join("");
+}
+
+function getDonationMeta(donation: DbDonationAdminRow) {
+  const payload = donation.allocations as any;
+  return Array.isArray(payload) ? {} : (payload?.meta ?? {});
+}
+
+function formatDonationAmount(donation: DbDonationAdminRow): string {
+  const meta = getDonationMeta(donation);
+  const asset = meta.asset ?? donation.asset;
+  const amountAsset = meta.amountAsset ?? donation.amountAsset;
+  return asset && amountAsset ? `${amountAsset} ${asset}` : `${donation.amountKrw.toLocaleString("ko-KR")} KRW`;
+}
+
+function renderAdminDonations(donations: DbDonationAdminRow[]): void {
+  if (!donationListEl) return;
+  if (donations.length === 0) {
+    donationListEl.innerHTML = `<p class="microcopy">No DB donation records found.</p>`;
+    return;
+  }
+  donationListEl.innerHTML = donations
+    .map((donation) => {
+      const meta = getDonationMeta(donation);
+      const credential = meta.credential ?? {};
+      return `
+        <article class="foundation-admin-card">
+          <div class="foundation-admin-head">
+            <div>
+              <h3>${formatDonationAmount(donation)}</h3>
+              <p class="microcopy">${donation.xrplAccount ?? "-"} · ${new Date(donation.donatedAt).toLocaleString("ko-KR")}</p>
+            </div>
+            <span class="status-badge ${credential.status === "failed" ? "error" : "success"}">${credential.status ?? "evidence_ready"}</span>
+          </div>
+          <div class="result-row"><span>Receipt ID</span><strong>${meta.receiptId ?? donation.id}</strong></div>
+          <div class="result-row"><span>Evidence Hash</span><strong>${meta.evidenceHash ?? "-"}</strong></div>
+          <div class="result-row"><span>Tx Hash</span><strong>${donation.txHash ?? "-"}</strong></div>
+          <div class="foundation-admin-actions">
+            ${donation.txHash ? `<a class="ghost-btn" href="./verify.html?id=${encodeURIComponent(meta.receiptId ?? donation.txHash)}" target="_blank" rel="noreferrer">Verify</a>` : ""}
+            <button class="ghost-btn admin-delete-donation-btn" type="button" data-donation-id="${donation.id}">Hide/Delete Test Record</button>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+
+  donationListEl.querySelectorAll<HTMLButtonElement>(".admin-delete-donation-btn").forEach((button) => {
+    button.addEventListener("click", () => {
+      const id = button.dataset.donationId;
+      if (id) void deleteDonationRecord(id);
+    });
+  });
+}
+
+async function loadAdminDonations(): Promise<void> {
+  if (!donationListEl) return;
+  const adminSecret = getAdminSecret();
+  localStorage.setItem(ADMIN_SECRET_STORAGE_KEY, adminSecret);
+  if (!adminSecret) {
+    donationListEl.innerHTML = `<p class="tax-disclaimer">Enter Admin Secret to load DB donation records.</p>`;
+    return;
+  }
+  donationListEl.innerHTML = `<p class="microcopy">Loading DB donation records...</p>`;
+  try {
+    renderAdminDonations(await fetchAdminDonations(adminSecret));
+  } catch (error) {
+    donationListEl.innerHTML = `<p class="tax-disclaimer">${error instanceof Error ? error.message : "Donation lookup failed."}</p>`;
+  }
+}
+
+async function deleteDonationRecord(id: string): Promise<void> {
+  const adminSecret = getAdminSecret();
+  if (!adminSecret) {
+    renderMessage("Admin Secret is required to delete test records.", true);
+    return;
+  }
+  const confirmed = window.confirm("Delete this test donation record from the prototype DB?");
+  if (!confirmed) return;
+  try {
+    await deleteAdminDonation(adminSecret, id);
+    renderMessage(`Deleted test donation record ${id}.`);
+    await loadAdminDonations();
+  } catch (error) {
+    renderMessage(error instanceof Error ? error.message : "Delete failed.", true);
+  }
 }
 
 async function recordAuditEvent(): Promise<void> {
@@ -594,4 +685,9 @@ refreshFoundationsBtnEl?.addEventListener("click", () => {
   void renderFoundationDashboard();
 });
 
+refreshDonationsBtnEl?.addEventListener("click", () => {
+  void loadAdminDonations();
+});
+
 void renderFoundationDashboard();
+void loadAdminDonations();

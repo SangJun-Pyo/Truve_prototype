@@ -130,11 +130,11 @@
         }
       }
     </style>
-    <script type="module" crossorigin src="/assets/admin-Bhzr9ant.js"></script>
+    <script type="module" crossorigin src="/assets/admin-DctU6x68.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-N-DOuI4P.js">
-    <link rel="modulepreload" crossorigin href="/assets/apiBase-BXOIOaTT.js">
-    <link rel="modulepreload" crossorigin href="/assets/nav-YCQT744t.js">
-    <link rel="stylesheet" crossorigin href="/assets/styles-zSAEe-X7.css">
+    <link rel="modulepreload" crossorigin href="/assets/db-DAqxnIVe.js">
+    <link rel="modulepreload" crossorigin href="/assets/nav-B2IzWUDP.js">
+    <link rel="stylesheet" crossorigin href="/assets/styles-C7H-W-Ti.css">
   </head>
   <body>
     <main class="app-shell">
@@ -248,6 +248,20 @@
           <div id="audit-log-list" class="foundation-admin-list">
             <p class="microcopy">No audit events recorded yet.</p>
           </div>
+        </div>
+      </section>
+
+      <section class="admin-card">
+        <div class="row-between">
+          <div>
+            <p class="summary-kicker">Test Data</p>
+            <h2>Donation Record Manager</h2>
+            <p class="subtitle">Review, verify, or delete prototype DB donation records that came from local and deployed testnet runs.</p>
+          </div>
+          <button id="refresh-donations-btn" class="ghost-btn" type="button">Refresh Records</button>
+        </div>
+        <div id="admin-donation-list" class="foundation-admin-list">
+          <p class="microcopy">Enter Admin Secret, then refresh records.</p>
         </div>
       </section>
     </main>

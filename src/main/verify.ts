@@ -1,4 +1,5 @@
 import { createRepositories } from "../api/provider";
+import { API_BASE } from "../services/apiBase";
 import { fetchDbDonationByTx, type DbDonation } from "../services/db";
 import { listLocalDonations, type LocalDonationRecord } from "../services/donations";
 import { getTestnetExplorerLink } from "../services/xrpl";
@@ -11,6 +12,17 @@ if (navRoot) navRoot.innerHTML = renderTopNav("status");
 
 const statusEl = document.getElementById("verify-status");
 const resultEl = document.getElementById("verify-result");
+
+interface CredentialLookupResult {
+  exists: boolean;
+  accepted: boolean;
+  flags?: number;
+  index?: string;
+  ledgerIndex?: number;
+  previousTxId?: string;
+  uri?: string | null;
+  error?: string;
+}
 
 function getLookupId(): string {
   const pathParts = window.location.pathname.split("/").filter(Boolean);
@@ -48,6 +60,7 @@ function mapDbDonation(d: DbDonation): LocalDonationRecord {
   return {
     id: d.id,
     userId: d.userId,
+    xrplAccount: d.xrplAccount ?? undefined,
     donatedAt: d.donatedAt,
     amountKrw: d.amountKrw,
     allocations,
@@ -87,10 +100,41 @@ function mapDbDonation(d: DbDonation): LocalDonationRecord {
   };
 }
 
-function renderDonation(donation: LocalDonationRecord): void {
+async function lookupCredential(donation: LocalDonationRecord): Promise<CredentialLookupResult | null> {
+  if (!donation.xrplAccount || !donation.credentialIssuer || !donation.credentialType) {
+    return null;
+  }
+  try {
+    const params = new URLSearchParams({
+      subject: donation.xrplAccount,
+      issuer: donation.credentialIssuer,
+      credentialType: donation.credentialType,
+    });
+    const response = await fetch(`${API_BASE}/api/xrpl/credential?${params.toString()}`);
+    const payload = (await response.json()) as CredentialLookupResult;
+    return payload;
+  } catch (error) {
+    return {
+      exists: false,
+      accepted: false,
+      error: error instanceof Error ? error.message : "Credential lookup failed",
+    };
+  }
+}
+
+async function renderDonation(donation: LocalDonationRecord): Promise<void> {
   if (!resultEl) return;
   const explorer = donation.explorerUrl ?? (donation.txHash ? getTestnetExplorerLink(donation.txHash) : "");
-  setStatus(donation.validationStatus === "validated" ? "VERIFIED" : "RECORDED");
+  resultEl.innerHTML = `<p class="microcopy">Checking XRPL payment and Credential state...</p>`;
+  const credential = await lookupCredential(donation);
+  const ledgerCredentialStatus = credential?.exists
+    ? credential.accepted
+      ? "accepted on ledger"
+      : "issued, waiting for accept"
+    : credential
+      ? "not found on ledger"
+      : "not issued";
+  setStatus(credential?.accepted ? "CREDENTIAL VERIFIED" : donation.validationStatus === "validated" ? "EVIDENCE VERIFIED" : "RECORDED");
   resultEl.innerHTML = `
     <article class="timeline-item">
       <div class="row-between">
@@ -107,8 +151,11 @@ function renderDonation(donation: LocalDonationRecord): void {
         <div class="onchain-row"><span>TX Hash</span><strong>${donation.txHash ?? "-"}</strong></div>
         <div class="onchain-row"><span>Evidence</span><strong>${donation.evidenceHash ? "ready" : "pending"}</strong></div>
         <div class="onchain-row"><span>XLS-70 Credential</span><strong>${donation.credentialStatus ?? "not issued"}</strong></div>
+        <div class="onchain-row"><span>Ledger Credential</span><strong>${ledgerCredentialStatus}</strong></div>
         <div class="onchain-row"><span>Credential Issuer</span><strong>${donation.credentialIssuer ?? "-"}</strong></div>
         <div class="onchain-row"><span>Credential Type</span><strong>${donation.credentialType ?? "-"}</strong></div>
+        <div class="onchain-row"><span>Credential Ledger ID</span><strong>${credential?.index ?? "-"}</strong></div>
+        <div class="onchain-row"><span>Credential Previous TX</span><strong>${credential?.previousTxId ?? "-"}</strong></div>
       </div>
       ${
         explorer
@@ -118,6 +165,11 @@ function renderDonation(donation: LocalDonationRecord): void {
       ${
         donation.credentialAcceptExplorerUrl
           ? `<a class="ghost-btn mt-12" href="${donation.credentialAcceptExplorerUrl}" target="_blank" rel="noreferrer">Open CredentialAccept TX</a>`
+          : ""
+      }
+      ${
+        credential?.error
+          ? `<p class="tax-disclaimer mt-12">Credential ledger lookup: ${credential.error}</p>`
           : ""
       }
     </article>
@@ -141,7 +193,7 @@ async function init(): Promise<void> {
   if (!donation) {
     const dbDonation = await fetchDbDonationByTx(lookupId);
     if (dbDonation) {
-      renderDonation(mapDbDonation(dbDonation));
+      await renderDonation(mapDbDonation(dbDonation));
       return;
     }
     setStatus("NOT FOUND", true);
@@ -154,7 +206,7 @@ async function init(): Promise<void> {
     return;
   }
 
-  renderDonation(donation);
+  await renderDonation(donation);
 }
 
 void init();

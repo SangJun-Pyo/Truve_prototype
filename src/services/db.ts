@@ -21,6 +21,8 @@ export interface DbDonation {
   asset?: "XRP" | "RLUSD" | "USDC" | null;
   amountAsset?: number | null;
   credential?: DonationCredentialMeta | null;
+  xrplAccount?: string | null;
+  userDisplayName?: string | null;
 }
 
 export interface DonationCredentialMeta {
@@ -107,6 +109,32 @@ export async function fetchDbDonationByTx(txHash: string): Promise<DbDonation | 
     return res.json() as Promise<DbDonation>;
   } catch {
     return null;
+  }
+}
+
+export interface DbDonationAdminRow extends DbDonation {
+  xrplAccount: string;
+  userDisplayName?: string | null;
+}
+
+export async function fetchAdminDonations(adminSecret: string): Promise<DbDonationAdminRow[]> {
+  const res = await fetch(`${API_BASE}/api/admin/donations?limit=100`, {
+    headers: { "x-admin-secret": adminSecret },
+  });
+  if (!res.ok) {
+    throw new Error(await res.text());
+  }
+  const payload = (await res.json()) as { donations: DbDonationAdminRow[] };
+  return payload.donations;
+}
+
+export async function deleteAdminDonation(adminSecret: string, id: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/admin/donations/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    headers: { "x-admin-secret": adminSecret },
+  });
+  if (!res.ok) {
+    throw new Error(await res.text());
   }
 }
 

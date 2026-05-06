@@ -15,19 +15,6 @@ const categoryEl = document.getElementById("foundation-info-category") as HTMLSe
 
 let foundations: Foundation[] = [];
 
-function shortWallet(address: string): string {
-  return `${address.slice(0, 8)}...${address.slice(-6)}`;
-}
-
-function verificationLabel(level: Foundation["trustMetrics"]["verificationLevel"]): string {
-  const labels: Record<Foundation["trustMetrics"]["verificationLevel"], string> = {
-    basic: "Basic",
-    verified: "Verified",
-    premium: "Premium",
-  };
-  return labels[level];
-}
-
 function filterFoundations(): Foundation[] {
   const query = (searchEl?.value ?? "").trim().toLowerCase();
   const category = categoryEl?.value ?? "";
@@ -36,7 +23,6 @@ function filterFoundations(): Foundation[] {
     const searchable = [
       foundation.name,
       foundation.region,
-      foundation.description,
       foundation.tags.join(" "),
       categoryToKorean(foundation.category),
     ]
@@ -48,34 +34,18 @@ function filterFoundations(): Foundation[] {
   });
 }
 
-function renderFoundation(foundation: Foundation): string {
-  const tags = foundation.tags.map((tag) => `<span>${tag}</span>`).join("");
-
+function renderFoundationListItem(foundation: Foundation): string {
   return `
-    <article id="${foundation.id}" class="foundation-profile card">
-      <div class="foundation-profile-main">
-        <div>
-          <p class="summary-kicker">${categoryToKorean(foundation.category)} · ${foundation.region}</p>
-          <h2>${foundation.name}</h2>
-        </div>
-        <p>${foundation.description}</p>
-        <div class="foundation-profile-tags">${tags}</div>
+    <article class="foundation-list-card card">
+      <div>
+        <p class="summary-kicker">${categoryToKorean(foundation.category)} · ${foundation.region}</p>
+        <h2>${foundation.name}</h2>
       </div>
-      <aside class="foundation-profile-side">
-        <div>
-          <span>데이터 완성도</span>
-          <strong>${foundation.trustMetrics.proofCoveragePct}%</strong>
-        </div>
-        <div>
-          <span>검증 레벨</span>
-          <strong>${verificationLabel(foundation.trustMetrics.verificationLevel)}</strong>
-        </div>
-        <div>
-          <span>수령 지갑</span>
-          <strong title="${foundation.walletAddress}">${shortWallet(foundation.walletAddress)}</strong>
-        </div>
-        <a class="primary-link-button" href="./foundations.html">기부하기</a>
-      </aside>
+      <div class="foundation-list-meta">
+        <span>데이터 완성도 ${foundation.trustMetrics.proofCoveragePct}%</span>
+        <span>${foundation.trustMetrics.verificationLevel.toUpperCase()}</span>
+      </div>
+      <a class="primary-link-button" href="./foundation-detail.html?id=${foundation.id}">상세 보기</a>
     </article>
   `;
 }
@@ -93,20 +63,13 @@ function render(): void {
     return;
   }
 
-  listEl.innerHTML = filtered.map(renderFoundation).join("");
+  listEl.innerHTML = filtered.map(renderFoundationListItem).join("");
 }
 
 async function init(): Promise<void> {
   const repositories = await createRepositories();
   foundations = await repositories.foundationRepository.list();
   render();
-
-  const hashId = decodeURIComponent(window.location.hash.replace("#", ""));
-  if (hashId) {
-    requestAnimationFrame(() => {
-      document.getElementById(hashId)?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-  }
 }
 
 searchEl?.addEventListener("input", render);

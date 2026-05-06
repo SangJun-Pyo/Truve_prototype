@@ -1,15 +1,12 @@
-function e(e){return{climate:`환경`,education:`아동/교육`,health:`의료`,animal:`동물`,humanitarian:`긴급구호`}[e]}function t(e){return{climate:[`#FFF0E5`,`#FDBA74`],education:[`#F8FAFC`,`#CBD5E1`],health:[`#FFE4E6`,`#FDA4AF`],animal:[`#ECFEFF`,`#67E8F9`],humanitarian:[`#EEF2FF`,`#A5B4FC`]}[e]}function n(n,r){let[i,a]=t(n.category);return`
+function e(e){return{climate:`환경`,education:`아동/교육`,health:`의료`,animal:`동물`,humanitarian:`긴급구호`}[e]}function t(e){return{climate:`climate`,education:`education`,health:`health`,animal:`animal`,humanitarian:`humanitarian`}[e]}function n(n,r){let i=t(n.category);return`
     <article class="card explore-card" data-card-id="${n.id}">
-      <div class="card-visual" style="background: linear-gradient(135deg, ${i}, ${a})">
-        <div class="visual-pattern"></div>
-      </div>
+      <div class="card-visual" style="background-image: url('./foundation-covers/${i}.svg')"></div>
       <div class="card-content">
         <div class="card-header">
           <h3 class="card-title">${n.name}</h3>
           <span class="card-tag">${e(n.category)}</span>
         </div>
-        <p class="card-desc">${n.description}</p>
-        <a class="foundation-info-link" href="./foundation-info.html#${n.id}">소개 보기</a>
+        <a class="foundation-info-link" href="./foundation-detail.html?id=${n.id}">재단 소개 보기</a>
         <div class="card-footer">
           <div class="metric">
             <span class="metric-label">데이터 완성도</span>

@@ -1,14 +1,11 @@
-import{a as e,c as t,d as n,i as r,l as i,n as a,o,r as s,s as c,t as ee,u as l}from"./cart-CC7s9kTk.js";/* empty css               */import"./modulepreload-polyfill-Btlm8H0F.js";import{t as te}from"./provider-CJy0T7hV.js";import{l as u,s as ne,u as re}from"./db-DmLe3doe.js";import{i as ie}from"./donations-uvx315z0.js";import{a as ae,n as d,o as oe,r as se,s as f,t as ce}from"./wallet-CRHQzKj2.js";import{a as p,i as le,n as ue,o as de,r as fe,t as pe}from"./xrpl-D8xi5gSD.js";import{n as me,t as he}from"./explorerCard-vk88b9WG.js";import{t as ge}from"./nav-BPJhJNtb.js";var _e=n(),ve=[[`#FFF0E5`,`#FDBA74`],[`#F8FAFC`,`#CBD5E1`],[`#EEF2FF`,`#A5B4FC`],[`#ECFEFF`,`#67E8F9`]];function ye(e,t){let n=e.allocations.map(e=>t.find(t=>t.id===e.foundationId)?.name??e.foundationId).slice(0,3).join(`, `),[r,i]=ve[Math.abs(e.id.split(``).reduce((e,t)=>e+t.charCodeAt(0),0))%ve.length];return`
+import{a as e,c as t,d as n,i as r,l as i,n as a,o,r as s,s as c,t as ee,u as l}from"./cart-BnSAkGKH.js";/* empty css               */import"./modulepreload-polyfill-CfRWewTA.js";import{t as te}from"./provider-wBI-_yYj.js";import{l as u,s as ne,u as re}from"./db-Bb3MhysS.js";import{i as ie}from"./donations-Yv8Ifjw3.js";import{a as ae,n as d,o as oe,r as se,s as f,t as ce}from"./wallet-Bpxj4PC5.js";import{a as p,i as le,n as ue,o as de,r as fe,t as pe}from"./xrpl-BHSRxYyM.js";import{n as me,t as he}from"./explorerCard-D2FI8z-m.js";import{t as ge}from"./nav-BPnoixS_.js";var _e=n();function ve(e){return{balanced:`education`,health:`health`,relief:`humanitarian`,"local-care":`animal`}[e]??`education`}function ye(e,t){let n=e.allocations.map(e=>t.find(t=>t.id===e.foundationId)?.name??e.foundationId).slice(0,3).join(`, `),r=ve(e.theme);return`
     <article class="card explore-card" data-bundle-card-id="${e.id}">
-      <div class="card-visual" style="background: linear-gradient(135deg, ${r}, ${i})">
-        <div class="visual-pattern"></div>
-      </div>
+      <div class="card-visual" style="background-image: url('./foundation-covers/${r}.svg')"></div>
       <div class="card-content">
         <div class="card-header">
           <h3 class="card-title">${e.name}</h3>
           <span class="card-tag">추천 포트폴리오</span>
         </div>
-        <p class="card-desc">${e.summary}</p>
         <div class="metric mb-12">
           <span class="metric-label">포함 재단</span>
           <span class="metric-value">${e.allocations.length}개 · ${n}</span>

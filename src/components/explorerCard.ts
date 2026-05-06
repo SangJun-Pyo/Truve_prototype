@@ -11,32 +11,29 @@ export function categoryToKorean(category: Foundation["category"]): string {
   return map[category];
 }
 
-function getVisualColors(category: Foundation["category"]): [string, string] {
-  const map: Record<Foundation["category"], [string, string]> = {
-    climate: ["#FFF0E5", "#FDBA74"],
-    education: ["#F8FAFC", "#CBD5E1"],
-    health: ["#FFE4E6", "#FDA4AF"],
-    animal: ["#ECFEFF", "#67E8F9"],
-    humanitarian: ["#EEF2FF", "#A5B4FC"],
+function getCoverImage(category: Foundation["category"]): string {
+  const map: Record<Foundation["category"], string> = {
+    climate: "climate",
+    education: "education",
+    health: "health",
+    animal: "animal",
+    humanitarian: "humanitarian",
   };
   return map[category];
 }
 
 export function renderFoundationCard(foundation: Foundation, alreadyInCart: boolean): string {
-  const [color1, color2] = getVisualColors(foundation.category);
+  const coverImage = getCoverImage(foundation.category);
 
   return `
     <article class="card explore-card" data-card-id="${foundation.id}">
-      <div class="card-visual" style="background: linear-gradient(135deg, ${color1}, ${color2})">
-        <div class="visual-pattern"></div>
-      </div>
+      <div class="card-visual" style="background-image: url('./foundation-covers/${coverImage}.svg')"></div>
       <div class="card-content">
         <div class="card-header">
           <h3 class="card-title">${foundation.name}</h3>
           <span class="card-tag">${categoryToKorean(foundation.category)}</span>
         </div>
-        <p class="card-desc">${foundation.description}</p>
-        <a class="foundation-info-link" href="./foundation-info.html#${foundation.id}">소개 보기</a>
+        <a class="foundation-info-link" href="./foundation-detail.html?id=${foundation.id}">재단 소개 보기</a>
         <div class="card-footer">
           <div class="metric">
             <span class="metric-label">데이터 완성도</span>

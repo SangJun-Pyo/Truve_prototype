@@ -1,90 +1,48 @@
 [
   {
     "id": "bdl-balanced-impact",
-    "name": "?? ?? ?????",
-    "summary": "????, ????, ??, ????? ??? ?? ?? ?? ?????.",
+    "name": "균형 기부 포트폴리오",
+    "summary": "교육, 구호, 지역 돌봄을 균형 있게 담은 추천 묶음입니다.",
     "theme": "balanced",
     "allocations": [
-      {
-        "foundationId": "fnd-aba683237b",
-        "ratioPct": 25
-      },
-      {
-        "foundationId": "fnd-b67ba7bacf",
-        "ratioPct": 25
-      },
-      {
-        "foundationId": "fnd-2aaedf20bf",
-        "ratioPct": 25
-      },
-      {
-        "foundationId": "fnd-4696a39e95",
-        "ratioPct": 25
-      }
+      { "foundationId": "fnd-aba683237b", "ratioPct": 25 },
+      { "foundationId": "fnd-b67ba7bacf", "ratioPct": 25 },
+      { "foundationId": "fnd-2aaedf20bf", "ratioPct": 25 },
+      { "foundationId": "fnd-4696a39e95", "ratioPct": 25 }
     ]
   },
   {
     "id": "bdl-health-recovery",
-    "name": "????? ?????",
-    "summary": "?? ???, ?? ???, ?? ?? ??? ?? ??? ?? ?????.",
+    "name": "의료 회복 포트폴리오",
+    "summary": "의료 지원과 취약계층 회복을 중심으로 구성한 추천 묶음입니다.",
     "theme": "health",
     "allocations": [
-      {
-        "foundationId": "fnd-aba683237b",
-        "ratioPct": 34
-      },
-      {
-        "foundationId": "fnd-aaf6a4ea31",
-        "ratioPct": 33
-      },
-      {
-        "foundationId": "fnd-dd215e1a57",
-        "ratioPct": 33
-      }
+      { "foundationId": "fnd-aba683237b", "ratioPct": 34 },
+      { "foundationId": "fnd-aaf6a4ea31", "ratioPct": 33 },
+      { "foundationId": "fnd-dd215e1a57", "ratioPct": 33 }
     ]
   },
   {
     "id": "bdl-emergency-relief",
-    "name": "???? ?????",
-    "summary": "??, ????, ???? ?? ???? ???? ??? ?????.",
+    "name": "긴급 구호 포트폴리오",
+    "summary": "재난, 긴급구호, 취약지역 지원에 초점을 둔 추천 묶음입니다.",
     "theme": "relief",
     "allocations": [
-      {
-        "foundationId": "fnd-b67ba7bacf",
-        "ratioPct": 34
-      },
-      {
-        "foundationId": "fnd-81e0506942",
-        "ratioPct": 33
-      },
-      {
-        "foundationId": "fnd-7c9127448e",
-        "ratioPct": 33
-      }
+      { "foundationId": "fnd-b67ba7bacf", "ratioPct": 34 },
+      { "foundationId": "fnd-81e0506942", "ratioPct": 33 },
+      { "foundationId": "fnd-7c9127448e", "ratioPct": 33 }
     ]
   },
   {
     "id": "bdl-local-care",
-    "name": "?? ?? ?????",
-    "summary": "?? ?? ??? ?????????? ???? ?? ?????.",
+    "name": "지역 돌봄 포트폴리오",
+    "summary": "지역 사회 돌봄과 아동·복지 분야를 묶은 추천 포트폴리오입니다.",
     "theme": "local-care",
     "allocations": [
-      {
-        "foundationId": "fnd-2aaedf20bf",
-        "ratioPct": 25
-      },
-      {
-        "foundationId": "fnd-2660c8a992",
-        "ratioPct": 25
-      },
-      {
-        "foundationId": "fnd-1a50065e7c",
-        "ratioPct": 25
-      },
-      {
-        "foundationId": "fnd-58f2390d09",
-        "ratioPct": 25
-      }
+      { "foundationId": "fnd-2aaedf20bf", "ratioPct": 25 },
+      { "foundationId": "fnd-2660c8a992", "ratioPct": 25 },
+      { "foundationId": "fnd-1a50065e7c", "ratioPct": 25 },
+      { "foundationId": "fnd-58f2390d09", "ratioPct": 25 }
     ]
   }
 ]

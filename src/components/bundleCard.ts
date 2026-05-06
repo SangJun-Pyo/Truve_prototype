@@ -1,11 +1,14 @@
 ﻿import type { DonationBundle, Foundation } from "../api";
 
-const BUNDLE_COLORS: Array<[string, string]> = [
-  ["#FFF0E5", "#FDBA74"],
-  ["#F8FAFC", "#CBD5E1"],
-  ["#EEF2FF", "#A5B4FC"],
-  ["#ECFEFF", "#67E8F9"],
-];
+function getBundleCover(theme: string): string {
+  const map: Record<string, string> = {
+    balanced: "education",
+    health: "health",
+    relief: "humanitarian",
+    "local-care": "animal",
+  };
+  return map[theme] ?? "education";
+}
 
 export function renderBundleCard(bundle: DonationBundle, foundations: Foundation[]): string {
   const names = bundle.allocations
@@ -16,19 +19,16 @@ export function renderBundleCard(bundle: DonationBundle, foundations: Foundation
     .slice(0, 3)
     .join(", ");
 
-  const [color1, color2] = BUNDLE_COLORS[Math.abs(bundle.id.split("").reduce((acc, ch) => acc + ch.charCodeAt(0), 0)) % BUNDLE_COLORS.length];
+  const coverImage = getBundleCover(bundle.theme);
 
   return `
     <article class="card explore-card" data-bundle-card-id="${bundle.id}">
-      <div class="card-visual" style="background: linear-gradient(135deg, ${color1}, ${color2})">
-        <div class="visual-pattern"></div>
-      </div>
+      <div class="card-visual" style="background-image: url('./foundation-covers/${coverImage}.svg')"></div>
       <div class="card-content">
         <div class="card-header">
           <h3 class="card-title">${bundle.name}</h3>
           <span class="card-tag">추천 포트폴리오</span>
         </div>
-        <p class="card-desc">${bundle.summary}</p>
         <div class="metric mb-12">
           <span class="metric-label">포함 재단</span>
           <span class="metric-value">${bundle.allocations.length}개 · ${names}</span>

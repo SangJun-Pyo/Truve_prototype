@@ -9,6 +9,7 @@ export default defineConfig({
         index:      resolve(__dirname, "index.html"),
         donation:   resolve(__dirname, "donation.html"),
         foundations:resolve(__dirname, "foundations.html"),
+        foundationInfo: resolve(__dirname, "foundation-info.html"),
         governance: resolve(__dirname, "governance.html"),
         status:     resolve(__dirname, "status.html"),
         about:      resolve(__dirname, "about.html"),

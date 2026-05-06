@@ -36,6 +36,7 @@ export function renderFoundationCard(foundation: Foundation, alreadyInCart: bool
           <span class="card-tag">${categoryToKorean(foundation.category)}</span>
         </div>
         <p class="card-desc">${foundation.description}</p>
+        <a class="foundation-info-link" href="./foundation-info.html#${foundation.id}">소개 보기</a>
         <div class="card-footer">
           <div class="metric">
             <span class="metric-label">데이터 완성도</span>

@@ -482,8 +482,8 @@ function renderImpactChart(): void {
     .map((amount, index) => {
       const height = amount > 0 ? Math.max(18, Math.round((amount / max) * 85)) : 4;
       const activeClass = amount > 0 ? "solid" : "empty";
-      const indicator = amount > 0 ? `<span class="bar-indicator" title="${formatKrwPlain(amount)}"></span>` : "";
-      return `<div class="bar-wrapper" title="${formatKrwPlain(amount)}">${indicator}<div class="bar ${activeClass}" style="height:${height}%"></div></div>`;
+      const valueLabel = amount > 0 ? `<span class="bar-value">${formatKrwPlain(amount)}</span><span class="bar-indicator" aria-hidden="true"></span>` : "";
+      return `<div class="bar-wrapper" title="${formatKrwPlain(amount)}">${valueLabel}<div class="bar ${activeClass}" style="height:${height}%"></div></div>`;
     })
     .join("");
 

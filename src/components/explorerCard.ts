@@ -30,10 +30,10 @@ export function renderFoundationCard(foundation: Foundation, alreadyInCart: bool
       <div class="card-visual" style="background-image: url('./foundation-covers/${coverImage}.svg')"></div>
       <div class="card-content">
         <div class="card-header">
-          <h3 class="card-title">${foundation.name}</h3>
           <span class="card-tag">${categoryToKorean(foundation.category)}</span>
+          <h3 class="card-title">${foundation.name}</h3>
         </div>
-        <a class="foundation-info-link" href="./foundation-detail.html?id=${foundation.id}">재단 소개 보기</a>
+        <a class="foundation-info-link" href="./foundation-detail.html?id=${foundation.id}">재단 소개 <span aria-hidden="true">→</span></a>
         <div class="card-footer">
           <div class="metric">
             <span class="metric-label">데이터 완성도</span>

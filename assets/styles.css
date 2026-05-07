@@ -6,16 +6,16 @@
   --text-tertiary: #94a3b8;
   --accent-black: #0f172a;
   --accent-white: #ffffff;
-  --brand-orange: #ff5a00;
-  --brand-orange-hover: #e04e00;
-  --tag-bg-orange: #fff0e5;
-  --tag-text-orange: #ff5a00;
+  --brand-orange: #d95f18;
+  --brand-orange-hover: #bd4b12;
+  --tag-bg-orange: #fff1e8;
+  --tag-text-orange: #b94714;
   --line: #e2e8f0;
-  --radius-card: 24px;
+  --radius-card: 18px;
   --radius-pill: 999px;
   --radius-button: 50%;
-  --shadow-card: 0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -1px rgba(15, 23, 42, 0.03), 0 12px 24px -8px rgba(255, 90, 0, 0.08);
-  --shadow-card-hover: 0 10px 15px -3px rgba(15, 23, 42, 0.06), 0 4px 6px -2px rgba(15, 23, 42, 0.03), 0 20px 25px -5px rgba(255, 90, 0, 0.12);
+  --shadow-card: 0 4px 8px rgba(15, 23, 42, 0.04), 0 14px 28px rgba(15, 23, 42, 0.05);
+  --shadow-card-hover: 0 8px 14px rgba(15, 23, 42, 0.06), 0 18px 34px rgba(15, 23, 42, 0.08);
   --shadow-nav: 0 8px 30px rgba(15, 23, 42, 0.06);
   --space-1: 4px;
   --space-2: 8px;
@@ -53,7 +53,7 @@ body::before {
   width: 640px;
   height: 640px;
   border-radius: 999px;
-  background: rgba(255, 90, 0, 0.1);
+  background: rgba(217, 95, 24, 0.06);
   filter: blur(100px);
   pointer-events: none;
 }
@@ -294,19 +294,50 @@ input::placeholder {
 .grid,
 .foundation-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 16px;
+}
+
+.donation-explorer .foundation-grid {
+  max-height: calc(100vh - 292px);
+  min-height: 360px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 4px 8px 16px 2px;
+  scrollbar-gutter: stable;
+  align-content: start;
+}
+
+.donation-explorer .foundation-grid::-webkit-scrollbar {
+  width: 10px;
+}
+
+.donation-explorer .foundation-grid::-webkit-scrollbar-track {
+  background: rgba(226, 232, 240, 0.5);
+  border-radius: 999px;
+}
+
+.donation-explorer .foundation-grid::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border: 2px solid rgba(248, 250, 252, 0.9);
+  border-radius: 999px;
+}
+
+.donation-explorer .foundation-grid::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .foundation-info-link {
   align-self: flex-start;
-  color: var(--brand-orange);
+  color: #475569;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 800;
+  text-decoration: none;
+  transition: color 0.2s ease;
 }
 
 .foundation-info-link:hover {
-  text-decoration: underline;
+  color: var(--brand-orange);
 }
 
 .donation-workspace {
@@ -322,7 +353,7 @@ input::placeholder {
 
 .donation-console {
   position: sticky;
-  top: 24px;
+  top: 104px;
 }
 
 .summary-card {
@@ -829,8 +860,8 @@ input::placeholder {
 .card {
   background-color: var(--bg-surface);
   border-radius: var(--radius-card);
-  padding: var(--space-4);
-  border: 1px solid rgba(226, 232, 240, 0.78);
+  padding: 20px;
+  border: 1px solid rgba(203, 213, 225, 0.72);
   box-shadow: var(--shadow-card);
   position: relative;
 }
@@ -842,14 +873,14 @@ input::placeholder {
 }
 
 .explore-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-2px);
   box-shadow: var(--shadow-card-hover);
 }
 
 .card-visual {
   height: 118px;
-  border-radius: 10px;
-  margin-bottom: 12px;
+  border-radius: 8px;
+  margin-bottom: 14px;
   position: relative;
   overflow: hidden;
   background-color: #fff7ed;
@@ -870,21 +901,30 @@ input::placeholder {
   display: flex;
   flex-direction: column;
   flex: 1;
+  gap: 8px;
 }
 
 .card-header {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: flex-start;
-  gap: 10px;
-  margin-bottom: var(--space-1);
+  gap: 8px;
+  margin-bottom: 0;
 }
 
 .card-title {
-  font-size: 14px;
+  min-height: 40px;
+  font-size: 15px;
   font-weight: 800;
   color: var(--text-primary);
-  line-height: 1.3;
+  line-height: 1.35;
+  letter-spacing: 0;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .card-tag,
@@ -895,7 +935,7 @@ input::placeholder {
   font-weight: 800;
   padding: 5px 9px;
   border-radius: 999px;
-  letter-spacing: 0.04em;
+  letter-spacing: 0;
   white-space: nowrap;
 }
 
@@ -923,7 +963,7 @@ input::placeholder {
   justify-content: space-between;
   align-items: center;
   gap: 8px;
-  padding-top: 10px;
+  padding-top: 12px;
   border-top: 1px solid rgba(226, 232, 240, 0.78);
 }
 
@@ -935,6 +975,7 @@ input::placeholder {
 .metric-label {
   font-size: 11px;
   margin-bottom: 2px;
+  font-weight: 700;
 }
 
 .metric-value {
@@ -947,7 +988,7 @@ input::placeholder {
   width: 36px;
   height: 36px;
   border-radius: var(--radius-button);
-  background-color: var(--accent-black);
+  background-color: #172033;
   color: var(--accent-white);
   border: none;
   cursor: pointer;
@@ -955,13 +996,13 @@ input::placeholder {
   align-items: center;
   justify-content: center;
   transition: transform 0.1s, background-color 0.2s, box-shadow 0.2s;
-  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.18);
+  box-shadow: 0 8px 16px rgba(15, 23, 42, 0.16);
 }
 
 .add-btn:hover {
   transform: scale(1.05);
   background-color: var(--brand-orange);
-  box-shadow: 0 10px 22px rgba(255, 90, 0, 0.22);
+  box-shadow: 0 10px 20px rgba(217, 95, 24, 0.2);
 }
 
 .add-btn:active {
@@ -2831,6 +2872,13 @@ input::placeholder {
 
   .donation-console {
     position: static;
+  }
+
+  .donation-explorer .foundation-grid {
+    max-height: none;
+    min-height: 0;
+    overflow: visible;
+    padding: 0;
   }
 
   .allocation-controls {

@@ -2019,6 +2019,10 @@ input::placeholder {
   background: var(--brand-orange);
 }
 
+.bar.empty {
+  background: #eef2f7;
+}
+
 .bar-indicator {
   position: absolute;
   top: -12px;
@@ -2129,6 +2133,12 @@ input::placeholder {
 .token-row span,
 .token-row strong {
   font-size: 14px;
+}
+
+.token-subvalue {
+  margin: -4px 0 0;
+  color: #6b7280;
+  font-size: 12px;
 }
 
 .token-bar {

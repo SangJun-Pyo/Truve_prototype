@@ -58,6 +58,17 @@ let totalDonatedForTax = 0;
 let currentDonations: LocalDonationRecord[] = [];
 let eventsBound = false;
 
+const ASSET_KRW_RATES: Record<"XRP" | "RLUSD" | "USDC", number> = {
+  XRP: 1000,
+  RLUSD: 1400,
+  USDC: 1400,
+};
+
+interface AssetDistribution {
+  amount: number;
+  krw: number;
+}
+
 interface TaxSimulationResult {
   estimated_deduction_min: number;
   estimated_deduction_max: number;
@@ -83,6 +94,14 @@ function formatCompactKrw(value: number): string {
 
 function formatAssetAmount(value: number): string {
   return value.toLocaleString("ko-KR", { maximumFractionDigits: 6 });
+}
+
+function getDisplayAssetAmount(donation: LocalDonationRecord): number {
+  if (!donation.asset) return donation.amountKrw;
+  if (typeof donation.amountAsset === "number" && Number.isFinite(donation.amountAsset)) {
+    return donation.amountAsset;
+  }
+  return donation.amountKrw / ASSET_KRW_RATES[donation.asset];
 }
 
 function shortHash(value?: string): string {
@@ -403,9 +422,13 @@ function renderSummary(profileName: string, tier: string, walletDbCount: number)
   const total = currentDonations.reduce((sum, item) => sum + item.amountKrw, 0);
   const onchainCount = currentDonations.filter((item) => Boolean(item.txHash)).length;
   const evidenceReadyCount = currentDonations.filter((item) => Boolean(item.txHash || item.evidenceHash)).length;
-  const assetTotals = currentDonations.reduce<Record<string, number>>((totals, item) => {
+  const assetTotals = currentDonations.reduce<Record<string, AssetDistribution>>((totals, item) => {
     const asset = item.asset ?? "KRW";
-    totals[asset] = (totals[asset] ?? 0) + (item.amountAsset ?? item.amountKrw);
+    const current = totals[asset] ?? { amount: 0, krw: 0 };
+    totals[asset] = {
+      amount: current.amount + getDisplayAssetAmount(item),
+      krw: current.krw + item.amountKrw,
+    };
     return totals;
   }, {});
 
@@ -453,15 +476,14 @@ function renderImpactChart(): void {
     const index = 6 - diff;
     if (index >= 0 && index < monthly.length) monthly[index] += donation.amountKrw;
   });
-  const fallback = [40, 60, 50, 30, 45, 85, 65];
   const max = Math.max(...monthly, 1);
 
   impactChartAreaEl.innerHTML = monthly
     .map((amount, index) => {
-      const height = amount > 0 ? Math.max(18, Math.round((amount / max) * 85)) : fallback[index];
-      const activeClass = index === 5 || amount === max ? "solid" : "striped";
-      const indicator = activeClass === "solid" ? `<span class="bar-indicator"></span>` : "";
-      return `<div class="bar-wrapper">${indicator}<div class="bar ${activeClass}" style="height:${height}%"></div></div>`;
+      const height = amount > 0 ? Math.max(18, Math.round((amount / max) * 85)) : 4;
+      const activeClass = amount > 0 ? "solid" : "empty";
+      const indicator = amount > 0 ? `<span class="bar-indicator" title="${formatKrwPlain(amount)}"></span>` : "";
+      return `<div class="bar-wrapper" title="${formatKrwPlain(amount)}">${indicator}<div class="bar ${activeClass}" style="height:${height}%"></div></div>`;
     })
     .join("");
 
@@ -471,24 +493,29 @@ function renderImpactChart(): void {
   }).join("");
 }
 
-function renderTokenDistribution(assetTotals: Record<string, number>): void {
+function renderTokenDistribution(assetTotals: Record<string, AssetDistribution>): void {
   if (!tokenDistributionEl) return;
-  const entries = Object.entries(assetTotals).filter(([, amount]) => amount > 0);
-  const total = entries.reduce((sum, [, amount]) => sum + amount, 0);
-  if (entries.length === 0 || total <= 0) {
+  const entries = Object.entries(assetTotals)
+    .filter(([, totals]) => totals.amount > 0)
+    .sort(([assetA], [assetB]) => (assetA === "KRW" ? 1 : assetB === "KRW" ? -1 : assetA.localeCompare(assetB)));
+  const totalKrw = entries.reduce((sum, [, totals]) => sum + totals.krw, 0);
+  if (entries.length === 0 || totalKrw <= 0) {
     tokenDistributionEl.innerHTML = `<p class="muted-text">아직 표시할 자산 분포가 없습니다.</p>`;
     return;
   }
 
   tokenDistributionEl.innerHTML = entries
-    .map(([asset, amount], index) => {
-      const pct = Math.round((amount / total) * 100);
+    .map(([asset, totals], index) => {
+      const pct = Math.round((totals.krw / totalKrw) * 100);
+      const primaryAmount = asset === "KRW" ? formatKrwPlain(totals.krw) : `${formatAssetAmount(totals.amount)} ${asset}`;
+      const secondaryAmount = asset === "KRW" ? "자산 정보가 없는 과거 기록" : `≈ ${formatKrwPlain(totals.krw)}`;
       return `
         <div class="token-row">
           <div class="row-between">
             <span>${asset}</span>
-            <strong>${formatAssetAmount(amount)}</strong>
+            <strong>${primaryAmount}</strong>
           </div>
+          <p class="token-subvalue">${secondaryAmount}</p>
           <div class="token-bar"><span class="${index === 0 ? "blue" : "dark"}" style="width:${Math.max(3, pct)}%"></span></div>
         </div>
       `;

@@ -812,6 +812,35 @@ input::placeholder {
   gap: 10px;
 }
 
+.success-panel {
+  display: grid;
+  gap: 18px;
+  width: min(560px, 100%);
+}
+
+.success-modal-details {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 14px;
+  background: #f8fafc;
+}
+
+.success-modal-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.success-modal-row strong {
+  color: var(--text-primary);
+  text-align: right;
+  word-break: break-all;
+}
+
 .icon-btn {
   width: 40px;
   height: 40px;

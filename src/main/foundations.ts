@@ -92,6 +92,14 @@ const walletStatusEl = document.getElementById("wallet-status");
 const walletAddressEl = document.getElementById("wallet-address");
 const walletBalanceEl = document.getElementById("wallet-balance");
 const qrWrapEl = document.getElementById("xaman-qr-wrap");
+const successModalEl = document.getElementById("success-modal");
+const successModalKickerEl = document.getElementById("success-modal-kicker");
+const successModalTitleEl = document.getElementById("success-modal-title");
+const successModalMessageEl = document.getElementById("success-modal-message");
+const successModalDetailsEl = document.getElementById("success-modal-details");
+const successModalPrimaryLinkEl = document.getElementById("success-modal-primary-link") as HTMLAnchorElement | null;
+const successModalCloseBtnEl = document.getElementById("success-modal-close-btn") as HTMLButtonElement | null;
+const successModalOkBtnEl = document.getElementById("success-modal-ok-btn") as HTMLButtonElement | null;
 const preflightModalEl = document.getElementById("preflight-modal");
 const preflightRealNameEl = document.getElementById("preflight-real-name") as HTMLInputElement | null;
 const preflightPurposeEl = document.getElementById("preflight-purpose") as HTMLSelectElement | null;
@@ -597,6 +605,53 @@ function closePreflightModal(): void {
   preflightModalEl?.classList.add("hidden");
 }
 
+function shortAddress(address: string): string {
+  return address.length > 14 ? `${address.slice(0, 6)}...${address.slice(-4)}` : address;
+}
+
+function closeSuccessModal(): void {
+  successModalEl?.classList.add("hidden");
+}
+
+function openSuccessModal(input: {
+  kicker: string;
+  title: string;
+  message: string;
+  details?: Array<[string, string]>;
+  link?: { label: string; href: string };
+}): void {
+  if (!successModalEl) return;
+  if (successModalKickerEl) successModalKickerEl.textContent = input.kicker;
+  if (successModalTitleEl) successModalTitleEl.textContent = input.title;
+  if (successModalMessageEl) successModalMessageEl.textContent = input.message;
+  if (successModalDetailsEl) {
+    successModalDetailsEl.replaceChildren(
+      ...(input.details ?? []).map(([label, value]) => {
+        const row = document.createElement("div");
+        const labelEl = document.createElement("span");
+        const valueEl = document.createElement("strong");
+        row.className = "success-modal-row";
+        labelEl.textContent = label;
+        valueEl.textContent = value;
+        row.append(labelEl, valueEl);
+        return row;
+      }),
+    );
+    successModalDetailsEl.classList.toggle("hidden", !input.details?.length);
+  }
+  if (successModalPrimaryLinkEl) {
+    if (input.link) {
+      successModalPrimaryLinkEl.href = input.link.href;
+      successModalPrimaryLinkEl.textContent = input.link.label;
+      successModalPrimaryLinkEl.classList.remove("hidden");
+    } else {
+      successModalPrimaryLinkEl.removeAttribute("href");
+      successModalPrimaryLinkEl.classList.add("hidden");
+    }
+  }
+  successModalEl.classList.remove("hidden");
+}
+
 async function collectComplianceSnapshot(receiptId: string, walletAccount: string): Promise<ComplianceSnapshot> {
   const capturedAt = new Date().toISOString();
   const realNameHash = await sha256Hex(`${walletAccount}:${receiptId}:${preflightRealNameEl?.value.trim() ?? ""}`);
@@ -702,6 +757,12 @@ async function connectWallet(): Promise<void> {
     void upsertDbUser(resolved.account);
     clearQrcode();
     await updateWalletStatusFromSession();
+    openSuccessModal({
+      kicker: "Wallet Connected",
+      title: "Xaman 지갑 연결 완료",
+      message: "이제 선택한 재단으로 테스트넷 기부를 진행할 수 있습니다.",
+      details: [["연결 계정", shortAddress(resolved.account)]],
+    });
   } catch (error) {
     setTxStatus(error instanceof Error ? error.message : "지갑 연결 실패", true);
   }
@@ -772,12 +833,21 @@ async function submitDonation(): Promise<void> {
 
     renderQrcode(payload.qrPngUrl, payload.deepLink);
     const signed = await waitForPayloadResolution(payload.uuid);
+    const paymentSender = signed.account ?? wallet.account;
     if (!signed.signed || !signed.txHash) {
       setTxStatus("서명 취소", true);
       return;
     }
 
     setTxStatus("검증 대기", false);
+    if (paymentSender !== wallet.account) {
+      setWalletSession({
+        account: paymentSender,
+        connectedAt: wallet.connectedAt,
+        lastPayloadUuid: signed.uuid ?? payload.uuid,
+      });
+      void upsertDbUser(paymentSender);
+    }
     const validated = await waitForTxValidation(signed.txHash);
     const validationStatus = validated.validated ? "validated" : "signed";
     setTxStatus(`Evidence ready (${validationStatus})`, false);
@@ -786,7 +856,7 @@ async function submitDonation(): Promise<void> {
     try {
       setTxStatus("XLS-70 Credential 발급 중", false);
       const issuedCredential = await issueDonationCredential({
-        subject: wallet.account,
+        subject: paymentSender,
         receiptId,
         evidenceHash,
         txHash: signed.txHash,
@@ -820,7 +890,7 @@ async function submitDonation(): Promise<void> {
     const donationRecord: LocalDonationRecord = {
       id: `dnt_live_${Date.now()}`,
       userId: USER_ID,
-      xrplAccount: wallet.account,
+      xrplAccount: paymentSender,
       donatedAt: new Date().toISOString(),
       amountKrw,
       asset,
@@ -865,7 +935,7 @@ async function submitDonation(): Promise<void> {
     lastDonationRecord = donationRecord;
     renderTxResult(lastDonationRecord);
     void saveDbDonation({
-      xrplAccount: wallet.account,
+      xrplAccount: paymentSender,
       amountKrw,
       allocations: donationRecord.allocations,
       txHash: donationRecord.txHash,
@@ -881,6 +951,24 @@ async function submitDonation(): Promise<void> {
         lastDonationRecord = { ...lastDonationRecord, dbId: saved.id };
         upsertLocalDonation(lastDonationRecord);
       }
+    });
+    openSuccessModal({
+      kicker: "Payment Complete",
+      title: "기부 결제가 완료되었습니다",
+      message:
+        credentialMeta?.status === "failed"
+          ? "Payment는 성공했고 Evidence도 생성되었습니다. Credential은 다시 확인이 필요합니다."
+          : "Payment와 Evidence 생성이 완료되었습니다. Credential 진행 상태를 함께 저장했습니다.",
+      details: [
+        ["Payment", validationStatus],
+        ["결제 계정", shortAddress(paymentSender)],
+        ["Tx Hash", signed.txHash],
+        ["Credential", credentialMeta?.status ?? "evidence_ready"],
+      ],
+      link: {
+        label: "Payment 성공 링크 열기",
+        href: validated.explorerUrl ?? getTestnetExplorerLink(signed.txHash),
+      },
     });
     await updateWalletStatusFromSession();
   } catch (error) {
@@ -935,6 +1023,11 @@ function bindEvents(): void {
   preflightCancelBtnEl?.addEventListener("click", closePreflightModal);
   preflightModalEl?.addEventListener("click", (event) => {
     if (event.target === preflightModalEl) closePreflightModal();
+  });
+  successModalCloseBtnEl?.addEventListener("click", closeSuccessModal);
+  successModalOkBtnEl?.addEventListener("click", closeSuccessModal);
+  successModalEl?.addEventListener("click", (event) => {
+    if (event.target === successModalEl) closeSuccessModal();
   });
   preflightConfirmBtnEl?.addEventListener("click", () => {
     closePreflightModal();

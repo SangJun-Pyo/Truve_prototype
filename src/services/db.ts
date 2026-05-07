@@ -34,6 +34,7 @@ export interface DonationCredentialMeta {
   acceptTxHash?: string | null;
   acceptExplorerUrl?: string | null;
   status?: "issued" | "accept_pending" | "accepted" | "failed";
+  errorMessage?: string;
 }
 
 export interface DbVoteTally {

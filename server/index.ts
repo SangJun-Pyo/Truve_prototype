@@ -288,6 +288,10 @@ function getPaymentAmountValue(amount: any): number {
   return Number(amount?.value);
 }
 
+function getIssuedPaymentAmount(txJson: any) {
+  return txJson?.Amount ?? txJson?.DeliverMax;
+}
+
 function getMemoPayload(txJson: any): any | null {
   const memos = Array.isArray(txJson?.Memos) ? txJson.Memos : [];
   for (const item of memos) {
@@ -346,7 +350,7 @@ async function verifyDonationPaymentForCredential(
     throw new Error("compliance_hash is required in the payment memo.");
   }
 
-  const amount = txJson?.Amount;
+  const amount = getIssuedPaymentAmount(txJson);
   if (!amount || typeof amount === "string") {
     throw new Error("Donation Credential issuance requires an issued currency payment.");
   }

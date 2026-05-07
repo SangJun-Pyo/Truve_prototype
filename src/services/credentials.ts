@@ -36,7 +36,14 @@ export async function issueDonationCredential(
     body: JSON.stringify(input),
   });
   if (!response.ok) {
-    throw new Error(await response.text());
+    const text = await response.text();
+    try {
+      const payload = JSON.parse(text) as { error?: string };
+      throw new Error(payload.error ?? text);
+    } catch (error) {
+      if (error instanceof Error && error.message !== text) throw error;
+      throw new Error(text);
+    }
   }
   return response.json() as Promise<IssueDonationCredentialResponse>;
 }

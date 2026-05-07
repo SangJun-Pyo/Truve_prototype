@@ -879,9 +879,10 @@ async function submitDonation(): Promise<void> {
         false,
       );
     } catch (credentialError) {
-      credentialMeta = { status: "failed" };
+      const credentialErrorMessage = credentialError instanceof Error ? credentialError.message : "unknown";
+      credentialMeta = { status: "failed", errorMessage: credentialErrorMessage };
       setTxStatus(
-        `Evidence ready · Credential failed (${credentialError instanceof Error ? credentialError.message : "unknown"})`,
+        `Evidence ready · Credential failed (${credentialErrorMessage})`,
         true,
       );
     }
@@ -964,6 +965,7 @@ async function submitDonation(): Promise<void> {
         ["결제 계정", shortAddress(paymentSender)],
         ["Tx Hash", signed.txHash],
         ["Credential", credentialMeta?.status ?? "evidence_ready"],
+        ...(credentialMeta?.errorMessage ? [["Credential 사유", credentialMeta.errorMessage] as [string, string]] : []),
       ],
       link: {
         label: "Payment 성공 링크 열기",

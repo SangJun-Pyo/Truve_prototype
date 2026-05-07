@@ -6,34 +6,18 @@
     <title>Truve | 기부하기</title>
     <link rel="stylesheet" href="./assets/styles.css" />
   </head>
-  <body class="foundations-page">
+  <body>
     <main class="app-shell">
       <div id="top-nav"></div>
 
-      <header class="page-header trust-hero">
-        <div class="trust-hero-copy">
-          <p class="summary-kicker">Verified Donation Network</p>
-          <h1>기부를 신뢰 가능한 기록으로 전환합니다</h1>
-          <p class="subtitle">국세청 등록 재단 기반 검증 시스템과 XRPL Credential 기반 기부 증빙 인프라를 한 화면에서 연결하세요.</p>
-          <div class="hero-actions">
-            <a class="cta-btn hero-primary" href="#foundations-grid">재단 탐색</a>
-            <button id="hero-donate-btn" class="ghost-btn hero-secondary" type="button">기부 시작</button>
-          </div>
-        </div>
-        <div class="trust-hero-visual" aria-hidden="true">
-          <div class="network-orbit">
-            <div class="network-globe"></div>
-            <span class="network-node node-a">Verified</span>
-            <span class="network-node node-b">RLUSD</span>
-            <span class="network-node node-c">USDC</span>
-            <span class="credential-card">XLS-70<br />Credential</span>
-          </div>
-        </div>
+      <header class="page-header">
+        <h1>기부하기</h1>
+        <p class="subtitle">국세청 공개 데이터 기반 재단과 추천 기부 포트폴리오를 고르고, 비율·자산·증빙까지 한 화면에서 준비하세요.</p>
       </header>
 
       <div class="donation-workspace">
         <section class="donation-explorer">
-          <section class="controls-bar foundation-filter-bar">
+          <section class="controls-bar">
             <div class="search-wrapper">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="11" cy="11" r="8"></circle>
@@ -43,6 +27,13 @@
                 <input id="search-input" type="search" placeholder="재단명, 설명, 태그 검색" />
               </label>
             </div>
+            <div class="tabs">
+              <button id="tab-foundation" class="tab-btn active" type="button">단일 재단</button>
+              <button id="tab-bundle" class="tab-btn" type="button">추천 포트폴리오</button>
+            </div>
+          </section>
+
+          <section class="controls-bar controls-bar--sub">
             <label class="field field-inline">
               <span>카테고리</span>
               <div class="select-wrapper">
@@ -56,37 +47,6 @@
                 </select>
               </div>
             </label>
-            <label class="field field-inline">
-              <span>지역</span>
-              <div class="select-wrapper">
-                <select id="region-select">
-                  <option value="">전체 지역</option>
-                  <option value="서울">서울</option>
-                  <option value="경기">경기</option>
-                  <option value="강원">강원</option>
-                  <option value="경상">경상</option>
-                  <option value="전라">전라</option>
-                </select>
-              </div>
-            </label>
-            <label class="verified-filter">
-              <input id="verified-only" type="checkbox" checked />
-              <span>검증 완료만</span>
-            </label>
-            <div class="tabs">
-              <button id="tab-foundation" class="tab-btn active" type="button">단일 재단</button>
-              <button id="tab-bundle" class="tab-btn" type="button">추천 포트폴리오</button>
-            </div>
-          </section>
-
-          <section class="featured-foundations" aria-label="추천 재단">
-            <div class="section-head">
-              <div>
-                <p class="summary-kicker">Curated Foundations</p>
-                <h2>추천 재단</h2>
-              </div>
-            </div>
-            <div id="featured-rails" class="featured-rail"></div>
           </section>
 
           <div id="foundations-grid" class="grid foundation-grid"></div>

@@ -731,6 +731,11 @@ input::placeholder {
   gap: 10px;
 }
 
+.preflight-onchain-card,
+.preflight-receipt-card {
+  background: #fff;
+}
+
 .onchain-row {
   display: flex;
   justify-content: space-between;

@@ -917,6 +917,74 @@ input::placeholder {
   box-shadow: 0 24px 80px rgba(15, 23, 42, 0.22);
 }
 
+.modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.modal-head h3,
+.modal-head p {
+  margin: 0;
+}
+
+.modal-head h3 {
+  color: var(--text-primary);
+  font-size: 24px;
+}
+
+.modal-head p:not(.modal-kicker) {
+  margin-top: 6px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.modal-kicker {
+  margin-bottom: 6px !important;
+  color: var(--brand-orange);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.modal-close {
+  display: inline-flex;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  background: #fff;
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.primary-btn {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 12px;
+  background: var(--brand-orange);
+  padding: 0 16px;
+  color: #fff;
+  font-weight: 900;
+  text-decoration: none;
+  cursor: pointer;
+}
+
 .preflight-panel {
   display: grid;
   gap: 18px;
@@ -2226,9 +2294,24 @@ input::placeholder {
   display: flex;
   gap: 14px;
   align-items: center;
+  width: 100%;
   border: 1px solid var(--line);
   border-radius: 12px;
+  background: #fff;
   padding: 14px;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.credential-mini-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 90, 0, 0.35);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
 }
 
 .credential-icon {
@@ -2254,9 +2337,79 @@ input::placeholder {
 }
 
 .credential-mini-card span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   margin-top: 3px;
   color: #6b7280;
   font-size: 12px;
+}
+
+.credential-mini-card small {
+  margin-left: auto;
+  color: var(--brand-orange);
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.credential-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #94a3b8;
+}
+
+.credential-status-dot.accepted {
+  background: #10b981;
+}
+
+.credential-status-dot.failed {
+  background: #ef4444;
+}
+
+.credential-status-dot.pending {
+  background: #f59e0b;
+}
+
+.credential-detail-panel {
+  width: min(760px, 100%);
+}
+
+.credential-detail-grid {
+  display: grid;
+  gap: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #f8fafc;
+  padding: 14px;
+}
+
+.credential-detail-row {
+  display: grid;
+  grid-template-columns: 170px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 9px 0;
+}
+
+.credential-detail-row:last-child {
+  border-bottom: 0;
+}
+
+.credential-detail-row span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.credential-detail-row strong,
+.credential-detail-row a {
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
 }
 
 .token-row {
@@ -3170,5 +3323,18 @@ input::placeholder {
   .status-tax-card #tax-scenario-label {
     width: 100%;
     text-align: center;
+  }
+
+  .credential-detail-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .credential-mini-card {
+    align-items: flex-start;
+  }
+
+  .credential-mini-card small {
+    display: none;
   }
 }

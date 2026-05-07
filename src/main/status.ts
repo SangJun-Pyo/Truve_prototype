@@ -109,6 +109,34 @@ function shortHash(value?: string): string {
   return `${value.slice(0, 6)}...${value.slice(-4)}`;
 }
 
+function escapeHtml(value?: string | number | null): string {
+  return String(value ?? "-")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function getTestnetExplorerLink(txHash?: string): string {
+  return txHash ? `https://testnet.xrpl.org/transactions/${encodeURIComponent(txHash)}` : "";
+}
+
+function credentialStatusLabel(status?: LocalDonationRecord["credentialStatus"]): string {
+  switch (status) {
+    case "accepted":
+      return "Credential accepted";
+    case "accept_pending":
+      return "Accept pending";
+    case "issued":
+      return "Issued";
+    case "failed":
+      return "Failed";
+    default:
+      return "Evidence ready";
+  }
+}
+
 function formatDate(iso: string): string {
   return new Intl.DateTimeFormat("ko-KR", {
     year: "numeric",
@@ -359,6 +387,14 @@ function bindEvents(): void {
   connectBtnEl?.addEventListener("click", () => void connectWalletAndSync());
   disconnectBtnEl?.addEventListener("click", disconnectWalletAndSync);
   refreshBtnEl?.addEventListener("click", () => void init());
+  credentialListEl?.addEventListener("click", (event) => {
+    const button = (event.target as HTMLElement | null)?.closest<HTMLButtonElement>(".credential-detail-btn");
+    if (button?.dataset.donationId) openCredentialDetail(button.dataset.donationId);
+  });
+  document.addEventListener("click", closeCredentialDetail);
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") document.querySelector(".credential-detail-modal")?.remove();
+  });
 }
 
 function openVerificationForDonation(donationId: string): void {
@@ -534,17 +570,84 @@ function renderCredentialList(): void {
   credentialListEl.innerHTML = credentials
     .map((donation) => {
       const status = donation.credentialStatus ?? (donation.txHash ? "evidence_ready" : "pending");
+      const statusClass =
+        donation.credentialStatus === "accepted" ? "accepted" : donation.credentialStatus === "failed" ? "failed" : "pending";
       return `
-        <article class="credential-mini-card">
+        <button class="credential-mini-card credential-detail-btn" type="button" data-donation-id="${escapeHtml(donation.id)}">
           <div class="credential-icon">✓</div>
           <div>
-            <strong>${donation.receiptId ?? "Donation Evidence"}</strong>
-            <span>${status} · ${shortHash(donation.txHash ?? donation.evidenceHash)}</span>
+            <strong>${escapeHtml(donation.receiptId ?? "Donation Evidence")}</strong>
+            <span><em class="credential-status-dot ${statusClass}"></em>${escapeHtml(status)} · ${escapeHtml(shortHash(donation.credentialAcceptTxHash ?? donation.txHash ?? donation.evidenceHash))}</span>
           </div>
-        </article>
+          <small>상세보기</small>
+        </button>
       `;
     })
     .join("");
+}
+
+function renderCredentialDetailRow(label: string, value?: string | number | null, link?: string): string {
+  const content = link
+    ? `<a class="text-link" href="${escapeHtml(link)}" target="_blank" rel="noreferrer">${escapeHtml(value)}</a>`
+    : `<strong>${escapeHtml(value)}</strong>`;
+  return `<div class="credential-detail-row"><span>${escapeHtml(label)}</span>${content}</div>`;
+}
+
+function openCredentialDetail(donationId: string): void {
+  const donation = currentDonations.find((item) => item.id === donationId || item.dbId === donationId);
+  if (!donation) return;
+
+  document.querySelector(".credential-detail-modal")?.remove();
+  const paymentLink = donation.explorerUrl ?? getTestnetExplorerLink(donation.txHash);
+  const issueLink = donation.credentialIssueExplorerUrl ?? getTestnetExplorerLink(donation.credentialIssueTxHash);
+  const acceptLink = donation.credentialAcceptExplorerUrl ?? getTestnetExplorerLink(donation.credentialAcceptTxHash);
+  const verificationKey = donation.receiptId ?? donation.evidenceHash ?? donation.txHash ?? donation.id;
+  const verifyLink = `./verify.html?id=${encodeURIComponent(verificationKey)}`;
+  const status = credentialStatusLabel(donation.credentialStatus);
+  const amount = donation.asset
+    ? `${formatAssetAmount(getDisplayAssetAmount(donation))} ${donation.asset} (${formatKrwPlain(donation.amountKrw)})`
+    : formatKrwPlain(donation.amountKrw);
+
+  const modal = document.createElement("div");
+  modal.className = "modal-backdrop credential-detail-modal";
+  modal.innerHTML = `
+    <article class="modal-panel credential-detail-panel" role="dialog" aria-modal="true" aria-labelledby="credential-detail-title">
+      <div class="modal-head">
+        <div>
+          <p class="modal-kicker">XLS-70 Credential</p>
+          <h3 id="credential-detail-title">${escapeHtml(donation.receiptId ?? "Donation Evidence")}</h3>
+          <p>${escapeHtml(status)} · ${escapeHtml(formatDate(donation.donatedAt))}</p>
+        </div>
+        <button class="modal-close credential-detail-close" type="button" aria-label="닫기">×</button>
+      </div>
+      <div class="credential-detail-grid">
+        ${renderCredentialDetailRow("Status", status)}
+        ${renderCredentialDetailRow("Amount", amount)}
+        ${renderCredentialDetailRow("Holder", donation.xrplAccount)}
+        ${renderCredentialDetailRow("Issuer", donation.credentialIssuer)}
+        ${renderCredentialDetailRow("Credential Type", donation.credentialType)}
+        ${renderCredentialDetailRow("Credential URI", donation.credentialUri)}
+        ${renderCredentialDetailRow("Payment TX", shortHash(donation.txHash), paymentLink)}
+        ${renderCredentialDetailRow("Credential Issue TX", shortHash(donation.credentialIssueTxHash), issueLink)}
+        ${renderCredentialDetailRow("Credential Accept TX", shortHash(donation.credentialAcceptTxHash), acceptLink)}
+        ${renderCredentialDetailRow("Evidence Hash", donation.evidenceHash)}
+        ${renderCredentialDetailRow("Compliance Hash", donation.complianceHash)}
+      </div>
+      <div class="modal-actions">
+        <a class="primary-btn" href="${escapeHtml(verifyLink)}" target="_blank" rel="noreferrer">검증 페이지 열기</a>
+        ${acceptLink ? `<a class="ghost-btn" href="${escapeHtml(acceptLink)}" target="_blank" rel="noreferrer">Credential TX 보기</a>` : ""}
+      </div>
+    </article>
+  `;
+  document.body.appendChild(modal);
+  modal.querySelector<HTMLButtonElement>(".credential-detail-close")?.focus();
+}
+
+function closeCredentialDetail(event: Event): void {
+  const target = event.target as HTMLElement | null;
+  if (target?.classList.contains("credential-detail-modal") || target?.closest(".credential-detail-close")) {
+    document.querySelector(".credential-detail-modal")?.remove();
+  }
 }
 
 function renderTimeline(): void {

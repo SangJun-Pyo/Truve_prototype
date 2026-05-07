@@ -48,10 +48,14 @@ if (navRoot) {
 
 const searchInputEl = document.getElementById("search-input") as HTMLInputElement | null;
 const categorySelectEl = document.getElementById("category-select") as HTMLSelectElement | null;
+const regionSelectEl = document.getElementById("region-select") as HTMLSelectElement | null;
+const verifiedOnlyEl = document.getElementById("verified-only") as HTMLInputElement | null;
 const foundationsGridEl = document.getElementById("foundations-grid");
+const featuredRailsEl = document.getElementById("featured-rails");
 const bundlesGridEl = document.getElementById("bundles-grid");
 const tabFoundationEl = document.getElementById("tab-foundation") as HTMLButtonElement | null;
 const tabBundleEl = document.getElementById("tab-bundle") as HTMLButtonElement | null;
+const heroDonateBtnEl = document.getElementById("hero-donate-btn") as HTMLButtonElement | null;
 const cartCountEl = document.getElementById("cart-count");
 const consoleEl = document.querySelector<HTMLElement>(".donation-console");
 
@@ -213,12 +217,16 @@ function updateCartBadge(): void {
 function filterFoundations(): Foundation[] {
   const query = (searchInputEl?.value ?? "").trim().toLowerCase();
   const category = categorySelectEl?.value ?? "";
+  const region = regionSelectEl?.value ?? "";
+  const verifiedOnly = verifiedOnlyEl?.checked ?? false;
 
   return foundations.filter((foundation) => {
     const searchable = `${foundation.name} ${foundation.description} ${foundation.tags.join(" ")}`.toLowerCase();
     const queryMatch = query.length === 0 || searchable.includes(query);
     const categoryMatch = category.length === 0 || foundation.category === category;
-    return queryMatch && categoryMatch;
+    const regionMatch = region.length === 0 || foundation.region.includes(region);
+    const verifiedMatch = !verifiedOnly || foundation.trustMetrics.verificationLevel !== "basic";
+    return queryMatch && categoryMatch && regionMatch && verifiedMatch;
   });
 }
 
@@ -292,6 +300,52 @@ function renderFoundationTab(): void {
     .join("");
 
   foundationsGridEl.querySelectorAll<HTMLButtonElement>(".add-to-cart-btn").forEach((button) => {
+    button.addEventListener("click", () => {
+      const id = button.dataset.addId;
+      if (!id) return;
+      addFoundationToCart(id);
+      animateToConsole(button);
+      renderAll();
+      renderFoundationTab();
+    });
+  });
+}
+
+function renderFeaturedFoundations(): void {
+  if (!featuredRailsEl) return;
+  const groups: Array<{ title: string; category: Foundation["category"]; label: string }> = [
+    { title: "긴급 지원 재단", category: "humanitarian", label: "Rapid Aid" },
+    { title: "글로벌 아동 지원", category: "education", label: "Child Impact" },
+    { title: "의료 지원", category: "health", label: "Health Network" },
+    { title: "환경/기후", category: "climate", label: "Climate Action" },
+  ];
+  const picked = groups
+    .map((group) => {
+      const foundation = foundations.find((item) => item.category === group.category);
+      return foundation ? { ...group, foundation } : null;
+    })
+    .filter((item): item is { title: string; category: Foundation["category"]; label: string; foundation: Foundation } =>
+      Boolean(item),
+    );
+
+  featuredRailsEl.innerHTML = picked
+    .map(
+      (item) => `
+        <article class="featured-card">
+          <span class="featured-label">${item.label}</span>
+          <h3>${item.title}</h3>
+          <p>${item.foundation.name}</p>
+          <div class="trust-badge-row">
+            <span class="trust-badge verified">Verified</span>
+            <span class="trust-badge credential">On-chain Proof</span>
+          </div>
+          <button class="ghost-btn featured-add-btn" data-add-id="${item.foundation.id}" type="button">포트폴리오에 추가</button>
+        </article>
+      `,
+    )
+    .join("");
+
+  featuredRailsEl.querySelectorAll<HTMLButtonElement>(".featured-add-btn").forEach((button) => {
     button.addEventListener("click", () => {
       const id = button.dataset.addId;
       if (!id) return;
@@ -995,6 +1049,15 @@ function bindEvents(): void {
   categorySelectEl?.addEventListener("change", () => {
     if (activeTab === "foundation") renderFoundationTab();
   });
+  regionSelectEl?.addEventListener("change", () => {
+    if (activeTab === "foundation") renderFoundationTab();
+  });
+  verifiedOnlyEl?.addEventListener("change", () => {
+    if (activeTab === "foundation") renderFoundationTab();
+  });
+  heroDonateBtnEl?.addEventListener("click", () => {
+    executeBtnEl?.scrollIntoView({ behavior: "smooth", block: "center" });
+  });
   tabFoundationEl?.addEventListener("click", () => {
     activeTab = "foundation";
     syncTabs();
@@ -1090,6 +1153,7 @@ async function init(): Promise<void> {
   bindEvents();
   syncTabs();
   renderFoundationTab();
+  renderFeaturedFoundations();
   renderBundleTab();
   renderTxResult(lastDonationRecord);
   renderAll();

@@ -2956,6 +2956,59 @@ input::placeholder {
   padding: 32px 0 64px;
 }
 
+.about-partner-band {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr) auto;
+  gap: 24px;
+  align-items: center;
+  margin: 0 0 22px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(16px);
+}
+
+.about-partner-logo {
+  display: flex;
+  min-height: 96px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #fff;
+  padding: 12px;
+}
+
+.about-partner-logo img {
+  display: block;
+  width: min(100%, 260px);
+  height: auto;
+}
+
+.about-partner-band h2,
+.about-partner-band p {
+  margin: 0;
+}
+
+.about-partner-band h2 {
+  max-width: 760px;
+  color: var(--text-primary);
+  font-size: clamp(24px, 3vw, 34px);
+  line-height: 1.22;
+  word-break: keep-all;
+}
+
+.about-partner-band p:not(.about-section-kicker) {
+  max-width: 760px;
+  margin-top: 10px;
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.85;
+  word-break: keep-all;
+}
+
 .about-glass-card,
 .about-dark-section,
 .about-goal-dark {
@@ -3414,6 +3467,7 @@ input::placeholder {
   .portfolio-stat-grid,
   .portfolio-bottom-row,
   .about-dark-hero,
+  .about-partner-band,
   .about-dark-grid,
   .about-dark-section,
   .about-business-section,
@@ -3430,6 +3484,10 @@ input::placeholder {
   .about-dark-hero {
     min-height: auto;
     padding: 44px 0 56px;
+  }
+
+  .about-partner-band {
+    gap: 16px;
   }
 
   .about-orbit {

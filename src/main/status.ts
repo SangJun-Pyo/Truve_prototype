@@ -636,6 +636,15 @@ function renderTokenDistribution(assetTotals: Record<string, AssetDistribution>)
       `;
     })
     .join("");
+  tokenDistributionEl.insertAdjacentHTML(
+    "beforeend",
+    `
+      <div class="token-rate-note">
+        <strong>환산 기준</strong>
+        <span>XRPL Testnet 데모 지표이며, RLUSD/USDC는 1토큰 = 1,400 KRW 고정 환율로 표시합니다. 실제 세무·회계 금액은 기부 시점 기준가로 별도 확정해야 합니다.</span>
+      </div>
+    `,
+  );
 }
 
 function renderCredentialList(): void {

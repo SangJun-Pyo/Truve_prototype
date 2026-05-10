@@ -1030,6 +1030,108 @@ input::placeholder {
   word-break: break-all;
 }
 
+.donation-progress {
+  display: grid;
+  gap: 10px;
+}
+
+.donation-progress-step {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+  padding: 12px;
+}
+
+.donation-progress-step > span {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #eef2f7;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.donation-progress-step.active {
+  border-color: rgba(255, 90, 0, 0.34);
+  background: #fff7ed;
+}
+
+.donation-progress-step.active > span {
+  background: var(--brand-orange);
+  color: #fff;
+}
+
+.donation-progress-step.done > span {
+  background: #10b981;
+  color: #fff;
+}
+
+.donation-progress-step.error {
+  border-color: rgba(239, 68, 68, 0.3);
+  background: #fef2f2;
+}
+
+.donation-progress-step.error > span {
+  background: #ef4444;
+  color: #fff;
+}
+
+.donation-progress-step strong,
+.donation-progress-step p {
+  display: block;
+  margin: 0;
+}
+
+.donation-progress-step strong {
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.donation-progress-step p,
+.donation-progress-message {
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.donation-progress-message {
+  margin: 10px 0 0;
+}
+
+.donation-progress-detail {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
+  padding: 12px;
+}
+
+.donation-progress-detail div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.donation-progress-detail span {
+  color: #64748b;
+  font-weight: 900;
+}
+
+.donation-progress-detail strong {
+  color: var(--text-primary);
+}
+
 .icon-btn {
   width: 40px;
   height: 40px;
@@ -2458,6 +2560,26 @@ input::placeholder {
   margin: -4px 0 0;
   color: #6b7280;
   font-size: 12px;
+}
+
+.token-rate-note {
+  display: grid;
+  gap: 4px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
+  padding: 12px;
+}
+
+.token-rate-note strong {
+  color: #0f172a;
+  font-size: 12px;
+}
+
+.token-rate-note span {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.6;
 }
 
 .token-bar {

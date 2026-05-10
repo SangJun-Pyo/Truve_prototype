@@ -147,6 +147,15 @@ interface TaxSimulationResult {
   source?: "anthropic" | "fallback";
 }
 
+type DonationFlowPhase = "idle" | "payment" | "evidence" | "credential" | "complete" | "credential_error" | "error";
+
+interface DonationProgressStep {
+  key: "payment" | "evidence" | "credential";
+  title: string;
+  description: string;
+  state: "waiting" | "active" | "done" | "error";
+}
+
 function getSelectedAsset(): DonationAsset {
   const value = assetSelectEl?.value;
   return value === "USDC" ? "USDC" : "RLUSD";
@@ -609,6 +618,63 @@ function shortAddress(address: string): string {
   return address.length > 14 ? `${address.slice(0, 6)}...${address.slice(-4)}` : address;
 }
 
+function getDonationProgressSteps(phase: DonationFlowPhase): DonationProgressStep[] {
+  const order: DonationProgressStep["key"][] = ["payment", "evidence", "credential"];
+  const activeIndex = phase === "idle" ? -1 : phase === "payment" ? 0 : phase === "evidence" ? 1 : 2;
+  const base = {
+    payment: {
+      title: "결제 완료",
+      description: "Xaman에서 Payment가 서명되고 XRPL Testnet에 제출됩니다.",
+    },
+    evidence: {
+      title: "증빙 생성 완료",
+      description: "Payment 해시와 기부 메모를 기반으로 Evidence Package를 준비합니다.",
+    },
+    credential: {
+      title: "Credential 승인",
+      description: "기부자 지갑에서 XLS-70 Donation Credential을 승인합니다.",
+    },
+  };
+
+  return order.map((key, index) => {
+    let state: DonationProgressStep["state"] = "waiting";
+    if (phase === "complete") state = "done";
+    else if (phase === "credential_error" && key === "credential") state = "error";
+    else if (phase === "error" && index === Math.max(activeIndex, 0)) state = "error";
+    else if (index < activeIndex) state = "done";
+    else if (index === activeIndex) state = "active";
+    return { key, state, ...base[key] };
+  });
+}
+
+function renderDonationProgress(phase: DonationFlowPhase): string {
+  return `
+    <div class="donation-progress">
+      ${getDonationProgressSteps(phase)
+        .map(
+          (step) => `
+            <div class="donation-progress-step ${step.state}">
+              <span>${step.state === "done" ? "✓" : step.state === "error" ? "!" : ""}</span>
+              <div>
+                <strong>${step.title}</strong>
+                <p>${step.description}</p>
+              </div>
+            </div>
+          `,
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+function renderDonationFlowState(phase: DonationFlowPhase, message: string): void {
+  if (!txResultEl) return;
+  txResultEl.innerHTML = `
+    ${renderDonationProgress(phase)}
+    <p class="donation-progress-message">${message}</p>
+  `;
+}
+
 function closeSuccessModal(): void {
   successModalEl?.classList.add("hidden");
 }
@@ -671,24 +737,34 @@ async function collectComplianceSnapshot(receiptId: string, walletAccount: strin
 function renderTxResult(record: LocalDonationRecord | null): void {
   if (!txResultEl) return;
   if (!record) {
-    txResultEl.textContent = "아직 제출된 트랜잭션이 없습니다.";
+    renderDonationFlowState("idle", "기부를 실행하면 결제, 증빙, Credential 승인 단계가 여기에 표시됩니다.");
     return;
   }
   const explorer = record.explorerUrl ?? (record.txHash ? getTestnetExplorerLink(record.txHash) : "-");
   if (!record.txHash) {
-    txResultEl.textContent = "트랜잭션 정보 없음";
+    renderDonationFlowState("error", "트랜잭션 정보를 찾을 수 없습니다.");
     return;
   }
   const credentialLink =
     record.credentialAcceptExplorerUrl ?? (record.credentialAcceptTxHash ? getTestnetExplorerLink(record.credentialAcceptTxHash) : "");
+  const phase = record.credentialStatus === "failed" ? "credential_error" : record.credentialStatus === "accepted" ? "complete" : "credential";
+  const credentialText =
+    record.credentialStatus === "accepted"
+      ? "Credential 승인 완료"
+      : record.credentialStatus === "accept_pending"
+        ? "Credential 승인 대기"
+        : record.credentialStatus === "failed"
+          ? "Credential 확인 필요"
+          : "Credential 준비 중";
   txResultEl.innerHTML = `
-    <div>Payment TX: <a class="text-link" href="${explorer}" target="_blank" rel="noreferrer">${record.txHash}</a> (${record.validationStatus ?? "-"})</div>
-    <div>Evidence: ${record.evidenceHash ? "ready" : "pending"}</div>
-    <div>Credential: ${record.credentialStatus ?? "pending"}${
-      credentialLink
-        ? ` · <a class="text-link" href="${credentialLink}" target="_blank" rel="noreferrer">CredentialAccept TX</a>`
-        : ""
-    }</div>
+    ${renderDonationProgress(phase)}
+    <div class="donation-progress-detail">
+      <div><span>Payment</span><a class="text-link" href="${explorer}" target="_blank" rel="noreferrer">${shortAddress(record.txHash)}</a></div>
+      <div><span>Evidence</span><strong>${record.evidenceHash ? "생성 완료" : "생성 대기"}</strong></div>
+      <div><span>Credential</span><strong>${credentialText}</strong>${
+        credentialLink ? ` <a class="text-link" href="${credentialLink}" target="_blank" rel="noreferrer">TX 보기</a>` : ""
+      }</div>
+    </div>
   `;
 }
 
@@ -809,7 +885,8 @@ async function submitDonation(): Promise<void> {
         complianceHash: compliance.complianceHash,
       }),
     );
-    setTxStatus("Xaman 서명 대기", false);
+    setTxStatus("Xaman에서 결제 서명을 기다리는 중", false);
+    renderDonationFlowState("payment", "Xaman 앱에서 Payment 요청을 확인하고 서명해 주세요.");
     const payload = await createPaymentPayload({
       account: wallet.account,
       destination: donationDestination.address,
@@ -835,11 +912,13 @@ async function submitDonation(): Promise<void> {
     const signed = await waitForPayloadResolution(payload.uuid);
     const paymentSender = signed.account ?? wallet.account;
     if (!signed.signed || !signed.txHash) {
-      setTxStatus("서명 취소", true);
+      setTxStatus("결제 서명이 취소되었습니다", true);
+      renderDonationFlowState("error", "기부 결제가 완료되지 않았습니다. 다시 실행하면 새 결제 요청이 생성됩니다.");
       return;
     }
 
-    setTxStatus("검증 대기", false);
+    setTxStatus("Payment 검증 중", false);
+    renderDonationFlowState("payment", "결제 서명은 완료되었습니다. XRPL Testnet에서 Payment 확정을 확인하고 있습니다.");
     if (paymentSender !== wallet.account) {
       setWalletSession({
         account: paymentSender,
@@ -850,11 +929,13 @@ async function submitDonation(): Promise<void> {
     }
     const validated = await waitForTxValidation(signed.txHash);
     const validationStatus = validated.validated ? "validated" : "signed";
-    setTxStatus(`Evidence ready (${validationStatus})`, false);
+    setTxStatus("증빙 생성 완료", false);
+    renderDonationFlowState("evidence", "Payment가 확인되어 Evidence Package가 생성되었습니다.");
 
     let credentialMeta: DonationCredentialMeta | null = null;
     try {
-      setTxStatus("XLS-70 Credential 발급 중", false);
+      setTxStatus("Credential 발급 준비 중", false);
+      renderDonationFlowState("credential", "Evidence를 기반으로 XLS-70 Donation Credential 승인 요청을 준비합니다.");
       const issuedCredential = await issueDonationCredential({
         subject: paymentSender,
         receiptId,
@@ -862,7 +943,8 @@ async function submitDonation(): Promise<void> {
         txHash: signed.txHash,
       });
       renderQrcode(issuedCredential.accept.qrPngUrl, issuedCredential.accept.deepLink);
-      setTxStatus("XLS-70 Credential 수락 서명 대기", false);
+      setTxStatus("Credential 승인 대기", false);
+      renderDonationFlowState("credential", "Xaman에서 Credential 승인 요청을 확인해 주세요.");
       const accepted = await waitForPayloadResolution(issuedCredential.accept.uuid);
       credentialMeta = {
         issuer: issuedCredential.issuer,
@@ -875,15 +957,25 @@ async function submitDonation(): Promise<void> {
         status: accepted.signed && accepted.txHash ? "accepted" : "accept_pending",
       };
       setTxStatus(
-        credentialMeta.status === "accepted" ? "XLS-70 Credential accepted" : "XLS-70 Credential accept pending",
+        credentialMeta.status === "accepted" ? "Credential 승인 완료" : "Credential 승인 대기",
         false,
+      );
+      renderDonationFlowState(
+        credentialMeta.status === "accepted" ? "complete" : "credential",
+        credentialMeta.status === "accepted"
+          ? "결제, 증빙 생성, Credential 승인이 모두 완료되었습니다."
+          : "Credential 승인 요청이 생성되었습니다. 승인 완료 후 기부현황에서 다시 확인할 수 있습니다.",
       );
     } catch (credentialError) {
       const credentialErrorMessage = credentialError instanceof Error ? credentialError.message : "unknown";
       credentialMeta = { status: "failed", errorMessage: credentialErrorMessage };
       setTxStatus(
-        `Evidence ready · Credential failed (${credentialErrorMessage})`,
+        `증빙 생성 완료 · Credential 확인 필요`,
         true,
+      );
+      renderDonationFlowState(
+        "credential_error",
+        `Payment와 Evidence는 완료되었습니다. Credential은 다시 확인이 필요합니다. (${credentialErrorMessage})`,
       );
     }
 
@@ -958,17 +1050,20 @@ async function submitDonation(): Promise<void> {
       title: "기부 결제가 완료되었습니다",
       message:
         credentialMeta?.status === "failed"
-          ? "Payment는 성공했고 Evidence도 생성되었습니다. Credential은 다시 확인이 필요합니다."
-          : "Payment와 Evidence 생성이 완료되었습니다. Credential 진행 상태를 함께 저장했습니다.",
+          ? "결제와 증빙 생성은 완료되었습니다. Credential은 기부현황에서 다시 확인해 주세요."
+          : credentialMeta?.status === "accepted"
+            ? "결제, 증빙 생성, Credential 승인이 모두 완료되었습니다."
+            : "결제와 증빙 생성이 완료되었습니다. Credential 승인 상태는 기부현황에서 계속 확인할 수 있습니다.",
       details: [
-        ["Payment", validationStatus],
+        ["결제", validationStatus === "validated" ? "완료" : "서명 완료"],
         ["결제 계정", shortAddress(paymentSender)],
         ["Tx Hash", signed.txHash],
-        ["Credential", credentialMeta?.status ?? "evidence_ready"],
+        ["증빙", "Evidence 생성 완료"],
+        ["Credential", credentialMeta?.status === "accepted" ? "승인 완료" : credentialMeta?.status === "failed" ? "확인 필요" : "승인 대기"],
         ...(credentialMeta?.errorMessage ? [["Credential 사유", credentialMeta.errorMessage] as [string, string]] : []),
       ],
       link: {
-        label: "Payment 성공 링크 열기",
+        label: "Payment 확인",
         href: validated.explorerUrl ?? getTestnetExplorerLink(signed.txHash),
       },
     });

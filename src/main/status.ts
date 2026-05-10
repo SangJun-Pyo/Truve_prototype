@@ -1,6 +1,6 @@
 import { createRepositories } from "../api/provider";
 import { API_BASE } from "../services/apiBase";
-import { fetchDbDonations, upsertDbUser } from "../services/db";
+import { fetchDbDonations, patchDbDonation, upsertDbUser } from "../services/db";
 import {
   listWalletLocalDonations,
   mergeDonationRecords,
@@ -78,6 +78,13 @@ interface TaxSimulationResult {
   source?: "anthropic" | "fallback";
 }
 
+interface CredentialLookupResult {
+  exists: boolean;
+  accepted: boolean;
+  previousTxId?: string | null;
+  error?: string;
+}
+
 function formatKrw(value: number): string {
   return `${Math.max(0, Math.round(value)).toLocaleString("ko-KR")}원`;
 }
@@ -111,11 +118,11 @@ function shortHash(value?: string): string {
 
 function escapeHtml(value?: string | number | null): string {
   return String(value ?? "-")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 function getTestnetExplorerLink(txHash?: string): string {
@@ -135,6 +142,64 @@ function credentialStatusLabel(status?: LocalDonationRecord["credentialStatus"])
     default:
       return "Evidence ready";
   }
+}
+
+async function lookupCredentialOnLedger(donation: LocalDonationRecord): Promise<CredentialLookupResult | null> {
+  if (!donation.xrplAccount || !donation.credentialIssuer || !donation.credentialType) {
+    return null;
+  }
+  try {
+    const params = new URLSearchParams({
+      subject: donation.xrplAccount,
+      issuer: donation.credentialIssuer,
+      credentialType: donation.credentialType,
+    });
+    const response = await fetch(`${API_BASE}/api/xrpl/credential?${params.toString()}`);
+    return (await response.json()) as CredentialLookupResult;
+  } catch (error) {
+    return {
+      exists: false,
+      accepted: false,
+      error: error instanceof Error ? error.message : "Credential lookup failed",
+    };
+  }
+}
+
+async function syncCredentialStatuses(): Promise<void> {
+  const synced = await Promise.all(
+    currentDonations.map(async (donation) => {
+      if (donation.credentialStatus === "accepted") return donation;
+      const credential = await lookupCredentialOnLedger(donation);
+      if (!credential?.accepted) return donation;
+
+      const acceptTxHash = donation.credentialAcceptTxHash ?? credential.previousTxId ?? undefined;
+      const next: LocalDonationRecord = {
+        ...donation,
+        credentialStatus: "accepted",
+        proofMintStatus: "credential_accepted",
+        credentialAcceptTxHash: acceptTxHash,
+        credentialAcceptExplorerUrl: donation.credentialAcceptExplorerUrl ?? getTestnetExplorerLink(acceptTxHash),
+      };
+
+      upsertLocalDonation(next);
+      if (next.dbId) {
+        await patchDbDonation(next.dbId, {
+          credential: {
+            issuer: next.credentialIssuer,
+            credentialType: next.credentialType,
+            uri: next.credentialUri,
+            issueTxHash: next.credentialIssueTxHash,
+            issueExplorerUrl: next.credentialIssueExplorerUrl,
+            acceptTxHash: next.credentialAcceptTxHash,
+            acceptExplorerUrl: next.credentialAcceptExplorerUrl,
+            status: "accepted",
+          },
+        });
+      }
+      return next;
+    }),
+  );
+  currentDonations = synced;
 }
 
 function formatDate(iso: string): string {
@@ -756,6 +821,7 @@ async function init(): Promise<void> {
     currentDonations = mergeDonationRecords(baseDonations, USER_ID);
   }
 
+  await syncCredentialStatuses();
   totalDonatedForTax = currentDonations.reduce((sum, item) => sum + item.amountKrw, 0);
   renderTaxFormState();
   resetTaxResult();

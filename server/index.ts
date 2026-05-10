@@ -1413,6 +1413,7 @@ app.delete("/api/admin/donations/:id", async (req, res) => {
 // ── DB: 기부 상태 업데이트 (Evidence/Credential 상태 등) ─────────────
 app.patch("/api/db/donations/:id", async (req, res) => {
   try {
+    const body = req.body ?? {};
     const allowedKeys = [
       "paymentStatus",
       "proofStatus",
@@ -1425,8 +1426,28 @@ app.patch("/api/db/donations/:id", async (req, res) => {
       "allocations",
     ];
     const data = Object.fromEntries(
-      Object.entries(req.body ?? {}).filter(([key]) => allowedKeys.includes(key)),
+      Object.entries(body).filter(([key]) => allowedKeys.includes(key)),
     );
+    if (body.credential !== undefined) {
+      const existing = await prisma.donation.findUnique({ where: { id: req.params.id } });
+      if (!existing) {
+        res.status(404).json({ error: "Donation not found." });
+        return;
+      }
+      const existingAllocations = existing.allocations as any;
+      const existingItems = Array.isArray(existingAllocations) ? existingAllocations : (existingAllocations?.items ?? []);
+      const existingMeta = Array.isArray(existingAllocations) ? {} : (existingAllocations?.meta ?? {});
+      data.allocations = {
+        items: existingItems,
+        meta: {
+          ...existingMeta,
+          credential: {
+            ...(existingMeta.credential ?? {}),
+            ...(body.credential ?? {}),
+          },
+        },
+      };
+    }
     if (Object.keys(data).length === 0) {
       res.status(400).json({ error: "No supported donation fields to update." });
       return;

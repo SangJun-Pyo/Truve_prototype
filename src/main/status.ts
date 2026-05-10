@@ -81,7 +81,11 @@ interface TaxSimulationResult {
 interface CredentialLookupResult {
   exists: boolean;
   accepted: boolean;
+  index?: string | null;
+  ledgerIndex?: number | string | null;
   previousTxId?: string | null;
+  uri?: string | null;
+  flags?: number | null;
   error?: string;
 }
 
@@ -144,6 +148,13 @@ function credentialStatusLabel(status?: LocalDonationRecord["credentialStatus"])
   }
 }
 
+function credentialLedgerLabel(credential: CredentialLookupResult | null): string {
+  if (!credential) return "Not checked";
+  if (credential.accepted) return "Ledger verified";
+  if (credential.exists) return "Issued, waiting for accept";
+  return "Not found on ledger";
+}
+
 async function lookupCredentialOnLedger(donation: LocalDonationRecord): Promise<CredentialLookupResult | null> {
   if (!donation.xrplAccount || !donation.credentialIssuer || !donation.credentialType) {
     return null;
@@ -155,6 +166,9 @@ async function lookupCredentialOnLedger(donation: LocalDonationRecord): Promise<
       credentialType: donation.credentialType,
     });
     const response = await fetch(`${API_BASE}/api/xrpl/credential?${params.toString()}`);
+    if (!response.ok && response.status !== 404) {
+      throw new Error(await response.text());
+    }
     return (await response.json()) as CredentialLookupResult;
   } catch (error) {
     return {
@@ -454,7 +468,7 @@ function bindEvents(): void {
   refreshBtnEl?.addEventListener("click", () => void init());
   credentialListEl?.addEventListener("click", (event) => {
     const button = (event.target as HTMLElement | null)?.closest<HTMLButtonElement>(".credential-detail-btn");
-    if (button?.dataset.donationId) openCredentialDetail(button.dataset.donationId);
+    if (button?.dataset.donationId) void openCredentialDetail(button.dataset.donationId);
   });
   document.addEventListener("click", closeCredentialDetail);
   document.addEventListener("keydown", (event) => {
@@ -658,17 +672,41 @@ function renderCredentialDetailRow(label: string, value?: string | number | null
   return `<div class="credential-detail-row"><span>${escapeHtml(label)}</span>${content}</div>`;
 }
 
-function openCredentialDetail(donationId: string): void {
+function renderCredentialLedgerSummary(credential: CredentialLookupResult | null): string {
+  const state = credentialLedgerLabel(credential);
+  const stateClass = credential?.accepted ? "accepted" : credential?.exists ? "pending" : "failed";
+  return `
+    <div class="credential-ledger-summary">
+      <article>
+        <span>Ledger status</span>
+        <strong><em class="credential-status-dot ${stateClass}"></em>${escapeHtml(state)}</strong>
+      </article>
+      <article>
+        <span>Credential object</span>
+        <strong>${escapeHtml(shortHash(credential?.index ?? undefined))}</strong>
+      </article>
+      <article>
+        <span>Previous TX</span>
+        <strong>${escapeHtml(shortHash(credential?.previousTxId ?? undefined))}</strong>
+      </article>
+    </div>
+  `;
+}
+
+async function openCredentialDetail(donationId: string): Promise<void> {
   const donation = currentDonations.find((item) => item.id === donationId || item.dbId === donationId);
   if (!donation) return;
 
   document.querySelector(".credential-detail-modal")?.remove();
+  const credential = await lookupCredentialOnLedger(donation);
   const paymentLink = donation.explorerUrl ?? getTestnetExplorerLink(donation.txHash);
   const issueLink = donation.credentialIssueExplorerUrl ?? getTestnetExplorerLink(donation.credentialIssueTxHash);
-  const acceptLink = donation.credentialAcceptExplorerUrl ?? getTestnetExplorerLink(donation.credentialAcceptTxHash);
+  const acceptTxHash = donation.credentialAcceptTxHash ?? credential?.previousTxId ?? undefined;
+  const acceptLink = donation.credentialAcceptExplorerUrl ?? getTestnetExplorerLink(acceptTxHash);
   const verificationKey = donation.receiptId ?? donation.evidenceHash ?? donation.txHash ?? donation.id;
   const verifyLink = `./verify.html?id=${encodeURIComponent(verificationKey)}`;
   const status = credentialStatusLabel(donation.credentialStatus);
+  const ledgerStatus = credentialLedgerLabel(credential);
   const amount = donation.asset
     ? `${formatAssetAmount(getDisplayAssetAmount(donation))} ${donation.asset} (${formatKrwPlain(donation.amountKrw)})`
     : formatKrwPlain(donation.amountKrw);
@@ -681,27 +719,33 @@ function openCredentialDetail(donationId: string): void {
         <div>
           <p class="modal-kicker">XLS-70 Credential</p>
           <h3 id="credential-detail-title">${escapeHtml(donation.receiptId ?? "Donation Evidence")}</h3>
-          <p>${escapeHtml(status)} · ${escapeHtml(formatDate(donation.donatedAt))}</p>
+          <p>${escapeHtml(status)} · ${escapeHtml(ledgerStatus)} · ${escapeHtml(formatDate(donation.donatedAt))}</p>
         </div>
-        <button class="modal-close credential-detail-close" type="button" aria-label="닫기">×</button>
+        <button class="modal-close credential-detail-close" type="button" aria-label="Close">&times;</button>
       </div>
+      ${renderCredentialLedgerSummary(credential)}
       <div class="credential-detail-grid">
         ${renderCredentialDetailRow("Status", status)}
+        ${renderCredentialDetailRow("Ledger Credential", ledgerStatus)}
         ${renderCredentialDetailRow("Amount", amount)}
         ${renderCredentialDetailRow("Holder", donation.xrplAccount)}
         ${renderCredentialDetailRow("Issuer", donation.credentialIssuer)}
         ${renderCredentialDetailRow("Credential Type", donation.credentialType)}
-        ${renderCredentialDetailRow("Credential URI", donation.credentialUri)}
+        ${renderCredentialDetailRow("Credential URI", credential?.uri ?? donation.credentialUri)}
+        ${renderCredentialDetailRow("Credential Object ID", credential?.index)}
+        ${renderCredentialDetailRow("Ledger Index", credential?.ledgerIndex)}
+        ${renderCredentialDetailRow("Ledger Flags", credential?.flags)}
         ${renderCredentialDetailRow("Payment TX", shortHash(donation.txHash), paymentLink)}
         ${renderCredentialDetailRow("Credential Issue TX", shortHash(donation.credentialIssueTxHash), issueLink)}
-        ${renderCredentialDetailRow("Credential Accept TX", shortHash(donation.credentialAcceptTxHash), acceptLink)}
+        ${renderCredentialDetailRow("Credential Accept TX", shortHash(acceptTxHash), acceptLink)}
         ${renderCredentialDetailRow("Evidence Hash", donation.evidenceHash)}
         ${renderCredentialDetailRow("Compliance Hash", donation.complianceHash)}
       </div>
       <div class="modal-actions">
-        <a class="primary-btn" href="${escapeHtml(verifyLink)}" target="_blank" rel="noreferrer">검증 페이지 열기</a>
-        ${acceptLink ? `<a class="ghost-btn" href="${escapeHtml(acceptLink)}" target="_blank" rel="noreferrer">Credential TX 보기</a>` : ""}
+        <a class="primary-btn" href="${escapeHtml(verifyLink)}" target="_blank" rel="noreferrer">Open verification page</a>
+        ${acceptLink ? `<a class="ghost-btn" href="${escapeHtml(acceptLink)}" target="_blank" rel="noreferrer">Open Credential TX</a>` : ""}
       </div>
+      ${credential?.error ? `<p class="tax-disclaimer mt-12">Ledger lookup: ${escapeHtml(credential.error)}</p>` : ""}
     </article>
   `;
   document.body.appendChild(modal);

@@ -2376,6 +2376,38 @@ input::placeholder {
   width: min(760px, 100%);
 }
 
+.credential-ledger-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.credential-ledger-summary article {
+  display: grid;
+  gap: 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #fff7ed;
+  padding: 14px;
+}
+
+.credential-ledger-summary span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.credential-ledger-summary strong {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 900;
+  overflow-wrap: anywhere;
+}
+
 .credential-detail-grid {
   display: grid;
   gap: 10px;
@@ -3328,6 +3360,10 @@ input::placeholder {
   .credential-detail-row {
     grid-template-columns: 1fr;
     gap: 4px;
+  }
+
+  .credential-ledger-summary {
+    grid-template-columns: 1fr;
   }
 
   .credential-mini-card {

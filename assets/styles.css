@@ -158,12 +158,26 @@ body::before {
   --water-progress: 0;
   --growth-progress: 0;
   --final-progress: 0;
-  position: sticky;
+  position: absolute;
   top: 0;
+  right: 0;
+  left: 0;
   height: 100vh;
   height: 100svh;
   overflow: hidden;
   background: #f8f9fa;
+}
+
+.landing-hero.is-pinned .landing-hero-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+}
+
+.landing-hero.is-complete .landing-hero-stage {
+  position: absolute;
+  top: auto;
+  bottom: 0;
 }
 
 .landing-grid-bg {

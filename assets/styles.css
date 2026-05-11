@@ -382,7 +382,8 @@
   .foundation-hub-hero,
   .foundation-hub-toolbar,
   .foundation-featured-grid,
-  .foundation-verification-grid {
+  .foundation-verification-grid,
+  .project-campaign-grid {
     grid-template-columns: 1fr;
   }
 
@@ -408,6 +409,15 @@
 
   .foundation-hub-actions,
   .foundation-hub-actions a {
+    width: 100%;
+  }
+
+  .project-campaign-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .project-campaign-head .primary-link-button {
     width: 100%;
   }
 
@@ -3246,6 +3256,85 @@ input::placeholder {
   color: var(--text-primary);
   font-size: 19px;
   line-height: 1.35;
+}
+
+.project-campaign-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.project-campaign-head div {
+  min-width: 0;
+}
+
+.project-campaign-head h2 {
+  margin: 4px 0 8px;
+  color: var(--text-primary);
+  font-size: clamp(24px, 3vw, 36px);
+  line-height: 1.18;
+  letter-spacing: 0;
+  word-break: keep-all;
+}
+
+.project-campaign-head p {
+  max-width: 760px;
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.project-campaign-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.project-campaign-card {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.project-campaign-card h2 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 19px;
+  line-height: 1.35;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.project-campaign-card p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.65;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.project-campaign-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.project-campaign-facts span {
+  display: inline-flex;
+  padding: 7px 10px;
+  border: 1px solid rgba(226, 232, 240, 0.92);
+  border-radius: 999px;
+  background: #f8fafc;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.25;
+  word-break: keep-all;
 }
 
 .foundation-pagination {

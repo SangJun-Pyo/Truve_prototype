@@ -2770,6 +2770,7 @@ input::placeholder {
 .about-dark-copy {
   position: relative;
   z-index: 2;
+  min-width: 0;
 }
 
 .about-kicker {
@@ -2804,6 +2805,7 @@ input::placeholder {
   font-weight: 900;
   letter-spacing: 0;
   line-height: 1.02;
+  overflow-wrap: anywhere;
 }
 
 .about-dark-copy h1 span {
@@ -2820,6 +2822,8 @@ input::placeholder {
   font-size: 24px;
   font-weight: 600;
   line-height: 1.5;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 .about-dark-copy p {
@@ -2877,6 +2881,8 @@ input::placeholder {
   color: var(--text-secondary);
   font-size: 13px;
   font-weight: 800;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .about-orbit {
@@ -2928,9 +2934,10 @@ input::placeholder {
 .about-floating-card {
   position: absolute;
   z-index: 2;
-  width: 330px;
+  width: min(330px, 100%);
   border-radius: 20px;
   padding: 20px;
+  min-width: 0;
 }
 
 .about-floating-card.transfer {
@@ -2949,7 +2956,7 @@ input::placeholder {
 .about-floating-card.credential {
   bottom: 30px;
   left: 70px;
-  width: 360px;
+  width: min(360px, 100%);
   border-left: 2px solid rgba(15, 23, 42, 0.32);
   animation: aboutFloat 4.6s ease-in-out infinite;
 }
@@ -2967,10 +2974,16 @@ input::placeholder {
 .about-floating-head {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
   gap: 12px;
   border-bottom: 1px solid #e5eaf2;
   padding-bottom: 14px;
   margin-bottom: 14px;
+}
+
+.about-floating-head > div {
+  min-width: 0;
 }
 
 .about-floating-head strong,
@@ -2985,12 +2998,16 @@ input::placeholder {
 .about-floating-head strong {
   color: var(--text-primary);
   font-size: 14px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .about-floating-head span {
   margin-top: 4px;
   color: var(--text-secondary);
   font-size: 11px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
 }
 
 .about-floating-head em {
@@ -3010,9 +3027,17 @@ input::placeholder {
 .about-node-row {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   gap: 14px;
   border-bottom: 1px solid #edf2f7;
   padding: 9px 0;
+}
+
+.about-data-row span,
+.about-data-row strong,
+.about-node-row span,
+.about-node-row strong {
+  min-width: 0;
 }
 
 .about-data-row:last-child,
@@ -3031,6 +3056,7 @@ input::placeholder {
   color: var(--text-primary);
   font-size: 12px;
   text-align: right;
+  overflow-wrap: anywhere;
 }
 
 .about-data-row.code strong,
@@ -3087,6 +3113,7 @@ input::placeholder {
   font-size: clamp(24px, 3vw, 34px);
   line-height: 1.22;
   word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 .about-partner-band p:not(.about-section-kicker) {
@@ -3096,6 +3123,7 @@ input::placeholder {
   font-size: 15px;
   line-height: 1.85;
   word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 .about-glass-card,
@@ -3601,7 +3629,8 @@ input::placeholder {
   }
 
   .about-dark-copy h1 {
-    font-size: clamp(48px, 18vw, 72px);
+    font-size: clamp(42px, 13vw, 62px);
+    line-height: 1.08;
   }
 
   .fancy-hero {
@@ -3772,7 +3801,49 @@ input::placeholder {
   }
 
   .about-dark-copy h1 {
-    font-size: clamp(40px, 16vw, 56px);
+    font-size: clamp(36px, 12vw, 44px);
+    line-height: 1.1;
+  }
+
+  .about-dark-copy h2 {
+    font-size: 22px;
+    line-height: 1.35;
+    word-break: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .about-dark-copy p,
+  .about-partner-band p:not(.about-section-kicker) {
+    font-size: 15px;
+    line-height: 1.7;
+    word-break: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .about-partner-band h2,
+  .about-glass-card h3,
+  .about-glass-card p,
+  .about-glass-card li,
+  .about-dark-section h2,
+  .about-dark-section p,
+  .about-goal-dark h2,
+  .about-goal-dark p,
+  .about-business-grid h3,
+  .about-business-grid p,
+  .about-role-grid-dark strong,
+  .about-role-grid-dark span {
+    word-break: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .about-feature-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 12px;
+  }
+
+  .about-feature-row span {
+    line-height: 1.35;
   }
 }
 
@@ -3799,5 +3870,22 @@ input::placeholder {
 
   .percent-input-wrapper {
     padding-inline: 6px;
+  }
+
+  .about-dark-shell {
+    width: min(100% - 24px, 1280px);
+  }
+
+  .about-dark-copy h1 {
+    font-size: 40px;
+  }
+
+  .about-dark-copy h2 {
+    font-size: 20px;
+  }
+
+  .about-partner-band h2 {
+    font-size: 22px;
+    line-height: 1.28;
   }
 }

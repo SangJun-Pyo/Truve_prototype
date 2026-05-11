@@ -32,6 +32,17 @@
   padding: 0;
 }
 
+html {
+  overflow-x: hidden;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
 body {
   font-family: "Inter", "Pretendard", "Noto Sans KR", -apple-system, BlinkMacSystemFont, sans-serif;
   background-color: var(--bg-app);
@@ -169,6 +180,10 @@ body::before {
   color: var(--text-secondary);
   transition: all 0.2s ease;
   box-shadow: none;
+  line-height: 1.25;
+  text-align: center;
+  white-space: normal;
+  word-break: keep-all;
 }
 
 .tab-link:hover {
@@ -277,6 +292,9 @@ input::placeholder {
   transition: all 0.2s ease;
   box-shadow: var(--shadow-card);
   font-family: inherit;
+  line-height: 1.25;
+  white-space: normal;
+  word-break: keep-all;
 }
 
 .tab-btn:hover {
@@ -473,12 +491,16 @@ input::placeholder {
 .quick-btn,
 .ghost-btn {
   flex: 1;
+  min-width: 0;
   border-radius: 12px;
   border: 1px solid var(--line);
   background: #fff;
   padding: 10px;
   font-family: inherit;
   font-weight: 800;
+  line-height: 1.25;
+  white-space: normal;
+  word-break: keep-all;
   cursor: pointer;
   color: var(--text-primary);
   transition: transform 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
@@ -691,7 +713,9 @@ input::placeholder {
   border-radius: 12px;
   background: linear-gradient(180deg, #ffffff 0%, #fff7ed 100%);
   border: 1px solid rgba(255, 90, 0, 0.16);
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .tax-scenario-chart svg {
@@ -719,6 +743,9 @@ input::placeholder {
   color: #9a3412;
   padding: 10px;
   font-size: 12px;
+  line-height: 1.65;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 .status-tax-card {
@@ -855,8 +882,13 @@ input::placeholder {
 .onchain-row {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   gap: 12px;
   font-size: 13px;
+}
+
+.onchain-row span {
+  min-width: 0;
 }
 
 .onchain-row span:last-child {
@@ -921,6 +953,7 @@ input::placeholder {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 18px;
   margin-bottom: 16px;
 }
@@ -982,6 +1015,10 @@ input::placeholder {
   color: #fff;
   font-weight: 900;
   text-decoration: none;
+  line-height: 1.25;
+  text-align: center;
+  white-space: normal;
+  word-break: keep-all;
   cursor: pointer;
 }
 
@@ -1019,9 +1056,15 @@ input::placeholder {
 .success-modal-row {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   gap: 14px;
   font-size: 13px;
   color: var(--text-secondary);
+}
+
+.success-modal-row span,
+.success-modal-row strong {
+  min-width: 0;
 }
 
 .success-modal-row strong {
@@ -1119,8 +1162,15 @@ input::placeholder {
 .donation-progress-detail div {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   gap: 12px;
   font-size: 12px;
+}
+
+.donation-progress-detail span,
+.donation-progress-detail strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .donation-progress-detail span {
@@ -1160,6 +1210,9 @@ input::placeholder {
   font-family: inherit;
   font-size: 15px;
   font-weight: 800;
+  line-height: 1.25;
+  white-space: normal;
+  word-break: keep-all;
   cursor: pointer;
   box-shadow: 0 0 20px rgba(255, 90, 0, 0.2);
   transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
@@ -1184,6 +1237,7 @@ input::placeholder {
   border: 1px solid rgba(203, 213, 225, 0.72);
   box-shadow: var(--shadow-card);
   position: relative;
+  min-width: 0;
 }
 
 .explore-card {
@@ -1222,6 +1276,7 @@ input::placeholder {
   flex-direction: column;
   flex: 1;
   gap: 8px;
+  min-width: 0;
 }
 
 .card-header {
@@ -1241,10 +1296,6 @@ input::placeholder {
   letter-spacing: 0;
   word-break: keep-all;
   overflow-wrap: anywhere;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }
 
 .card-tag,
@@ -1271,10 +1322,9 @@ input::placeholder {
 .card-desc {
   font-size: 12px;
   margin-bottom: 12px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  line-height: 1.6;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 .card-footer {
@@ -1282,6 +1332,7 @@ input::placeholder {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
   padding-top: 12px;
   border-top: 1px solid rgba(226, 232, 240, 0.78);
@@ -1290,6 +1341,7 @@ input::placeholder {
 .metric {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .metric-label {
@@ -2081,12 +2133,14 @@ input::placeholder {
   border-radius: var(--radius-card);
   padding: 28px;
   box-shadow: var(--shadow-card);
+  min-width: 0;
 }
 
 .portfolio-card-head {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  flex-wrap: wrap;
   gap: 16px;
   margin-bottom: 24px;
 }
@@ -2150,6 +2204,7 @@ input::placeholder {
 .portfolio-dark-btn {
   display: inline-flex;
   flex: 1;
+  min-width: 0;
   min-height: 48px;
   align-items: center;
   justify-content: center;
@@ -2159,6 +2214,10 @@ input::placeholder {
   font-family: inherit;
   font-size: 14px;
   font-weight: 800;
+  line-height: 1.25;
+  text-align: center;
+  white-space: normal;
+  word-break: keep-all;
   cursor: pointer;
 }
 
@@ -2177,6 +2236,8 @@ input::placeholder {
 .portfolio-meta-row {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
   gap: 14px;
   border-top: 1px solid #f1f5f9;
   padding: 12px 0;
@@ -2187,6 +2248,8 @@ input::placeholder {
 .portfolio-meta-row strong {
   color: #111827;
   text-align: right;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .portfolio-list {
@@ -2228,6 +2291,9 @@ input::placeholder {
   display: block;
   color: #111827;
   font-size: 15px;
+  line-height: 1.35;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 .portfolio-list-info span {
@@ -2235,6 +2301,8 @@ input::placeholder {
   margin-top: 4px;
   color: #6b7280;
   font-size: 12px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
 }
 
 .portfolio-list-info em {
@@ -2250,10 +2318,13 @@ input::placeholder {
   font-size: 14px;
   font-weight: 800;
   text-align: right;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .impact-headline {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   align-items: center;
   margin-bottom: 34px;
@@ -2327,7 +2398,8 @@ input::placeholder {
   top: -34px;
   left: 50%;
   z-index: 1;
-  min-width: max-content;
+  width: max-content;
+  max-width: min(96px, 26vw);
   transform: translateX(-50%);
   border: 1px solid #e2e8f0;
   border-radius: 999px;
@@ -2336,6 +2408,9 @@ input::placeholder {
   color: #0f172a;
   font-size: 11px;
   font-weight: 900;
+  line-height: 1.2;
+  text-align: center;
+  overflow-wrap: anywhere;
   box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
 }
 
@@ -2410,6 +2485,10 @@ input::placeholder {
     transform 160ms ease;
 }
 
+.credential-mini-card > div:not(.credential-icon) {
+  min-width: 0;
+}
+
 .credential-mini-card:hover {
   transform: translateY(-1px);
   border-color: rgba(255, 90, 0, 0.35);
@@ -2436,11 +2515,15 @@ input::placeholder {
 .credential-mini-card strong {
   color: #111827;
   font-size: 14px;
+  line-height: 1.35;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 .credential-mini-card span {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 6px;
   margin-top: 3px;
   color: #6b7280;
@@ -2449,6 +2532,7 @@ input::placeholder {
 
 .credential-mini-card small {
   margin-left: auto;
+  flex-shrink: 0;
   color: var(--brand-orange);
   font-size: 12px;
   font-weight: 900;
@@ -2549,6 +2633,7 @@ input::placeholder {
 .token-row {
   display: grid;
   gap: 8px;
+  min-width: 0;
 }
 
 .token-row span,
@@ -2762,6 +2847,10 @@ input::placeholder {
   border-radius: 12px;
   padding: 0 24px;
   font-weight: 900;
+  line-height: 1.25;
+  text-align: center;
+  white-space: normal;
+  word-break: keep-all;
 }
 
 .about-primary-action {
@@ -3227,6 +3316,10 @@ input::placeholder {
   font-weight: 800;
   cursor: pointer;
   text-decoration: none;
+  line-height: 1.25;
+  text-align: center;
+  white-space: normal;
+  word-break: keep-all;
 }
 
 .btn:disabled {
@@ -3292,7 +3385,13 @@ input::placeholder {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
+}
+
+.row-between > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .page-grid {
@@ -3362,7 +3461,14 @@ input::placeholder {
 
 .table {
   width: 100%;
+  min-width: 720px;
   border-collapse: collapse;
+}
+
+#status-table {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .table th,
@@ -3552,5 +3658,146 @@ input::placeholder {
 
   .credential-mini-card small {
     display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .app-shell {
+    padding: 14px;
+  }
+
+  .glass-nav {
+    gap: 12px;
+    padding: 10px;
+  }
+
+  .tab-nav,
+  .tabs,
+  .quick-amounts,
+  .action-row,
+  .portfolio-actions,
+  .portfolio-button-row,
+  .modal-actions,
+  .about-hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .tab-link,
+  .tab-btn,
+  .quick-btn,
+  .ghost-btn,
+  .btn,
+  .primary-btn,
+  .cta-btn,
+  .portfolio-primary-btn,
+  .portfolio-dark-btn,
+  .about-primary-action,
+  .about-secondary-action {
+    width: 100%;
+    min-height: 42px;
+    padding-inline: 12px;
+  }
+
+  .page-header h1,
+  .portfolio-header h1 {
+    font-size: clamp(30px, 10vw, 38px);
+    line-height: 1.12;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+
+  .card,
+  .portfolio-card,
+  .modal-panel,
+  .about-glass-card,
+  .about-dark-section,
+  .about-goal-dark,
+  .about-partner-band {
+    padding: 18px;
+  }
+
+  .portfolio-big-amount {
+    font-size: clamp(30px, 11vw, 40px);
+    overflow-wrap: anywhere;
+  }
+
+  .portfolio-list-item {
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .portfolio-avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .portfolio-list-amount {
+    grid-column: 2;
+    text-align: left;
+  }
+
+  .portfolio-bar-chart {
+    gap: 8px;
+  }
+
+  .bar-value {
+    top: -30px;
+    max-width: 72px;
+    padding: 3px 6px;
+    font-size: 10px;
+  }
+
+  .credential-mini-card {
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .success-modal-row,
+  .onchain-row,
+  .donation-progress-detail div {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .success-modal-row strong,
+  .onchain-row span:last-child {
+    text-align: left;
+  }
+
+  .tax-scenario-chart svg {
+    min-width: 460px;
+  }
+
+  .about-dark-copy h1 {
+    font-size: clamp(40px, 16vw, 56px);
+  }
+}
+
+@media (max-width: 380px) {
+  .foundation-grid,
+  .foundation-list-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .card,
+  .portfolio-card,
+  .modal-panel,
+  .about-glass-card,
+  .about-dark-section,
+  .about-goal-dark,
+  .about-partner-band {
+    padding: 16px;
+  }
+
+  .allocation-controls {
+    grid-template-columns: 32px minmax(0, 1fr) 32px 56px;
+    gap: 6px;
+  }
+
+  .percent-input-wrapper {
+    padding-inline: 6px;
   }
 }

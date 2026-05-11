@@ -1431,32 +1431,10 @@ input::placeholder {
 }
 
 .donation-explorer .foundation-grid {
-  max-height: calc(100vh - 292px);
-  min-height: 360px;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: 4px 8px 16px 2px;
-  scrollbar-gutter: stable;
+  min-height: 0;
+  overflow: visible;
+  padding: 4px 0 0;
   align-content: start;
-}
-
-.donation-explorer .foundation-grid::-webkit-scrollbar {
-  width: 10px;
-}
-
-.donation-explorer .foundation-grid::-webkit-scrollbar-track {
-  background: rgba(226, 232, 240, 0.5);
-  border-radius: 999px;
-}
-
-.donation-explorer .foundation-grid::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border: 2px solid rgba(248, 250, 252, 0.9);
-  border-radius: 999px;
-}
-
-.donation-explorer .foundation-grid::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
 }
 
 .foundation-info-link {
@@ -3075,9 +3053,14 @@ input::placeholder {
 
 .foundation-pagination {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   gap: 8px;
   margin-top: 28px;
+}
+
+.donation-explorer .foundation-pagination {
+  margin-bottom: 12px;
 }
 
 .foundation-pagination button {

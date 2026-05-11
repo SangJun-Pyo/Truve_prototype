@@ -49,6 +49,7 @@ if (navRoot) {
 const searchInputEl = document.getElementById("search-input") as HTMLInputElement | null;
 const categorySelectEl = document.getElementById("category-select") as HTMLSelectElement | null;
 const foundationsGridEl = document.getElementById("foundations-grid");
+const foundationsPaginationEl = document.getElementById("foundations-pagination");
 const bundlesGridEl = document.getElementById("bundles-grid");
 const tabFoundationEl = document.getElementById("tab-foundation") as HTMLButtonElement | null;
 const tabBundleEl = document.getElementById("tab-bundle") as HTMLButtonElement | null;
@@ -116,6 +117,7 @@ document.querySelector<HTMLElement>(".donation-console .tax-card")?.remove();
 let foundations: Foundation[] = [];
 let bundles: DonationBundle[] = [];
 let activeTab: "foundation" | "bundle" = "foundation";
+let foundationPage = 1;
 let lastDonationRecord: LocalDonationRecord | null = null;
 let donationDestination = {
   address: "",
@@ -291,14 +293,21 @@ function clearQrcode(): void {
 function renderFoundationTab(): void {
   if (!foundationsGridEl) return;
   const filtered = filterFoundations();
+  const totalPages = Math.max(1, Math.ceil(filtered.length / FOUNDATION_PAGE_SIZE));
+  foundationPage = Math.min(foundationPage, totalPages);
+  const startIndex = (foundationPage - 1) * FOUNDATION_PAGE_SIZE;
+  const pageItems = filtered.slice(startIndex, startIndex + FOUNDATION_PAGE_SIZE);
+
   if (filtered.length === 0) {
     foundationsGridEl.innerHTML = `<div class="empty-state">조건에 맞는 재단이 없습니다.</div>`;
+    renderFoundationPagination(0);
     return;
   }
 
-  foundationsGridEl.innerHTML = filtered
+  foundationsGridEl.innerHTML = pageItems
     .map((foundation) => renderFoundationCard(foundation, isInCart(foundation.id)))
     .join("");
+  renderFoundationPagination(filtered.length);
 
   foundationsGridEl.querySelectorAll<HTMLButtonElement>(".add-to-cart-btn").forEach((button) => {
     button.addEventListener("click", () => {
@@ -338,6 +347,7 @@ function syncTabs(): void {
   tabFoundationEl.classList.toggle("active", isFoundation);
   tabBundleEl.classList.toggle("active", !isFoundation);
   foundationsGridEl.classList.toggle("hidden", !isFoundation);
+  foundationsPaginationEl?.classList.toggle("hidden", !isFoundation);
   bundlesGridEl.classList.toggle("hidden", isFoundation);
 }
 
@@ -616,6 +626,58 @@ function closePreflightModal(): void {
 
 function shortAddress(address: string): string {
   return address.length > 14 ? `${address.slice(0, 6)}...${address.slice(-4)}` : address;
+}
+
+const FOUNDATION_PAGE_SIZE = 9;
+
+function getFoundationPageNumbers(totalPages: number): Array<number | "..."> {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  }
+
+  const pages = new Set<number>([1, totalPages]);
+  for (let page = foundationPage - 1; page <= foundationPage + 1; page += 1) {
+    if (page > 1 && page < totalPages) pages.add(page);
+  }
+
+  const sorted = Array.from(pages).sort((a, b) => a - b);
+  return sorted.flatMap((page, index) => {
+    const previous = sorted[index - 1];
+    if (previous && page - previous > 1) return ["..." as const, page];
+    return [page];
+  });
+}
+
+function renderFoundationPagination(totalItems: number): void {
+  if (!foundationsPaginationEl) return;
+  const totalPages = Math.ceil(totalItems / FOUNDATION_PAGE_SIZE);
+
+  if (totalPages <= 1) {
+    foundationsPaginationEl.innerHTML = "";
+    return;
+  }
+
+  const pageButtons = getFoundationPageNumbers(totalPages)
+    .map((page) => {
+      if (page === "...") {
+        return `<button type="button" disabled aria-hidden="true">...</button>`;
+      }
+
+      const isActive = page === foundationPage;
+      return `<button type="button" class="${isActive ? "is-active" : ""}" data-page="${page}" aria-label="${page}페이지" aria-current="${isActive ? "page" : "false"}">${page}</button>`;
+    })
+    .join("");
+
+  foundationsPaginationEl.innerHTML = `
+    <button type="button" data-page="${foundationPage - 1}" ${foundationPage === 1 ? "disabled" : ""} aria-label="이전 페이지">‹</button>
+    ${pageButtons}
+    <button type="button" data-page="${foundationPage + 1}" ${foundationPage === totalPages ? "disabled" : ""} aria-label="다음 페이지">›</button>
+  `;
+}
+
+function resetFoundationPageAndRender(): void {
+  foundationPage = 1;
+  renderFoundationTab();
 }
 
 function getDonationProgressSteps(phase: DonationFlowPhase): DonationProgressStep[] {
@@ -1087,10 +1149,21 @@ function renderAll(): void {
 
 function bindEvents(): void {
   searchInputEl?.addEventListener("input", () => {
-    if (activeTab === "foundation") renderFoundationTab();
+    if (activeTab === "foundation") resetFoundationPageAndRender();
   });
   categorySelectEl?.addEventListener("change", () => {
-    if (activeTab === "foundation") renderFoundationTab();
+    if (activeTab === "foundation") resetFoundationPageAndRender();
+  });
+  foundationsPaginationEl?.addEventListener("click", (event) => {
+    const button = (event.target as HTMLElement).closest<HTMLButtonElement>("button[data-page]");
+    if (!button || button.disabled) return;
+    const nextPage = Number(button.dataset.page);
+    const totalPages = Math.max(1, Math.ceil(filterFoundations().length / FOUNDATION_PAGE_SIZE));
+    if (!Number.isFinite(nextPage) || nextPage < 1 || nextPage > totalPages) return;
+
+    foundationPage = nextPage;
+    renderFoundationTab();
+    foundationsGridEl?.scrollIntoView({ behavior: "smooth", block: "start" });
   });
   tabFoundationEl?.addEventListener("click", () => {
     activeTab = "foundation";

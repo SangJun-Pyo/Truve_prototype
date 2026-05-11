@@ -3073,8 +3073,8 @@ input::placeholder {
 
 .about-partner-band {
   display: grid;
-  grid-template-columns: 260px minmax(0, 1fr) auto;
-  gap: 24px;
+  grid-template-columns: 220px minmax(0, 1fr) auto;
+  gap: 28px;
   align-items: center;
   margin: 0 0 22px;
   border: 1px solid rgba(226, 232, 240, 0.95);
@@ -3087,18 +3087,14 @@ input::placeholder {
 
 .about-partner-logo {
   display: flex;
-  min-height: 96px;
   align-items: center;
   justify-content: center;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  background: #fff;
-  padding: 12px;
+  min-width: 0;
 }
 
 .about-partner-logo img {
   display: block;
-  width: min(100%, 260px);
+  width: min(100%, 220px);
   height: auto;
 }
 
@@ -3134,24 +3130,11 @@ input::placeholder {
 }
 
 .about-glass-card.solution {
-  border-top: 2px solid rgba(255, 90, 0, 0.4);
+  border-top: 1px solid rgba(255, 90, 0, 0.24);
 }
 
 .about-glass-card.problem {
-  border-top: 2px solid rgba(15, 23, 42, 0.16);
-}
-
-.about-icon {
-  display: inline-flex;
-  min-width: 40px;
-  height: 40px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
-  background: rgba(255, 90, 0, 0.1);
-  color: var(--brand-orange);
-  font-size: 12px;
-  font-weight: 900;
+  border-top: 1px solid rgba(15, 23, 42, 0.12);
 }
 
 .about-glass-card h3,
@@ -3162,7 +3145,7 @@ input::placeholder {
 }
 
 .about-glass-card h3 {
-  margin: 18px 0 10px;
+  margin: 8px 0 10px;
   font-size: 20px;
 }
 
@@ -3200,10 +3183,15 @@ input::placeholder {
 
 .about-glass-card ul {
   display: grid;
-  gap: 7px;
-  margin: 12px 0 0;
+  gap: 10px;
+  margin: 14px 0 0;
   padding: 0;
   list-style: none;
+}
+
+.about-glass-card li {
+  padding-top: 10px;
+  border-top: 1px solid #edf2f7;
 }
 
 .about-dark-section {
@@ -3240,8 +3228,7 @@ input::placeholder {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.about-role-grid-dark div,
-.about-business-grid article {
+.about-role-grid-dark div {
   border: 1px solid #e5eaf2;
   border-radius: 14px;
   background: #fff;
@@ -3267,10 +3254,31 @@ input::placeholder {
 
 .about-business-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  border-top: 1px solid #e5eaf2;
+  border-bottom: 1px solid #e5eaf2;
+}
+
+.about-business-grid article {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-width: 0;
+  border-right: 1px solid #e5eaf2;
+  padding: 8px 24px 8px 0;
+}
+
+.about-business-grid article + article {
+  padding-left: 24px;
+}
+
+.about-business-grid article:last-child {
+  border-right: 0;
+  padding-right: 0;
 }
 
 .about-business-grid h3 {
-  margin: 0 0 8px;
+  margin: 0;
   font-size: 16px;
 }
 
@@ -3624,6 +3632,26 @@ input::placeholder {
     gap: 16px;
   }
 
+  .about-business-grid {
+    gap: 0;
+  }
+
+  .about-business-grid article,
+  .about-business-grid article + article {
+    border-right: 0;
+    border-bottom: 1px solid #e5eaf2;
+    padding: 18px 0;
+  }
+
+  .about-business-grid article:first-child {
+    padding-top: 0;
+  }
+
+  .about-business-grid article:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
   .about-orbit {
     display: none;
   }
@@ -3844,6 +3872,14 @@ input::placeholder {
 
   .about-feature-row span {
     line-height: 1.35;
+  }
+
+  .about-partner-logo {
+    justify-content: flex-start;
+  }
+
+  .about-partner-logo img {
+    width: min(100%, 240px);
   }
 }
 

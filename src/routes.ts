@@ -1,4 +1,4 @@
-export type AppRouteKey = "donation" | "foundations" | "governance" | "about" | "status";
+export type AppRouteKey = "donation" | "foundations" | "governance" | "about" | "status" | "community";
 
 export interface AppRoute {
   key: AppRouteKey;
@@ -37,6 +37,12 @@ export const routes: Record<AppRouteKey, AppRoute> = {
     path: "/status",
     title: "내 기부 현황",
     navLabel: "내 기부 현황",
+  },
+  community: {
+    key: "community",
+    path: "/community",
+    title: "커뮤니티",
+    navLabel: "커뮤니티",
   },
 };
 

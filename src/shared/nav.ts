@@ -8,6 +8,7 @@ const TABS: Tab[] = [
   { id: "foundations", label: "기부하기", href: "./foundations.html" },
   { id: "foundation-info", label: "기부재단 소개", href: "./foundation-info.html" },
   { id: "status", label: "내 기부 현황", href: "./status.html" },
+  { id: "community", label: "커뮤니티", href: "./community.html" },
   { id: "about", label: "서비스 소개", href: "./about.html" },
   { id: "admin", label: "Admin", href: "./admin.html" },
 ];

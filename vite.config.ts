@@ -13,6 +13,7 @@ export default defineConfig({
         foundationDetail: resolve(__dirname, "foundation-detail.html"),
         governance: resolve(__dirname, "governance.html"),
         status:     resolve(__dirname, "status.html"),
+        community:  resolve(__dirname, "community.html"),
         about:      resolve(__dirname, "about.html"),
         support:    resolve(__dirname, "support.html"),
         privacy:    resolve(__dirname, "privacy.html"),

@@ -3,17 +3,154 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="refresh" content="0; url=./foundations.html" />
-    <title>Truve | 기부하기</title>
+    <meta name="description" content="Truve는 RLUSD·USDC 기부, Evidence Package, XLS-70 Donation Credential 검증을 연결하는 XRPL 기반 가상자산 기부 인프라입니다." />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Truve" />
+    <meta property="og:title" content="Truve | XRPL Credential 기반 가상자산 기부 인프라" />
+    <meta property="og:description" content="Truve는 RLUSD·USDC 기부, Evidence Package, XLS-70 Donation Credential 검증을 연결하는 XRPL 기반 가상자산 기부 인프라입니다." />
+    <meta property="og:locale" content="ko_KR" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Truve | XRPL Credential 기반 가상자산 기부 인프라" />
+    <meta name="twitter:description" content="Truve는 RLUSD·USDC 기부, Evidence Package, XLS-70 Donation Credential 검증을 연결하는 XRPL 기반 가상자산 기부 인프라입니다." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <title>Truve | Trust & Give</title>
     <link rel="stylesheet" href="./assets/styles.css" />
   </head>
-  <body>
-    <main class="app-shell">
-      <header class="app-header">
-        <h1 class="brand">Truve.</h1>
-        <p class="sub-copy">기부하기 화면으로 이동 중입니다.</p>
-      </header>
-      <a class="btn btn-primary" href="./foundations.html">기부하기로 이동</a>
+  <body class="landing-page">
+    <nav class="landing-nav" aria-label="Landing Navigation">
+      <a class="landing-brand" href="./index.html" aria-label="Truve landing">
+        <span class="brand-mark landing-brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32">
+            <path class="logo-layer logo-layer-top" d="M16 7 6 12.2 16 17.4 26 12.2 16 7Z"></path>
+            <path class="logo-layer logo-layer-mid" d="M7.5 17.4 16 21.8 24.5 17.4"></path>
+            <path class="logo-layer logo-layer-bottom" d="M8.5 22 16 25.8 23.5 22"></path>
+          </svg>
+        </span>
+        <span>Truve</span>
+      </a>
+
+      <div class="landing-nav-links">
+        <a href="./about.html">서비스 소개</a>
+        <a href="./foundation-info.html">기부재단 소개</a>
+        <a href="./status.html">내 기부 현황</a>
+      </div>
+
+      <a class="landing-nav-cta" href="./foundations.html">기부 시작</a>
+    </nav>
+
+    <main>
+      <section id="landing-hero" class="landing-hero" aria-label="Truve hero">
+        <div class="landing-hero-stage">
+          <div class="landing-grid-bg" aria-hidden="true"></div>
+          <div class="landing-water-layer" aria-hidden="true">
+            <div class="landing-water-gradient"></div>
+            <div class="landing-purify-glow"></div>
+            <span class="landing-particle p1"></span>
+            <span class="landing-particle p2"></span>
+            <span class="landing-particle p3"></span>
+            <span class="landing-particle p4"></span>
+          </div>
+          <div class="landing-growth-layer" aria-hidden="true">
+            <div class="landing-hill h1"></div>
+            <div class="landing-hill h2"></div>
+            <div class="landing-sprout s1"></div>
+            <div class="landing-sprout s2"></div>
+            <div class="landing-sprout s3"></div>
+          </div>
+
+          <div class="landing-intro-copy">
+            <p class="landing-kicker"><span></span> XRPL Credential 기반 기부 인프라</p>
+            <h1>The trust<br />layer for<br />verifiable<br />giving.</h1>
+            <p>
+              RLUSD와 USDC 기부를 Evidence Package, XLS-70 Credential, 검증 가능한 기부 기록으로 연결합니다.
+            </p>
+          </div>
+
+          <div class="landing-orbit" aria-hidden="true">
+            <div class="landing-rail outer"></div>
+            <div class="landing-rail middle"></div>
+            <div class="landing-rail inner"></div>
+
+            <div class="landing-coin landing-coin-usdc">
+              <strong>USDC</strong>
+              <span>$</span>
+            </div>
+
+            <div class="landing-coin landing-coin-rlusd">
+              <span>Ripple</span>
+              <strong>USD</strong>
+            </div>
+          </div>
+
+          <div class="landing-truve-reveal" aria-hidden="true">
+            <span class="brand-mark landing-reveal-mark">
+              <svg viewBox="0 0 32 32">
+                <path class="logo-layer logo-layer-top" d="M16 7 6 12.2 16 17.4 26 12.2 16 7Z"></path>
+                <path class="logo-layer logo-layer-mid" d="M7.5 17.4 16 21.8 24.5 17.4"></path>
+                <path class="logo-layer logo-layer-bottom" d="M8.5 22 16 25.8 23.5 22"></path>
+              </svg>
+            </span>
+          </div>
+
+          <div class="landing-final-copy">
+            <p class="landing-kicker"><span></span> Evidence Ready</p>
+            <h2>One donation. Clear proof. Trusted impact.</h2>
+            <p>
+              Truve는 기부자가 보낸 온체인 결제를 재단 운영, 세무 검증, Credential 승인 흐름까지 이어주는 신뢰 네트워크입니다.
+            </p>
+            <div class="landing-actions">
+              <a class="landing-primary" href="./foundations.html">기부 시작하기</a>
+              <a class="landing-secondary" href="./about.html">서비스 소개 보기</a>
+            </div>
+          </div>
+
+          <div class="landing-scroll-cue" aria-hidden="true">
+            <span>Scroll to explore</span>
+            <i></i>
+          </div>
+        </div>
+      </section>
+
+      <section class="landing-feature-section" aria-label="Truve highlights">
+        <div class="landing-feature-grid">
+          <article>
+            <span class="brand-mark landing-feature-icon">
+              <svg viewBox="0 0 32 32">
+                <path class="logo-layer logo-layer-top" d="M16 7 6 12.2 16 17.4 26 12.2 16 7Z"></path>
+                <path class="logo-layer logo-layer-mid" d="M7.5 17.4 16 21.8 24.5 17.4"></path>
+                <path class="logo-layer logo-layer-bottom" d="M8.5 22 16 25.8 23.5 22"></path>
+              </svg>
+            </span>
+            <h3>Direct Settlement</h3>
+            <p>기부금은 Truve를 거치지 않고 재단 지갑으로 직접 이동합니다.</p>
+          </article>
+          <article>
+            <span class="brand-mark landing-feature-icon">
+              <svg viewBox="0 0 32 32">
+                <path class="logo-layer logo-layer-top" d="M16 7 6 12.2 16 17.4 26 12.2 16 7Z"></path>
+                <path class="logo-layer logo-layer-mid" d="M7.5 17.4 16 21.8 24.5 17.4"></path>
+                <path class="logo-layer logo-layer-bottom" d="M8.5 22 16 25.8 23.5 22"></path>
+              </svg>
+            </span>
+            <h3>Credential Proof</h3>
+            <p>Evidence Package와 XLS-70 Credential로 기부 증빙을 추적합니다.</p>
+          </article>
+          <article>
+            <span class="brand-mark landing-feature-icon">
+              <svg viewBox="0 0 32 32">
+                <path class="logo-layer logo-layer-top" d="M16 7 6 12.2 16 17.4 26 12.2 16 7Z"></path>
+                <path class="logo-layer logo-layer-mid" d="M7.5 17.4 16 21.8 24.5 17.4"></path>
+                <path class="logo-layer logo-layer-bottom" d="M8.5 22 16 25.8 23.5 22"></path>
+              </svg>
+            </span>
+            <h3>Foundation Network</h3>
+            <p>검증 가능한 재단 목록과 기부 이력을 한 흐름에서 관리합니다.</p>
+          </article>
+        </div>
+      </section>
     </main>
+
+    <script type="module" src="./src/main/index.ts"></script>
   </body>
 </html>

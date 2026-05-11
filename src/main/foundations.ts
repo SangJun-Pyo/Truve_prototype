@@ -54,8 +54,10 @@ const categorySelectEl = document.getElementById("category-select") as HTMLSelec
 const foundationsGridEl = document.getElementById("foundations-grid");
 const foundationsPaginationEl = document.getElementById("foundations-pagination");
 const bundlesGridEl = document.getElementById("bundles-grid");
+const eventsGridEl = document.getElementById("events-grid");
 const tabFoundationEl = document.getElementById("tab-foundation") as HTMLButtonElement | null;
 const tabBundleEl = document.getElementById("tab-bundle") as HTMLButtonElement | null;
+const tabEventEl = document.getElementById("tab-event") as HTMLButtonElement | null;
 const cartCountEl = document.getElementById("cart-count");
 const consoleEl = document.querySelector<HTMLElement>(".donation-console");
 
@@ -119,7 +121,7 @@ document.querySelector<HTMLElement>(".donation-console .tax-card")?.remove();
 
 let foundations: Foundation[] = [];
 let bundles: DonationBundle[] = [];
-let activeTab: "foundation" | "bundle" = "foundation";
+let activeTab: "foundation" | "bundle" | "event" = "foundation";
 let foundationPage = 1;
 let lastDonationRecord: LocalDonationRecord | null = null;
 let donationDestination = {
@@ -217,6 +219,114 @@ function getCardVisual(category: Foundation["category"]): [string, string] {
     humanitarian: ["#EEF2FF", "#A5B4FC"],
   };
   return map[category];
+}
+
+interface CampaignEvent {
+  id: string;
+  foundationId: string;
+  title: string;
+  category: Foundation["category"];
+  region: string;
+  status: "fundraising" | "reported";
+  summary: string;
+  targetKrw: number;
+  raisedKrw: number;
+  beneficiaries: string;
+  evidence: string;
+  tags: string[];
+  reportLabel: string;
+  visual: string;
+}
+
+const CAMPAIGN_STORAGE_KEY = "truve_selected_campaign_v1";
+const GOODNEIGHBORS_FOUNDATION_ID = "fnd-2aaedf20bf";
+
+const campaignEvents: CampaignEvent[] = [
+  {
+    id: "gn-chad-water-2026",
+    foundationId: GOODNEIGHBORS_FOUNDATION_ID,
+    title: "굿네이버스 차드 식수위생지원사업",
+    category: "humanitarian",
+    region: "차드 4개 CDP",
+    status: "fundraising",
+    summary: "차드 수도 인근 4개 CDP 지역에 식수펌프, 물탱크, 태양광 시스템과 위생교육을 연결합니다.",
+    targetKrw: 58_000_000,
+    raisedKrw: 21_460_000,
+    beneficiaries: "총 수혜자 96,483명",
+    evidence: "제안서 기반 · Campaign Memo Ready",
+    tags: ["식수위생", "모금중", "굿네이버스"],
+    reportLabel: "제안서",
+    visual: "water",
+  },
+  {
+    id: "gn-ethiopia-school-2026",
+    foundationId: GOODNEIGHBORS_FOUNDATION_ID,
+    title: "굿네이버스 에티오피아 학교건축사업",
+    category: "education",
+    region: "에티오피아",
+    status: "fundraising",
+    summary: "교육이 중단된 지역 아동을 위해 신규 교실, 교무실, 화장실과 식수시설을 조성합니다.",
+    targetKrw: 100_000_000,
+    raisedKrw: 34_000_000,
+    beneficiaries: "교육 접근성 회복",
+    evidence: "제안서 기반 · XLS-70 Ready",
+    tags: ["교육", "모금중", "학교건축"],
+    reportLabel: "제안서",
+    visual: "school",
+  },
+  {
+    id: "gn-rwanda-school-report-2025",
+    foundationId: GOODNEIGHBORS_FOUNDATION_ID,
+    title: "굿네이버스 르완다 학교건축사업",
+    category: "education",
+    region: "르완다 Ngoma CDP",
+    status: "reported",
+    summary: "EP Magu 학교에 교실 5개동과 학습 기자재, 빗물집수 시스템을 구축한 완료 캠페인입니다.",
+    targetKrw: 95_000_000,
+    raisedKrw: 95_000_000,
+    beneficiaries: "직접 수혜 230명 · 전체 재학생 1,629명",
+    evidence: "결과보고 공개 · Evidence Sample",
+    tags: ["교육", "결과보고", "학교건축"],
+    reportLabel: "결과보고서",
+    visual: "school",
+  },
+  {
+    id: "gn-malawi-water-report-2024",
+    foundationId: GOODNEIGHBORS_FOUNDATION_ID,
+    title: "굿네이버스 말라위 식수위생지원사업",
+    category: "humanitarian",
+    region: "말라위",
+    status: "reported",
+    summary: "식수 접근성과 위생 환경 개선을 위한 완료형 프로젝트로 결과보고 기반의 증빙 샘플로 활용됩니다.",
+    targetKrw: 7_997_100,
+    raisedKrw: 7_997_100,
+    beneficiaries: "식수위생 프로젝트 완료",
+    evidence: "결과보고 공개 · Proof Link Ready",
+    tags: ["식수위생", "결과보고", "굿네이버스"],
+    reportLabel: "결과보고서",
+    visual: "water",
+  },
+];
+
+function getSelectedCampaignId(): string | null {
+  return localStorage.getItem(CAMPAIGN_STORAGE_KEY);
+}
+
+function getSelectedCampaign(): CampaignEvent | null {
+  const selectedId = getSelectedCampaignId();
+  return campaignEvents.find((campaign) => campaign.id === selectedId) ?? null;
+}
+
+function setSelectedCampaign(campaignId: string | null): void {
+  if (!campaignId) {
+    localStorage.removeItem(CAMPAIGN_STORAGE_KEY);
+    return;
+  }
+  localStorage.setItem(CAMPAIGN_STORAGE_KEY, campaignId);
+}
+
+function getCampaignProgress(campaign: CampaignEvent): number {
+  return Math.min(100, Math.round((campaign.raisedKrw / campaign.targetKrw) * 100));
 }
 
 function updateCartBadge(): void {
@@ -344,25 +454,135 @@ function renderBundleTab(): void {
   });
 }
 
+function filterCampaignEvents(): CampaignEvent[] {
+  const query = (searchInputEl?.value ?? "").trim().toLowerCase();
+  const category = categorySelectEl?.value ?? "";
+
+  return campaignEvents.filter((campaign) => {
+    const searchable = `${campaign.title} ${campaign.summary} ${campaign.region} ${campaign.tags.join(" ")}`.toLowerCase();
+    const queryMatch = query.length === 0 || searchable.includes(query);
+    const categoryMatch = category.length === 0 || campaign.category === category;
+    return queryMatch && categoryMatch;
+  });
+}
+
+function renderCampaignEventCard(campaign: CampaignEvent): string {
+  const progress = getCampaignProgress(campaign);
+  const statusLabel = campaign.status === "fundraising" ? "모금중" : "결과보고 공개";
+  const selected = getSelectedCampaignId() === campaign.id;
+
+  return `
+    <article class="card explore-card campaign-card" data-campaign-card-id="${campaign.id}">
+      <div class="campaign-visual campaign-visual-${campaign.visual}">
+        <span>${campaign.reportLabel}</span>
+      </div>
+      <div class="card-content">
+        <div class="campaign-card-topline">
+          <span class="card-tag">${statusLabel}</span>
+          <span class="campaign-region">${campaign.region}</span>
+        </div>
+        <h3 class="card-title">${campaign.title}</h3>
+        <p class="campaign-summary">${campaign.summary}</p>
+        <div class="campaign-stats">
+          <div>
+            <span class="metric-label">목표 금액</span>
+            <strong>${campaign.targetKrw.toLocaleString("ko-KR")}원</strong>
+          </div>
+          <div>
+            <span class="metric-label">현재 모금</span>
+            <strong>${campaign.raisedKrw.toLocaleString("ko-KR")}원</strong>
+          </div>
+        </div>
+        <div class="campaign-progress" aria-label="${progress}% 달성">
+          <div class="campaign-progress-head">
+            <span>${progress}% 달성</span>
+            <strong>${campaign.beneficiaries}</strong>
+          </div>
+          <div class="campaign-progress-track">
+            <span style="width: ${progress}%"></span>
+          </div>
+        </div>
+        <div class="campaign-proof-row">
+          <span>${campaign.evidence}</span>
+        </div>
+        <div class="card-footer">
+          <div class="campaign-tags">${campaign.tags.map((tag) => `<span>${tag}</span>`).join("")}</div>
+          <button class="add-btn add-campaign-btn ${selected ? "is-added" : ""}" data-campaign-id="${campaign.id}" data-foundation-id="${campaign.foundationId}" type="button" aria-label="캠페인 기부 담기">
+            ${
+              selected
+                ? `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>`
+                : `<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`
+            }
+          </button>
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+function renderEventTab(): void {
+  if (!eventsGridEl) return;
+  const campaigns = filterCampaignEvents();
+  if (campaigns.length === 0) {
+    eventsGridEl.innerHTML = `<div class="empty-state">조건에 맞는 이벤트 모금이 없습니다.</div>`;
+    return;
+  }
+
+  eventsGridEl.innerHTML = campaigns.map(renderCampaignEventCard).join("");
+  eventsGridEl.querySelectorAll<HTMLButtonElement>(".add-campaign-btn").forEach((button) => {
+    button.addEventListener("click", () => {
+      const campaignId = button.dataset.campaignId;
+      const foundationId = button.dataset.foundationId;
+      if (!campaignId || !foundationId) return;
+
+      setSelectedCampaign(campaignId);
+      addFoundationToCart(foundationId);
+      if (preflightPurposeEl) preflightPurposeEl.value = "campaign-support";
+      animateToConsole(button);
+      renderAll();
+      renderEventTab();
+      renderFoundationTab();
+    });
+  });
+}
+
 function syncTabs(): void {
-  if (!tabFoundationEl || !tabBundleEl || !foundationsGridEl || !bundlesGridEl) return;
+  if (!tabFoundationEl || !tabBundleEl || !tabEventEl || !foundationsGridEl || !bundlesGridEl || !eventsGridEl) return;
   const isFoundation = activeTab === "foundation";
+  const isBundle = activeTab === "bundle";
+  const isEvent = activeTab === "event";
   tabFoundationEl.classList.toggle("active", isFoundation);
-  tabBundleEl.classList.toggle("active", !isFoundation);
+  tabBundleEl.classList.toggle("active", isBundle);
+  tabEventEl.classList.toggle("active", isEvent);
   foundationsGridEl.classList.toggle("hidden", !isFoundation);
   foundationsPaginationEl?.classList.toggle("hidden", !isFoundation);
-  bundlesGridEl.classList.toggle("hidden", isFoundation);
+  bundlesGridEl.classList.toggle("hidden", !isBundle);
+  eventsGridEl.classList.toggle("hidden", !isEvent);
 }
 
 function renderSelectedItems(): void {
   if (!itemsContainerEl) return;
   const items = getCartView();
+  const selectedCampaign = getSelectedCampaign();
   if (items.length === 0) {
     itemsContainerEl.innerHTML = `<div class="empty-state">왼쪽에서 재단 또는 추천 포트폴리오를 선택하세요.</div>`;
     return;
   }
 
-  itemsContainerEl.innerHTML = items
+  const campaignNote =
+    selectedCampaign && items.some((item) => item.foundation.id === selectedCampaign.foundationId)
+      ? `
+        <div class="selected-campaign-note">
+          <span>지정 캠페인</span>
+          <strong>${selectedCampaign.title}</strong>
+          <button class="remove-campaign-btn" type="button">해제</button>
+        </div>
+      `
+      : "";
+
+  itemsContainerEl.innerHTML =
+    campaignNote +
+    items
     .map(
       (item) => `
         <article class="selected-item" data-id="${item.foundation.id}">
@@ -386,6 +606,12 @@ function renderSelectedItems(): void {
       `,
     )
     .join("");
+
+  itemsContainerEl.querySelector<HTMLButtonElement>(".remove-campaign-btn")?.addEventListener("click", () => {
+    setSelectedCampaign(null);
+    renderAll();
+    renderEventTab();
+  });
 
   itemsContainerEl.querySelectorAll<HTMLButtonElement>("[data-remove-id]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -922,6 +1148,10 @@ function toBundleAllocations() {
   }));
 }
 
+function getCampaignMemoId(): string {
+  return getSelectedCampaign()?.id ?? "truve_mvp";
+}
+
 async function submitDonation(): Promise<void> {
   const wallet = getWalletSession();
   if (!wallet || getCartView().length === 0 || !donationDestination.address) return;
@@ -938,6 +1168,7 @@ async function submitDonation(): Promise<void> {
   try {
     const amount = getAmount();
     const receiptId = `receipt_${Date.now()}`;
+    const campaignId = getCampaignMemoId();
     const compliance = await collectComplianceSnapshot(receiptId, wallet.account);
     const evidenceHash = await sha256Hex(
       JSON.stringify({
@@ -947,6 +1178,7 @@ async function submitDonation(): Promise<void> {
         asset,
         amount,
         allocations: toBundleAllocations(),
+        campaignId,
         complianceHash: compliance.complianceHash,
       }),
     );
@@ -965,7 +1197,7 @@ async function submitDonation(): Promise<void> {
         amount,
         allocations: toBundleAllocations(),
         settlement_wallet: donationDestination.address,
-        campaignId: "truve_mvp",
+        campaignId,
         receipt_id: receiptId,
         evidence_hash: evidenceHash,
         compliance_hash: compliance.complianceHash,
@@ -1153,9 +1385,11 @@ function renderAll(): void {
 function bindEvents(): void {
   searchInputEl?.addEventListener("input", () => {
     if (activeTab === "foundation") resetFoundationPageAndRender();
+    if (activeTab === "event") renderEventTab();
   });
   categorySelectEl?.addEventListener("change", () => {
     if (activeTab === "foundation") resetFoundationPageAndRender();
+    if (activeTab === "event") renderEventTab();
   });
   foundationsPaginationEl?.addEventListener("click", (event) => {
     const button = (event.target as HTMLElement).closest<HTMLButtonElement>("button[data-page]");
@@ -1177,6 +1411,11 @@ function bindEvents(): void {
     activeTab = "bundle";
     syncTabs();
     renderBundleTab();
+  });
+  tabEventEl?.addEventListener("click", () => {
+    activeTab = "event";
+    syncTabs();
+    renderEventTab();
   });
   totalAmountEl?.addEventListener("input", renderAll);
   assetSelectEl?.addEventListener("change", renderAll);
@@ -1231,8 +1470,10 @@ function bindEvents(): void {
   });
   clearBtnEl?.addEventListener("click", () => {
     clearCart();
+    setSelectedCampaign(null);
     renderAll();
     renderFoundationTab();
+    renderEventTab();
   });
   connectBtnEl?.addEventListener("click", () => void connectWallet());
   disconnectBtnEl?.addEventListener("click", disconnectWallet);
@@ -1264,6 +1505,7 @@ async function init(): Promise<void> {
   syncTabs();
   renderFoundationTab();
   renderBundleTab();
+  renderEventTab();
   renderTxResult(lastDonationRecord);
   renderAll();
   await updateWalletStatusFromSession();

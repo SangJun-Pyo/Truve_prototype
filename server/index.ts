@@ -1320,7 +1320,13 @@ app.get("/api/db/donations/:xrplAccount", async (req, res) => {
       where: { xrplAccount: req.params.xrplAccount },
       include: { donations: { orderBy: { donatedAt: "desc" } } },
     });
-    res.json(user?.donations ?? []);
+    res.json(
+      user?.donations.map((donation) => ({
+        ...donation,
+        xrplAccount: user.xrplAccount,
+        userDisplayName: user.displayName,
+      })) ?? [],
+    );
   } catch (error) {
     res.status(500).json({ error: error instanceof Error ? error.message : "기부 조회 실패" });
   }

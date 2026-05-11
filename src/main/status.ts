@@ -489,7 +489,10 @@ function openVerificationForDonation(donationId: string): void {
   window.open(`./verify.html?id=${encodeURIComponent(verificationKey)}`, "_blank", "noreferrer");
 }
 
-function mapDbDonation(d: Awaited<ReturnType<typeof fetchDbDonations>>[number]): LocalDonationRecord {
+function mapDbDonation(
+  d: Awaited<ReturnType<typeof fetchDbDonations>>[number],
+  fallbackXrplAccount?: string,
+): LocalDonationRecord {
   const allocationPayload = d.allocations as any;
   const allocations = Array.isArray(allocationPayload) ? allocationPayload : (allocationPayload?.items ?? []);
   const meta = allocationPayload?.meta ?? {};
@@ -512,6 +515,7 @@ function mapDbDonation(d: Awaited<ReturnType<typeof fetchDbDonations>>[number]):
     complianceHash: d.complianceHash ?? meta.complianceHash ?? undefined,
     asset: d.asset ?? meta.asset ?? undefined,
     amountAsset: d.amountAsset ?? meta.amountAsset ?? undefined,
+    xrplAccount: d.xrplAccount ?? fallbackXrplAccount,
     proofMintStatus:
       meta.credential?.status === "accepted"
         ? "credential_accepted"
@@ -862,7 +866,9 @@ async function init(): Promise<void> {
   const profile = await repositories.userRepository.getProfile(USER_ID);
   const baseDonations = await repositories.donationRepository.listDonationsByUser(USER_ID);
   const wallet = getWalletSession();
-  const dbDonations = wallet ? (await fetchDbDonations(wallet.account)).map(mapDbDonation) : [];
+  const dbDonations = wallet
+    ? (await fetchDbDonations(wallet.account)).map((donation) => mapDbDonation(donation, wallet.account))
+    : [];
   renderWalletSyncState(dbDonations.length);
 
   if (wallet) {

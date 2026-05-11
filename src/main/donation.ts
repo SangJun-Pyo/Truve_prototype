@@ -15,6 +15,9 @@ import { requestProofNftMintScaffold } from "../services/proofNft";
 import { clearWalletSession, getWalletSession, setWalletSession } from "../services/wallet";
 import { createPaymentPayload, createSignInPayload, waitForPayloadResolution } from "../services/xaman";
 import { fetchAccountInfo, getTestnetExplorerLink, waitForTxValidation } from "../services/xrpl";
+import { redirectMobileVisitors } from "../shared/mobileRedirect";
+
+redirectMobileVisitors();
 
 const USER_ID = "usr_demo_001";
 

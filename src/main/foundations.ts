@@ -30,7 +30,10 @@ import {
   waitForTxValidation,
   type XrplAssetConfig,
 } from "../services/xrpl";
+import { redirectMobileVisitors } from "../shared/mobileRedirect";
 import { renderTopNav } from "../shared/nav";
+
+redirectMobileVisitors();
 
 const USER_ID = "usr_demo_001";
 type DonationAsset = "XRP" | "RLUSD" | "USDC";

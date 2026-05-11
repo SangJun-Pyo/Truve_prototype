@@ -1,6 +1,9 @@
 ﻿// @ts-nocheck
+import { redirectMobileVisitors } from "../shared/mobileRedirect";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+redirectMobileVisitors();
 
 gsap.registerPlugin(ScrollTrigger);
 

@@ -9,7 +9,10 @@ import {
 } from "../services/donations";
 import { clearWalletSession, getWalletSession, setWalletSession } from "../services/wallet";
 import { createSignInPayload, waitForPayloadResolution } from "../services/xaman";
+import { redirectMobileVisitors } from "../shared/mobileRedirect";
 import { renderTopNav } from "../shared/nav";
+
+redirectMobileVisitors();
 
 const USER_ID = "usr_demo_001";
 

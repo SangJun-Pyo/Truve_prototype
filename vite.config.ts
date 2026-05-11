@@ -14,6 +14,7 @@ export default defineConfig({
         governance: resolve(__dirname, "governance.html"),
         status:     resolve(__dirname, "status.html"),
         community:  resolve(__dirname, "community.html"),
+        mobile:     resolve(__dirname, "mobile.html"),
         about:      resolve(__dirname, "about.html"),
         support:    resolve(__dirname, "support.html"),
         privacy:    resolve(__dirname, "privacy.html"),

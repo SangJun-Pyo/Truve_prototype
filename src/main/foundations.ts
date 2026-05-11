@@ -524,7 +524,7 @@ function renderEventTab(): void {
   if (!eventsGridEl) return;
   const campaigns = filterCampaignEvents();
   if (campaigns.length === 0) {
-    eventsGridEl.innerHTML = `<div class="empty-state">조건에 맞는 이벤트 모금이 없습니다.</div>`;
+    eventsGridEl.innerHTML = `<div class="empty-state">조건에 맞는 캠페인이 없습니다.</div>`;
     return;
   }
 

@@ -1,4 +1,4 @@
-import { campaignDetails, getCampaignDetailByPage } from "../data/campaignDetails";
+import { getCampaignDetailByPage } from "../data/campaignDetails";
 import { redirectMobileVisitors } from "../shared/mobileRedirect";
 import { renderTopNav } from "../shared/nav";
 
@@ -33,23 +33,6 @@ function renderProgress(progress: number): string {
   `;
 }
 
-function renderCampaignNav(): string {
-  return `
-    <nav class="campaign-detail-switcher" aria-label="캠페인 상세 페이지">
-      ${campaignDetails
-        .map(
-          (campaign) => `
-            <a class="${currentCampaign?.id === campaign.id ? "is-active" : ""}" href="./${campaign.page}">
-              <span>${campaign.documentType}</span>
-              <strong>${campaign.title}</strong>
-            </a>
-          `,
-        )
-        .join("")}
-    </nav>
-  `;
-}
-
 function render(): void {
   if (!root) return;
   if (!currentCampaign) {
@@ -75,13 +58,14 @@ function render(): void {
         </div>
       </div>
       <div class="campaign-detail-visual campaign-detail-visual-${currentCampaign.visual}">
-        <span>${escapeHtml(currentCampaign.documentType)}</span>
-        <strong>${escapeHtml(currentCampaign.country)}</strong>
-        <small>${escapeHtml(currentCampaign.region)}</small>
+        <img src="${escapeHtml(currentCampaign.imageSrc)}" alt="${escapeHtml(currentCampaign.imageAlt)}" />
+        <div class="campaign-detail-visual-label">
+          <span>${escapeHtml(currentCampaign.documentType)}</span>
+          <strong>${escapeHtml(currentCampaign.country)}</strong>
+          <small>${escapeHtml(currentCampaign.region)}</small>
+        </div>
       </div>
     </header>
-
-    ${renderCampaignNav()}
 
     <section class="campaign-detail-grid">
       <article class="card campaign-detail-overview">

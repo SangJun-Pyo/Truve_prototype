@@ -14,6 +14,8 @@ export interface CampaignDetail {
   status: "모금중" | "완료";
   category: "식수위생" | "학교건축";
   visual: "water" | "school";
+  imageSrc: string;
+  imageAlt: string;
   summary: string;
   sourceDocument: string;
   targetLabel: string;
@@ -36,6 +38,8 @@ export const campaignDetails: CampaignDetail[] = [
     status: "모금중",
     category: "식수위생",
     visual: "water",
+    imageSrc: "/campaigns/chad-water.webp",
+    imageAlt: "식수 펌프에서 물을 사용하는 아이들",
     summary:
       "수도 은자메나 인근 4개 CDP 지역에 안전한 식수시설과 위생 인프라를 연결해 주민과 아동의 건강, 교육환경, 지역사회 관리 역량을 함께 개선하는 프로젝트입니다.",
     sourceDocument: "[굿네이버스] 차드 식수위생지원사업 제안서.pdf",
@@ -105,6 +109,8 @@ export const campaignDetails: CampaignDetail[] = [
     status: "모금중",
     category: "학교건축",
     visual: "school",
+    imageSrc: "/campaigns/ethiopia-school.webp",
+    imageAlt: "굿네이버스 교육 지원을 받는 교실의 아이들",
     summary:
       "내전과 가뭄으로 교육 인프라가 크게 훼손된 티그라이 지역 아동에게 안전한 학습공간을 복구하고 교육 접근성을 회복하기 위한 학교건축 프로젝트입니다.",
     sourceDocument: "[굿네이버스] 에티오피아 학교건축사업 제안서.pdf",
@@ -174,6 +180,8 @@ export const campaignDetails: CampaignDetail[] = [
     status: "완료",
     category: "학교건축",
     visual: "school",
+    imageSrc: "/campaigns/rwanda-school.webp",
+    imageAlt: "르완다 학교 앞에 선 학생들",
     summary:
       "EP Magu 초등학교에 안전한 학습환경을 조성하기 위해 교실 5개동과 관련 시설을 구축한 완료형 프로젝트입니다. 결과보고서 기반으로 사업성과를 상세 확인할 수 있습니다.",
     sourceDocument: "[굿네이버스] 르완다 학교건축사업 결과보고서.pdf",
@@ -243,6 +251,8 @@ export const campaignDetails: CampaignDetail[] = [
     status: "완료",
     category: "식수위생",
     visual: "water",
+    imageSrc: "/campaigns/malawi-water.webp",
+    imageAlt: "말라위 식수 펌프에서 물을 마시는 아이",
     summary:
       "식수로 어려움을 겪던 말라위 지역 주민에게 안전한 물 접근성을 제공하기 위해 식수시설을 구축하고 위생 인식 개선을 연결한 완료형 프로젝트입니다.",
     sourceDocument: "[굿네이버스] 말라위 식수위생지원사업 결과보고.pdf",

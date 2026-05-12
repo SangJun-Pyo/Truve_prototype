@@ -1,9 +1,9 @@
 [build]
 builder = "nixpacks"
-buildCommand = "npx prisma generate"
+buildCommand = "npx prisma generate && npm run build && npm run build:server"
 
 [deploy]
-startCommand = "npx prisma migrate deploy && npx tsx server/index.ts"
+startCommand = "npx prisma migrate deploy && node dist/server/index.js"
 restartPolicyType = "on_failure"
 
 [[deploy.environmentVariables]]

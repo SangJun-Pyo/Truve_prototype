@@ -162,10 +162,11 @@
 
 .foundation-hub-hero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.72fr);
-  gap: 28px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
   align-items: center;
-  margin-bottom: 28px;
+  margin-bottom: 32px;
+  max-width: 980px;
 }
 
 .foundation-hub-copy h1 {
@@ -4645,33 +4646,24 @@ input::placeholder {
 }
 
 .portfolio-header {
-  margin: 38px 0 28px;
-}
-
-.portfolio-header .breadcrumbs {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  margin-bottom: 10px;
-  color: #6b7280;
-  font-size: 12px;
-}
-
-.portfolio-header .breadcrumbs span {
-  color: #cbd5e1;
+  margin: 8px 0 28px;
 }
 
 .portfolio-header h1 {
   color: #111827;
-  font-size: 42px;
-  font-weight: 500;
-  letter-spacing: 0;
-  line-height: 1.1;
+  font-size: clamp(56px, 6.5vw, 82px);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1.02;
 }
 
 .portfolio-header p {
-  margin-top: 10px;
+  max-width: 860px;
+  margin-top: 14px;
   color: #64748b;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.7;
 }
 
 .portfolio-grid {

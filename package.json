@@ -9,9 +9,12 @@
   "scripts": {
     "test": "npm run smoke:core",
     "smoke:core": "tsx scripts/smoke-core.ts",
+    "sync:pages": "node scripts/sync-pages.mjs",
     "dev": "concurrently \"npm:dev:api\" \"npm:dev:web\"",
+    "predev:web": "npm run sync:pages",
     "dev:web": "vite --host 0.0.0.0 --port 5173",
     "dev:api": "tsx server/index.ts",
+    "prebuild": "npm run sync:pages",
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0 --port 4173",
     "deploy": "npm run build && wrangler deploy",

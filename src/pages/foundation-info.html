@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Truve는 국세청 등록 재단, XRPL Payment, Evidence Package, XLS-70 Credential을 연결하는 기부 인프라입니다." />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Truve" />
+    <meta property="og:title" content="Truve | 기부재단 소개" />
+    <meta property="og:description" content="국세청 등록 재단 기반 검증 시스템과 XRPL Credential 기반 기부 증빙 인프라를 확인하세요." />
+    <meta property="og:locale" content="ko_KR" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Truve | 기부재단 소개" />
+    <meta name="twitter:description" content="국세청 등록 재단 기반 검증 시스템과 XRPL Credential 기반 기부 증빙 인프라를 확인하세요." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <title>Truve | 기부재단 소개</title>
+    <link rel="stylesheet" href="../../assets/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell foundation-hub-shell">
+      <div id="top-nav"></div>
+
+      <header class="foundation-hub-hero">
+        <div class="foundation-hub-copy">
+          <h1>검증 가능한 재단과 캠페인을 확인</h1>
+          <p>국세청 등록 재단 정보와 캠페인 구조를 기준으로 기부처를 비교하고, 수령 자산과 검증 준비 상태까지 한 화면에서 빠르게 확인합니다.</p>
+          <div class="foundation-hub-actions">
+            <a class="primary-link-button" href="./foundations.html">기부 시작</a>
+            <a class="secondary-link-button" href="./about.html">서비스 흐름 보기</a>
+          </div>
+        </div>
+      </header>
+
+      <section class="foundation-community-tabs" aria-label="기부재단 소개 섹션">
+        <button class="foundation-tab is-active" type="button" data-panel="directory">재단 목록</button>
+        <button class="foundation-tab" type="button" data-panel="campaigns">캠페인</button>
+        <button class="foundation-tab" type="button" data-panel="featured">추천 재단</button>
+        <button class="foundation-tab" type="button" data-panel="verification">검증 기준</button>
+      </section>
+
+      <section class="foundation-panel is-active" id="foundation-panel-directory">
+        <div class="foundation-hub-toolbar card">
+          <label class="field">
+            <span>재단 검색</span>
+            <input id="foundation-info-search" type="search" placeholder="재단명, 지역, 분야 검색" />
+          </label>
+          <label class="field">
+            <span>분야</span>
+            <select id="foundation-info-category">
+              <option value="">전체 분야</option>
+              <option value="climate">환경</option>
+              <option value="education">아동/교육</option>
+              <option value="health">의료</option>
+              <option value="animal">동물</option>
+              <option value="humanitarian">긴급구호</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>검증</span>
+            <select id="foundation-info-verified">
+              <option value="">전체</option>
+              <option value="verified">검증 완료만</option>
+            </select>
+          </label>
+        </div>
+
+        <section class="directory-summary" aria-label="재단 목록 요약">
+          <article class="card">
+            <span>검색 결과</span>
+            <strong id="foundation-info-count">0</strong>
+          </article>
+          <article class="card">
+            <span>수령 자산</span>
+            <strong>RLUSD / USDC</strong>
+          </article>
+          <article class="card">
+            <span>증빙 상태</span>
+            <strong>Credential Ready</strong>
+          </article>
+        </section>
+
+        <section id="foundation-info-list" class="foundation-list-grid"></section>
+        <nav id="foundation-info-pagination" class="foundation-pagination" aria-label="재단 목록 페이지"></nav>
+      </section>
+
+      <section class="foundation-panel" id="foundation-panel-campaigns">
+        <div class="project-campaign-head card">
+          <div>
+            <p class="summary-kicker">Campaign Fundraising</p>
+            <h2>굿네이버스 사업 단위로 기부를 연결합니다.</h2>
+            <p>
+              제안서와 결과보고서를 기반으로 사업 목표, 수혜자, 모금 달성률, Evidence 상태를 함께 보여줍니다.
+              Truve에서는 캠페인 ID가 Payment Memo와 Evidence Package에 연결됩니다.
+            </p>
+          </div>
+          <a class="primary-link-button" href="./foundations.html">캠페인에 기부하기</a>
+        </div>
+
+        <div class="project-campaign-grid">
+          <article class="project-campaign-card card">
+            <div class="campaign-visual campaign-visual-water">
+              <img src="/campaigns/chad-water.webp" alt="식수 펌프에서 물을 사용하는 아이들" loading="lazy" />
+              <span>제안서</span>
+            </div>
+            <div class="campaign-card-topline">
+              <span class="card-tag">모금중</span>
+              <span class="campaign-region">차드 4개 CDP</span>
+            </div>
+            <h2>차드 식수위생지원사업</h2>
+            <p>4개 CDP 지역에 식수펌프, 물탱크, 태양광 시스템과 위생교육을 연결하는 식수위생 프로젝트입니다.</p>
+            <div class="project-campaign-facts">
+              <span>목표 58,000,000원</span>
+              <span>총 수혜자 96,483명</span>
+            </div>
+            <div class="campaign-progress">
+              <div class="campaign-progress-head"><span>37% 달성</span><strong>21,460,000원 모금</strong></div>
+              <div class="campaign-progress-track"><span style="width: 37%"></span></div>
+              <div class="campaign-card-actions">
+                <a class="secondary-link-button" href="./campaign-chad-water.html">상세보기</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="project-campaign-card card">
+            <div class="campaign-visual campaign-visual-school">
+              <img src="/campaigns/ethiopia-school.webp" alt="굿네이버스 교육 지원을 받는 교실의 아이들" loading="lazy" />
+              <span>제안서</span>
+            </div>
+            <div class="campaign-card-topline">
+              <span class="card-tag">모금중</span>
+              <span class="campaign-region">에티오피아</span>
+            </div>
+            <h2>에티오피아 학교건축사업</h2>
+            <p>교육이 중단된 지역 아동을 위해 신규 교실, 교무실, 화장실과 식수시설을 조성합니다.</p>
+            <div class="project-campaign-facts">
+              <span>목표 100,000,000원</span>
+              <span>교육 접근성 회복</span>
+            </div>
+            <div class="campaign-progress">
+              <div class="campaign-progress-head"><span>34% 달성</span><strong>34,000,000원 모금</strong></div>
+              <div class="campaign-progress-track"><span style="width: 34%"></span></div>
+              <div class="campaign-card-actions">
+                <a class="secondary-link-button" href="./campaign-ethiopia-school.html">상세보기</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="project-campaign-card card">
+            <div class="campaign-visual campaign-visual-school">
+              <img src="/campaigns/rwanda-school.webp" alt="르완다 학교 앞에 선 학생들" loading="lazy" />
+              <span>결과보고서</span>
+            </div>
+            <div class="campaign-card-topline">
+              <span class="card-tag">결과보고 공개</span>
+              <span class="campaign-region">르완다 Ngoma CDP</span>
+            </div>
+            <h2>르완다 학교건축사업</h2>
+            <p>EP Magu 학교에 교실 5개동, 학습 기자재, 빗물집수 시스템을 구축한 완료 프로젝트입니다.</p>
+            <div class="project-campaign-facts">
+              <span>사업비 95,000,000원</span>
+              <span>직접 수혜 230명</span>
+            </div>
+            <div class="campaign-progress">
+              <div class="campaign-progress-head"><span>100% 완료</span><strong>결과보고 공개</strong></div>
+              <div class="campaign-progress-track"><span style="width: 100%"></span></div>
+              <div class="campaign-card-actions">
+                <a class="secondary-link-button" href="./campaign-rwanda-school.html">상세보기</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="project-campaign-card card">
+            <div class="campaign-visual campaign-visual-water">
+              <img src="/campaigns/malawi-water.webp" alt="말라위 식수 펌프에서 물을 마시는 아이" loading="lazy" />
+              <span>결과보고서</span>
+            </div>
+            <div class="campaign-card-topline">
+              <span class="card-tag">결과보고 공개</span>
+              <span class="campaign-region">말라위</span>
+            </div>
+            <h2>말라위 식수위생지원사업</h2>
+            <p>식수 접근성과 위생 환경 개선을 위한 완료형 프로젝트로, 결과보고 기반 증빙 샘플로 활용됩니다.</p>
+            <div class="project-campaign-facts">
+              <span>사업비 7,997,100원</span>
+              <span>식수위생 프로젝트 완료</span>
+            </div>
+            <div class="campaign-progress">
+              <div class="campaign-progress-head"><span>100% 완료</span><strong>Proof Link Ready</strong></div>
+              <div class="campaign-progress-track"><span style="width: 100%"></span></div>
+              <div class="campaign-card-actions">
+                <a class="secondary-link-button" href="./campaign-malawi-water.html">상세보기</a>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="foundation-panel" id="foundation-panel-featured">
+        <div class="foundation-featured-grid">
+          <article class="foundation-feature-card card">
+            <p class="summary-kicker">Good Neighbors</p>
+            <h2>굿네이버스 협력 재단</h2>
+            <p>아동권리, 국제구호, 지역사회 개발 영역을 Truve 검증 기부 흐름과 연결하는 우선 협력 파트너입니다.</p>
+            <a class="primary-link-button" href="./foundations.html">기부하기</a>
+          </article>
+          <article class="foundation-feature-card card">
+            <p class="summary-kicker">Emergency</p>
+            <h2>긴급구호 네트워크</h2>
+            <p>재난, 취약계층, 지역 구호 활동에 빠르게 기부할 수 있도록 검증 완료 재단을 묶어 보여줍니다.</p>
+            <a class="secondary-link-button" href="./community.html">커뮤니티에서 논의</a>
+          </article>
+          <article class="foundation-feature-card card">
+            <p class="summary-kicker">On-chain Proof</p>
+            <h2>증빙 준비 재단</h2>
+            <p>Payment, Evidence Package, Credential 승인까지 이어지는 절차를 우선적으로 지원하는 재단입니다.</p>
+            <a class="secondary-link-button" href="./credential-notice.html">검증 흐름 보기</a>
+          </article>
+        </div>
+      </section>
+
+      <section class="foundation-panel" id="foundation-panel-verification">
+        <div class="foundation-verification-grid">
+          <article class="card">
+            <span class="foundation-step-num">01</span>
+            <h2>등록 재단 확인</h2>
+            <p>국세청 공개 목록과 재단 기본 정보를 기준으로 기부처를 정리합니다.</p>
+          </article>
+          <article class="card">
+            <span class="foundation-step-num">02</span>
+            <h2>Payment 기록</h2>
+            <p>XRPL Payment의 송금 계정, 수령 지갑, 금액, memo를 Evidence 생성 기준으로 사용합니다.</p>
+          </article>
+          <article class="card">
+            <span class="foundation-step-num">03</span>
+            <h2>Credential 승인</h2>
+            <p>기부자가 Xaman에서 Credential을 승인하면 내 기부 현황에서 증빙 상태를 확인할 수 있습니다.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer-inner">
+        <strong class="footer-brand">Truve</strong>
+        <p>XRPL Credential 기반 가상자산 기부 인프라</p>
+        <p>Testnet prototype · No real value</p>
+        <div class="footer-bottom">
+          <span>© 2026 Truve. All rights reserved.</span>
+          <nav class="footer-links" aria-label="정책 링크">
+            <a href="./privacy.html">Privacy Policy</a>
+            <a href="./exchange-notice.html">거래소 기반 기부 고지</a>
+            <a href="./pre-donation-notice.html">기부 전 확인 안내</a>
+            <a href="./credential-notice.html">Evidence & Credential</a>
+          </nav>
+        </div>
+      </div>
+    </footer>
+
+    <script type="module" src="../main/foundationInfo.ts"></script>
+  </body>
+</html>

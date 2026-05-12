@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Truve는 RLUSD·USDC 기부, Evidence Package, XLS-70 Donation Credential 검증을 연결하는 XRPL 기반 가상자산 기부 인프라입니다." />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Truve" />
+    <meta property="og:title" content="Truve | XRPL Credential 기반 가상자산 기부 인프라" />
+    <meta property="og:description" content="Truve는 RLUSD·USDC 기부, Evidence Package, XLS-70 Donation Credential 검증을 연결하는 XRPL 기반 가상자산 기부 인프라입니다." />
+    <meta property="og:locale" content="ko_KR" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Truve | XRPL Credential 기반 가상자산 기부 인프라" />
+    <meta name="twitter:description" content="Truve는 RLUSD·USDC 기부, Evidence Package, XLS-70 Donation Credential 검증을 연결하는 XRPL 기반 가상자산 기부 인프라입니다." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <title>Truve | 거래소 기반 기부 및 사전 고지사항</title>
+    <link rel="stylesheet" href="../../assets/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell legal-shell">
+      <div id="top-nav"></div>
+      <article class="card policy-document">
+        <p class="summary-kicker">Exchange-Based Donation</p>
+        <h1>거래소 기반 기부 및 사전 고지사항</h1>
+        <p class="effective-date">시행일: 2026. 05. 06. | 프로토타입 고지 문서</p>
+
+        <section>
+          <h2>1. 기본 전제</h2>
+          <p>Truve는 기부자가 본인 명의 또는 본인이 통제하는 지갑에서 RLUSD 또는 USDC를 XRPL Testnet으로 송금하는 흐름을 검증합니다. 실제 서비스에서는 거래소 출금 정책, 네트워크 지원 여부, 재단 수령 정책을 반드시 확인해야 합니다.</p>
+        </section>
+
+        <section>
+          <h2>2. 기부자 확인 사항</h2>
+          <ul>
+            <li>기부 자산이 본인의 정당한 소유 자산인지 확인해야 합니다.</li>
+            <li>제재 대상, 범죄 수익, 분쟁 자산, 타인 소유 자산과 관련이 없어야 합니다.</li>
+            <li>거래소 출금 시 네트워크를 XRPL로 선택했는지, 수신 주소가 정확한지 확인해야 합니다.</li>
+            <li>RLUSD/USDC 수령에는 TrustLine이 필요할 수 있습니다.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>3. 위험 고지</h2>
+          <p>잘못된 네트워크 선택, 오입금, TrustLine 미설정, 거래소 출금 지연, 네트워크 혼잡, 잘못된 Destination/Memo 정보로 인해 기부가 실패하거나 복구가 어려울 수 있습니다.</p>
+        </section>
+
+        <section>
+          <h2>4. Truve의 역할</h2>
+          <p>Truve는 기부금을 보관하거나 운용하지 않고, 테스트넷 기준 기부 실행과 Evidence/Credential 검증 흐름을 제공합니다. 실제 재단 수령과 영수증 인정 여부는 재단과 관련 법령, 세무 검토에 따릅니다.</p>
+        </section>
+      </article>
+    </main>
+    <footer class="site-footer">
+      <div class="site-footer-inner">
+        <div><strong class="footer-brand">Truve</strong><p>XRPL Credential 기반 가상자산 기부 인프라</p></div>
+        <div class="footer-bottom">
+          <span>© TRUVE. ALL RIGHTS RESERVED.</span>
+          <nav class="footer-links" aria-label="정책 링크">
+            <a href="./privacy.html">Privacy Policy</a>
+            <a href="./exchange-notice.html">Exchange Notice</a>
+            <a href="./pre-donation-notice.html">Pre-Donation Notice</a>
+            <a href="./credential-notice.html">Credential Notice</a>
+          </nav>
+        </div>
+      </div>
+    </footer>
+    <script type="module" src="../main/legal.ts"></script>
+  </body>
+</html>

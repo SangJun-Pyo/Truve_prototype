@@ -1,4 +1,5 @@
 import { API_BASE } from "../services/apiBase";
+import { isOperatorSession } from "../services/auth";
 import { deleteAdminDonation, fetchAdminDonations, type DbDonationAdminRow } from "../services/db";
 import { renderTopNav } from "../shared/nav";
 
@@ -7,6 +8,11 @@ const ADMIN_SECRET_STORAGE_KEY = "truve_admin_secret";
 const navRoot = document.getElementById("top-nav");
 if (navRoot) {
   navRoot.innerHTML = renderTopNav("admin");
+}
+
+if (!isOperatorSession()) {
+  window.location.href = "./foundations.html";
+  throw new Error("Operator role is required to open Admin.");
 }
 
 const formEl = document.getElementById("faucet-form") as HTMLFormElement | null;

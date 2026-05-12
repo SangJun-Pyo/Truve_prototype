@@ -27,7 +27,7 @@ export function renderBundleCard(bundle: DonationBundle, foundations: Foundation
       <div class="card-content">
         <div class="card-header">
           <h3 class="card-title">${bundle.name}</h3>
-          <span class="card-tag">추천 포트폴리오</span>
+          <span class="card-tag">큐레이션</span>
         </div>
         <div class="metric mb-12">
           <span class="metric-label">포함 재단</span>

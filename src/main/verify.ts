@@ -157,16 +157,18 @@ async function renderDonation(donation: LocalDonationRecord): Promise<void> {
         <div class="onchain-row"><span>Credential Ledger ID</span><strong>${credential?.index ?? "-"}</strong></div>
         <div class="onchain-row"><span>Credential Previous TX</span><strong>${credential?.previousTxId ?? "-"}</strong></div>
       </div>
-      ${
-        explorer
-          ? `<a class="ghost-btn mt-12" href="${explorer}" target="_blank" rel="noreferrer">Open XRPL Testnet Explorer</a>`
-          : ""
-      }
-      ${
-        donation.credentialAcceptExplorerUrl
-          ? `<a class="ghost-btn mt-12" href="${donation.credentialAcceptExplorerUrl}" target="_blank" rel="noreferrer">Open CredentialAccept TX</a>`
-          : ""
-      }
+      <div class="verify-action-row">
+        ${
+          explorer
+            ? `<a class="ghost-btn" href="${explorer}" target="_blank" rel="noreferrer">Open XRPL Testnet Explorer</a>`
+            : ""
+        }
+        ${
+          donation.credentialAcceptExplorerUrl
+            ? `<a class="ghost-btn" href="${donation.credentialAcceptExplorerUrl}" target="_blank" rel="noreferrer">Open CredentialAccept TX</a>`
+            : ""
+        }
+      </div>
       ${
         credential?.error
           ? `<p class="tax-disclaimer mt-12">Credential ledger lookup: ${credential.error}</p>`

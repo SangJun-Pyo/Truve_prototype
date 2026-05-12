@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Truve Google 계정 로그인" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Truve | 로그인</title>
+    <link rel="stylesheet" href="./assets/styles.css" />
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+  </head>
+  <body>
+    <main class="app-shell auth-page">
+      <div id="top-nav"></div>
+
+      <section class="auth-hero">
+        <p class="summary-kicker">Google Sign In</p>
+        <h1>기부 기록과 Credential을 한 계정에서 관리합니다.</h1>
+        <p>Truve는 Google 계정 로그인만 사용합니다. 별도 비밀번호를 만들지 않고, 기부 현황과 검증 페이지 접근을 간단하게 연결합니다.</p>
+      </section>
+
+      <section class="auth-layout">
+        <article class="card auth-card">
+          <h2>Google 계정으로 로그인</h2>
+          <p>로그인 후 내 기부 현황, Evidence, XLS-70 Credential 상태를 이어서 확인할 수 있습니다.</p>
+
+          <label class="auth-consent">
+            <input id="auth-terms-agree" type="checkbox" />
+            <span>
+              <a href="./terms.html" target="_blank" rel="noreferrer">서비스 이용약관</a>과
+              <a href="./privacy.html" target="_blank" rel="noreferrer">개인정보처리방침</a>을 확인했습니다.
+            </span>
+          </label>
+
+          <div id="google-login-slot" class="google-login-slot"></div>
+          <div class="auth-dev-actions">
+            <button id="google-demo-login-btn" class="google-fallback-btn" type="button">개발용 유저 로그인</button>
+            <button id="google-demo-operator-login-btn" class="google-fallback-btn" type="button">개발용 운영자 로그인</button>
+          </div>
+          <p id="auth-status" class="auth-status" data-tone="muted">Google 로그인 준비 중입니다.</p>
+        </article>
+
+        <aside class="card auth-side-card">
+          <h2>비밀번호는 Google에서 관리됩니다</h2>
+          <p>Truve는 Google-only 로그인 구조이므로 사용자 비밀번호를 저장하거나 재설정하지 않습니다.</p>
+          <div class="auth-side-links">
+            <a href="./password-help.html">비밀번호 찾기/수정 안내</a>
+            <a href="./account.html">내 계정 관리</a>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <script type="module" src="./src/main/auth.ts"></script>
+  </body>
+</html>

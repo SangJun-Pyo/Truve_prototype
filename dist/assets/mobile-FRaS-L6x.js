@@ -1,0 +1,1 @@
+import"./modulepreload-polyfill-eJgYjmQ8.js";import{t as e}from"./mobileRedirect-BpvrRV-s.js";/* empty css               */document.getElementById(`desktop-link`)?.addEventListener(`click`,()=>{e()});

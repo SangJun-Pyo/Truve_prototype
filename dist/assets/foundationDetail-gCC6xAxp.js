@@ -1,4 +1,4 @@
-/* empty css               */import"./modulepreload-polyfill-CfRWewTA.js";import{t as e}from"./provider-wBI-_yYj.js";import{t}from"./explorerCard-D2FI8z-m.js";import{t as n}from"./nav-CA1dGXY3.js";var r=document.getElementById(`top-nav`);r&&(r.innerHTML=n(`foundation-info`));var i=document.getElementById(`foundation-detail-root`);function a(e){return`${e.slice(0,10)}...${e.slice(-8)}`}function o(e){let n=e.tags.map(e=>`<span>${e}</span>`).join(``);return`
+import"./modulepreload-polyfill-eJgYjmQ8.js";/* empty css               */import{t as e}from"./provider-DrGARZ6r.js";import{t}from"./explorerCard-BE06kHR8.js";import{t as n}from"./nav-2t9yL-0h.js";var r=document.getElementById(`top-nav`);r&&(r.innerHTML=n(`foundation-info`));var i=document.getElementById(`foundation-detail-root`);function a(e){return`${e.slice(0,10)}...${e.slice(-8)}`}function o(e){let n=e.tags.map(e=>`<span>${e}</span>`).join(``);return`
     <header class="page-header foundation-detail-hero">
       <p class="summary-kicker">${t(e.category)} · ${e.region}</p>
       <h1>${e.name}</h1>

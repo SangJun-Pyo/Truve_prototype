@@ -1,0 +1,1 @@
+import"./modulepreload-polyfill-eJgYjmQ8.js";import{n as e}from"./mobileRedirect-BpvrRV-s.js";/* empty css               */import{t}from"./nav-2t9yL-0h.js";e();var n=document.getElementById(`top-nav`);n&&(n.innerHTML=t(`community`));

@@ -31,12 +31,18 @@ const navRoot = document.getElementById("top-nav");
 if (navRoot) navRoot.innerHTML = renderTopNav("auth");
 
 const loginSlotEl = document.getElementById("google-login-slot");
+const devActionsEl = document.getElementById("auth-dev-actions");
 const demoLoginBtnEl = document.getElementById("google-demo-login-btn") as HTMLButtonElement | null;
 const demoOperatorLoginBtnEl = document.getElementById("google-demo-operator-login-btn") as HTMLButtonElement | null;
 const agreeEl = document.getElementById("auth-terms-agree") as HTMLInputElement | null;
 const statusEl = document.getElementById("auth-status");
 const existingSession = getAuthSession();
 const googleClientId = ((import.meta as unknown as { env?: Record<string, string> }).env?.VITE_GOOGLE_CLIENT_ID ?? "").trim();
+const showDevAuth = new URLSearchParams(window.location.search).get("devAuth") === "1";
+
+if (googleClientId && !showDevAuth) {
+  devActionsEl?.classList.add("hidden");
+}
 
 function nextUrl(): string {
   const params = new URLSearchParams(window.location.search);

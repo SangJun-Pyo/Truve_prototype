@@ -5,6 +5,7 @@ dev-*.log
 *.err.log
 tax-api-smoke.log
 design-*.html
+.claude/
 .env
 .env.local
 .env.*.local

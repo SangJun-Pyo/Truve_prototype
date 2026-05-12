@@ -29,18 +29,6 @@
 
       <section class="portfolio-grid">
         <div class="portfolio-left">
-          <article class="portfolio-card portfolio-total-card">
-            <div class="portfolio-card-head">
-              <span>Total Donated</span>
-              <span class="portfolio-pill">YTD</span>
-            </div>
-            <strong id="portfolio-total-amount" class="portfolio-big-amount">0 KRW</strong>
-            <div class="portfolio-actions">
-              <a class="portfolio-primary-btn" href="./foundations.html">↗ 기부하기</a>
-              <button id="status-refresh-btn" class="portfolio-dark-btn" type="button">↙ 새로고침</button>
-            </div>
-          </article>
-
           <article class="portfolio-card wallet-sync-card">
             <div class="portfolio-card-head">
               <div>
@@ -77,7 +65,6 @@
             <div class="portfolio-button-row">
               <a id="status-account-login-link" class="ghost-btn" href="./auth.html?next=./status.html%23account-card">Google 로그인</a>
               <button id="status-account-logout-btn" class="ghost-btn hidden" type="button">로그아웃</button>
-              <button id="status-account-disconnect-btn" class="ghost-btn hidden" type="button">계정 연결 해제</button>
             </div>
           </article>
 
@@ -93,9 +80,14 @@
         <div class="portfolio-right">
           <article class="portfolio-card impact-card">
             <div class="portfolio-card-head">
-              <h2>Impact Analysis</h2>
+              <div>
+                <h2>Impact Analysis</h2>
+                <p>Total Donated와 기간별 기부 흐름을 함께 확인합니다.</p>
+              </div>
               <div id="impact-period-control" class="period-segmented" aria-label="Impact analysis period">
-                <button class="active" type="button" data-period="day">Day</button>
+                <button class="active" type="button" data-period="total">Total</button>
+                <button type="button" data-period="ytd">YTD</button>
+                <button type="button" data-period="day">Day</button>
                 <button type="button" data-period="week">Week</button>
                 <button type="button" data-period="month">Month</button>
               </div>
@@ -103,6 +95,10 @@
             <div class="impact-headline">
               <strong id="impact-main-number">0 KRW</strong>
               <span id="impact-growth-badge" class="portfolio-success-pill">↑ +0%</span>
+            </div>
+            <div class="impact-actions">
+              <a class="portfolio-primary-btn" href="./foundations.html">↗ 기부하기</a>
+              <button id="status-refresh-btn" class="portfolio-dark-btn" type="button">↙ 새로고침</button>
             </div>
             <div id="impact-chart-area" class="portfolio-bar-chart"></div>
             <div id="impact-chart-labels" class="portfolio-chart-labels"></div>

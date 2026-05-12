@@ -39,7 +39,6 @@ const accountEmailEl = document.getElementById("status-account-email");
 const accountRoleEl = document.getElementById("status-account-role");
 const accountLoginLinkEl = document.getElementById("status-account-login-link");
 const accountLogoutBtnEl = document.getElementById("status-account-logout-btn") as HTMLButtonElement | null;
-const accountDisconnectBtnEl = document.getElementById("status-account-disconnect-btn") as HTMLButtonElement | null;
 
 const taxDonorTypeEl = document.getElementById("status-tax-donor-type") as HTMLSelectElement | null;
 const taxIncomeRangeEl = document.getElementById("status-tax-income-range") as HTMLSelectElement | null;
@@ -59,7 +58,6 @@ const taxPartnerBtnEl = document.getElementById("status-tax-partner-btn") as HTM
 const taxScenarioSliderEl = document.getElementById("tax-scenario-slider") as HTMLInputElement | null;
 const taxScenarioLabelEl = document.getElementById("tax-scenario-label");
 const taxScenarioChartEl = document.getElementById("tax-scenario-chart");
-const portfolioTotalAmountEl = document.getElementById("portfolio-total-amount");
 const impactMainNumberEl = document.getElementById("impact-main-number");
 const impactGrowthBadgeEl = document.getElementById("impact-growth-badge");
 const impactChartAreaEl = document.getElementById("impact-chart-area");
@@ -71,7 +69,7 @@ const credentialListEl = document.getElementById("credential-list");
 let totalDonatedForTax = 0;
 let currentDonations: LocalDonationRecord[] = [];
 let eventsBound = false;
-let impactPeriod: "day" | "week" | "month" = "day";
+let impactPeriod: "total" | "ytd" | "day" | "week" | "month" = "total";
 let timelinePage = 1;
 let credentialPage = 1;
 let tablePage = 1;
@@ -100,7 +98,6 @@ function renderAccountState(): void {
     accountRoleEl.textContent = "-";
     accountLoginLinkEl?.classList.remove("hidden");
     accountLogoutBtnEl?.classList.add("hidden");
-    accountDisconnectBtnEl?.classList.add("hidden");
     return;
   }
 
@@ -116,7 +113,6 @@ function renderAccountState(): void {
   accountRoleEl.textContent = session.role === "operator" ? "운영자" : "일반 유저";
   accountLoginLinkEl?.classList.add("hidden");
   accountLogoutBtnEl?.classList.remove("hidden");
-  accountDisconnectBtnEl?.classList.remove("hidden");
 }
 
 interface AssetDistribution {
@@ -293,8 +289,9 @@ function credentialLedgerLabel(credential: CredentialLookupResult | null): strin
 
 function getImpactBuckets(period: typeof impactPeriod): Array<{ label: string; amount: number; start: Date; end: Date }> {
   const now = new Date();
-  const buckets = Array.from({ length: 7 }, (_, index) => {
-    const offset = 6 - index;
+  const bucketCount = period === "ytd" ? Math.min(now.getMonth() + 1, 7) : 7;
+  const buckets = Array.from({ length: bucketCount }, (_, index) => {
+    const offset = bucketCount - 1 - index;
     let start: Date;
     let end: Date;
     let label: string;
@@ -309,6 +306,10 @@ function getImpactBuckets(period: typeof impactPeriod): Array<{ label: string; a
       start = monday;
       end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 7);
       label = `${start.toLocaleDateString("ko-KR", { month: "numeric", day: "numeric" })}주`;
+    } else if (period === "ytd") {
+      start = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+      end = new Date(start.getFullYear(), start.getMonth() + 1, 1);
+      label = `${start.getMonth() + 1}월`;
     } else {
       start = new Date(now.getFullYear(), now.getMonth() - offset, 1);
       end = new Date(start.getFullYear(), start.getMonth() + 1, 1);
@@ -325,6 +326,17 @@ function getImpactBuckets(period: typeof impactPeriod): Array<{ label: string; a
   });
 
   return buckets;
+}
+
+function getImpactDisplayTotal(buckets: ReturnType<typeof getImpactBuckets>): number {
+  if (impactPeriod === "total") return currentDonations.reduce((sum, donation) => sum + donation.amountKrw, 0);
+  if (impactPeriod === "ytd") {
+    const year = new Date().getFullYear();
+    return currentDonations
+      .filter((donation) => new Date(donation.donatedAt).getFullYear() === year)
+      .reduce((sum, donation) => sum + donation.amountKrw, 0);
+  }
+  return buckets.reduce((sum, bucket) => sum + bucket.amount, 0);
 }
 
 function clampPage(page: number, totalItems: number, pageSize: number): number {
@@ -665,12 +677,6 @@ function bindEvents(): void {
     renderAccountState();
     window.location.reload();
   });
-  accountDisconnectBtnEl?.addEventListener("click", () => {
-    const confirmed = window.confirm("이 브라우저에서 Google 계정 연결을 해제할까요? 기부 기록과 온체인 Credential은 삭제되지 않습니다.");
-    if (!confirmed) return;
-    clearAuthSession();
-    window.location.href = "./auth.html";
-  });
   taxDonorTypeEl?.addEventListener("change", () => {
     renderTaxFormState();
     resetTaxResult();
@@ -775,13 +781,9 @@ function mapDbDonation(
 
 function renderSummary(profileName: string, tier: string, walletDbCount: number): void {
   const wallet = getWalletSession();
-  const total = currentDonations.reduce((sum, item) => sum + item.amountKrw, 0);
   const onchainCount = currentDonations.filter((item) => Boolean(item.txHash)).length;
   const evidenceReadyCount = currentDonations.filter((item) => Boolean(item.txHash || item.evidenceHash)).length;
   const assetTotals = getAssetTotals(currentDonations);
-
-  if (portfolioTotalAmountEl) portfolioTotalAmountEl.textContent = formatKrwPlain(total);
-  renderAmountSubtext(portfolioTotalAmountEl, "portfolio-total-assets", formatAssetBreakdown(assetTotals));
 
   if (summaryEl) {
     summaryEl.innerHTML = `
@@ -813,21 +815,22 @@ function renderImpactChart(): void {
   const buckets = getImpactBuckets(impactPeriod);
   const amounts = buckets.map((bucket) => bucket.amount);
   const max = Math.max(...amounts, 1);
-  const periodTotal = amounts.reduce((sum, amount) => sum + amount, 0);
+  const displayTotal = getImpactDisplayTotal(buckets);
   const latest = amounts[amounts.length - 1] ?? 0;
   const previous = amounts[amounts.length - 2] ?? 0;
   const growthPct = previous > 0 ? Math.round(((latest - previous) / previous) * 100) : latest > 0 ? 100 : 0;
 
-  if (impactMainNumberEl) impactMainNumberEl.textContent = formatKrwPlain(periodTotal);
-  const periodDonations = currentDonations.filter((donation) => {
-    const donatedAt = new Date(donation.donatedAt);
-    return buckets.some((bucket) => donatedAt >= bucket.start && donatedAt < bucket.end);
-  });
-  renderAmountSubtext(impactMainNumberEl, "impact-asset-total", formatAssetBreakdown(getAssetTotals(periodDonations)));
+  if (impactMainNumberEl) impactMainNumberEl.textContent = formatKrwPlain(displayTotal);
   if (impactGrowthBadgeEl) {
-    const sign = growthPct > 0 ? "+" : "";
-    const arrow = growthPct >= 0 ? "↑" : "↓";
-    impactGrowthBadgeEl.textContent = `${arrow} ${sign}${growthPct}%`;
+    if (impactPeriod === "total") {
+      impactGrowthBadgeEl.textContent = "TOTAL";
+    } else if (impactPeriod === "ytd") {
+      impactGrowthBadgeEl.textContent = "YTD";
+    } else {
+      const sign = growthPct > 0 ? "+" : "";
+      const arrow = growthPct >= 0 ? "↑" : "↓";
+      impactGrowthBadgeEl.textContent = `${arrow} ${sign}${growthPct}%`;
+    }
   }
 
   impactChartAreaEl.innerHTML = buckets

@@ -4545,7 +4545,7 @@ input::placeholder {
   flex-wrap: wrap;
   gap: 12px;
   align-items: center;
-  margin-bottom: 34px;
+  margin-bottom: 16px;
 }
 
 .impact-headline strong {
@@ -4566,13 +4566,14 @@ input::placeholder {
 .period-segmented {
   display: inline-flex;
   gap: 4px;
+  flex-wrap: wrap;
   border-radius: 999px;
   background: #f3f4f6;
   padding: 4px;
 }
 
 .period-segmented button {
-  min-width: 56px;
+  min-width: 54px;
   border: 0;
   border-radius: 999px;
   background: transparent;
@@ -4581,6 +4582,18 @@ input::placeholder {
   font-size: 12px;
   font-weight: 900;
   cursor: pointer;
+}
+
+.impact-actions {
+  display: flex;
+  gap: 12px;
+  width: min(420px, 100%);
+  margin-bottom: 34px;
+}
+
+.impact-actions .portfolio-primary-btn,
+.impact-actions .portfolio-dark-btn {
+  flex: 1;
 }
 
 .period-segmented button.active {

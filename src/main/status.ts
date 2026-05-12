@@ -69,7 +69,7 @@ const credentialListEl = document.getElementById("credential-list");
 let totalDonatedForTax = 0;
 let currentDonations: LocalDonationRecord[] = [];
 let eventsBound = false;
-let impactPeriod: "total" | "ytd" | "day" | "week" | "month" = "total";
+let impactPeriod: "day" | "week" | "month" | "ytd" | "total" = "day";
 let timelinePage = 1;
 let credentialPage = 1;
 let tablePage = 1;
@@ -831,6 +831,15 @@ function renderImpactChart(): void {
       const arrow = growthPct >= 0 ? "↑" : "↓";
       impactGrowthBadgeEl.textContent = `${arrow} ${sign}${growthPct}%`;
     }
+  }
+
+  const showChart = impactPeriod !== "total";
+  impactChartAreaEl.classList.toggle("hidden", !showChart);
+  impactChartLabelsEl.classList.toggle("hidden", !showChart);
+  if (!showChart) {
+    impactChartAreaEl.innerHTML = "";
+    impactChartLabelsEl.innerHTML = "";
+    return;
   }
 
   impactChartAreaEl.innerHTML = buckets

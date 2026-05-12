@@ -1,6 +1,7 @@
 import { createRepositories } from "../api/provider";
 import { API_BASE } from "../services/apiBase";
 import { fetchDbDonations, patchDbDonation, upsertDbUser } from "../services/db";
+import { fetchTxStatus } from "../services/xrpl";
 import {
   listWalletLocalDonations,
   mergeDonationRecords,
@@ -54,12 +55,14 @@ const impactMainNumberEl = document.getElementById("impact-main-number");
 const impactGrowthBadgeEl = document.getElementById("impact-growth-badge");
 const impactChartAreaEl = document.getElementById("impact-chart-area");
 const impactChartLabelsEl = document.getElementById("impact-chart-labels");
+const impactPeriodControlEl = document.getElementById("impact-period-control");
 const tokenDistributionEl = document.getElementById("token-distribution");
 const credentialListEl = document.getElementById("credential-list");
 
 let totalDonatedForTax = 0;
 let currentDonations: LocalDonationRecord[] = [];
 let eventsBound = false;
+let impactPeriod: "day" | "week" | "month" = "month";
 
 const ASSET_KRW_RATES: Record<"XRP" | "RLUSD" | "USDC", number> = {
   XRP: 1000,
@@ -89,6 +92,14 @@ interface CredentialLookupResult {
   previousTxId?: string | null;
   uri?: string | null;
   flags?: number | null;
+  error?: string;
+}
+
+interface XrplTxLookupResult {
+  hash: string;
+  validated: boolean;
+  explorerUrl: string;
+  result?: any;
   error?: string;
 }
 
@@ -136,6 +147,45 @@ function getTestnetExplorerLink(txHash?: string): string {
   return txHash ? `https://testnet.xrpl.org/transactions/${encodeURIComponent(txHash)}` : "";
 }
 
+function getTxJson(result?: any): any {
+  return result?.tx_json ?? result?.tx ?? result?.transaction ?? result;
+}
+
+function getTxMeta(result?: any): any {
+  return result?.meta ?? result?.metaData ?? result?.metadata ?? {};
+}
+
+function getPaymentAmountLabel(amount: any): string {
+  if (!amount) return "-";
+  if (typeof amount === "string") return `${formatAssetAmount(Number(amount) / 1_000_000)} XRP`;
+  const value = Number(amount.value ?? 0);
+  const currency = amount.currency ?? "Issued asset";
+  return `${formatAssetAmount(value)} ${currency}`;
+}
+
+function decodeMemoHex(hex?: string): string {
+  if (!hex) return "-";
+  try {
+    const clean = hex.replace(/[^0-9a-f]/gi, "");
+    const bytes = clean.match(/.{1,2}/g)?.map((byte) => Number.parseInt(byte, 16)) ?? [];
+    return new TextDecoder().decode(new Uint8Array(bytes));
+  } catch {
+    return hex;
+  }
+}
+
+function parseTxMemos(txJson: any): string[] {
+  const memos = Array.isArray(txJson?.Memos) ? txJson.Memos : [];
+  return memos
+    .map((item: any) => item?.Memo)
+    .filter(Boolean)
+    .map((memo: any) => {
+      const type = decodeMemoHex(memo.MemoType);
+      const data = decodeMemoHex(memo.MemoData);
+      return type && type !== "-" ? `${type}: ${data}` : data;
+    });
+}
+
 function credentialStatusLabel(status?: LocalDonationRecord["credentialStatus"]): string {
   switch (status) {
     case "accepted":
@@ -156,6 +206,42 @@ function credentialLedgerLabel(credential: CredentialLookupResult | null): strin
   if (credential.accepted) return "Ledger verified";
   if (credential.exists) return "Issued, waiting for accept";
   return "Not found on ledger";
+}
+
+function getImpactBuckets(period: typeof impactPeriod): Array<{ label: string; amount: number; start: Date; end: Date }> {
+  const now = new Date();
+  const buckets = Array.from({ length: 7 }, (_, index) => {
+    const offset = 6 - index;
+    let start: Date;
+    let end: Date;
+    let label: string;
+
+    if (period === "day") {
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - offset);
+      end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 1);
+      label = start.toLocaleDateString("ko-KR", { month: "numeric", day: "numeric" });
+    } else if (period === "week") {
+      const day = now.getDay() === 0 ? 6 : now.getDay() - 1;
+      const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day - offset * 7);
+      start = monday;
+      end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 7);
+      label = `${start.toLocaleDateString("ko-KR", { month: "numeric", day: "numeric" })}주`;
+    } else {
+      start = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+      end = new Date(start.getFullYear(), start.getMonth() + 1, 1);
+      label = start.toLocaleDateString("en-US", { month: "short" });
+    }
+
+    return { label, amount: 0, start, end };
+  });
+
+  currentDonations.forEach((donation) => {
+    const donatedAt = new Date(donation.donatedAt);
+    const bucket = buckets.find((item) => donatedAt >= item.start && donatedAt < item.end);
+    if (bucket) bucket.amount += donation.amountKrw;
+  });
+
+  return buckets;
 }
 
 async function lookupCredentialOnLedger(donation: LocalDonationRecord): Promise<CredentialLookupResult | null> {
@@ -473,9 +559,20 @@ function bindEvents(): void {
     const button = (event.target as HTMLElement | null)?.closest<HTMLButtonElement>(".credential-detail-btn");
     if (button?.dataset.donationId) void openCredentialDetail(button.dataset.donationId);
   });
+  document.addEventListener("click", (event) => {
+    const button = (event.target as HTMLElement | null)?.closest<HTMLButtonElement>(".payment-detail-btn");
+    if (button?.dataset.donationId) void openPaymentDetail(button.dataset.donationId);
+  });
   document.addEventListener("click", closeCredentialDetail);
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") document.querySelector(".credential-detail-modal")?.remove();
+    if (event.key === "Escape") document.querySelector(".credential-detail-modal, .payment-detail-modal")?.remove();
+  });
+  impactPeriodControlEl?.addEventListener("click", (event) => {
+    const button = (event.target as HTMLElement | null)?.closest<HTMLButtonElement>("button[data-period]");
+    if (!button) return;
+    impactPeriod = (button.dataset.period as typeof impactPeriod) ?? "month";
+    impactPeriodControlEl.querySelectorAll("button").forEach((item) => item.classList.toggle("active", item === button));
+    renderImpactChart();
   });
 }
 
@@ -555,11 +652,6 @@ function renderSummary(profileName: string, tier: string, walletDbCount: number)
   }, {});
 
   if (portfolioTotalAmountEl) portfolioTotalAmountEl.textContent = formatKrwPlain(total);
-  if (impactMainNumberEl) impactMainNumberEl.textContent = formatKrwPlain(total);
-  if (impactGrowthBadgeEl) {
-    const growth = currentDonations.length > 1 ? "+10%" : "+0%";
-    impactGrowthBadgeEl.textContent = `↑ ${growth}`;
-  }
 
   if (summaryEl) {
     summaryEl.innerHTML = `
@@ -588,20 +680,23 @@ function renderSummary(profileName: string, tier: string, walletDbCount: number)
 
 function renderImpactChart(): void {
   if (!impactChartAreaEl || !impactChartLabelsEl) return;
-  const monthly = new Array(7).fill(0);
-  const now = new Date();
-  currentDonations.forEach((donation) => {
-    const donatedAt = new Date(donation.donatedAt);
-    const diff =
-      (now.getFullYear() - donatedAt.getFullYear()) * 12 +
-      (now.getMonth() - donatedAt.getMonth());
-    const index = 6 - diff;
-    if (index >= 0 && index < monthly.length) monthly[index] += donation.amountKrw;
-  });
-  const max = Math.max(...monthly, 1);
+  const buckets = getImpactBuckets(impactPeriod);
+  const amounts = buckets.map((bucket) => bucket.amount);
+  const max = Math.max(...amounts, 1);
+  const periodTotal = amounts.reduce((sum, amount) => sum + amount, 0);
+  const latest = amounts[amounts.length - 1] ?? 0;
+  const previous = amounts[amounts.length - 2] ?? 0;
+  const growthPct = previous > 0 ? Math.round(((latest - previous) / previous) * 100) : latest > 0 ? 100 : 0;
 
-  impactChartAreaEl.innerHTML = monthly
-    .map((amount, index) => {
+  if (impactMainNumberEl) impactMainNumberEl.textContent = formatKrwPlain(periodTotal);
+  if (impactGrowthBadgeEl) {
+    const sign = growthPct > 0 ? "+" : "";
+    const arrow = growthPct >= 0 ? "↑" : "↓";
+    impactGrowthBadgeEl.textContent = `${arrow} ${sign}${growthPct}%`;
+  }
+
+  impactChartAreaEl.innerHTML = buckets
+    .map(({ amount }) => {
       const height = amount > 0 ? Math.max(18, Math.round((amount / max) * 85)) : 4;
       const activeClass = amount > 0 ? "solid" : "empty";
       const valueLabel = amount > 0 ? `<span class="bar-value">${formatKrwPlain(amount)}</span><span class="bar-indicator" aria-hidden="true"></span>` : "";
@@ -609,10 +704,7 @@ function renderImpactChart(): void {
     })
     .join("");
 
-  impactChartLabelsEl.innerHTML = Array.from({ length: 7 }, (_, index) => {
-    const date = new Date(now.getFullYear(), now.getMonth() - (6 - index), 1);
-    return `<span>${date.toLocaleDateString("en-US", { month: "short" })}</span>`;
-  }).join("");
+  impactChartLabelsEl.innerHTML = buckets.map((bucket) => `<span>${escapeHtml(bucket.label)}</span>`).join("");
 }
 
 function renderTokenDistribution(assetTotals: Record<string, AssetDistribution>): void {
@@ -709,6 +801,96 @@ function renderCredentialLedgerSummary(credential: CredentialLookupResult | null
   `;
 }
 
+function renderPaymentLedgerSummary(tx: XrplTxLookupResult | null): string {
+  const result = getTxMeta(tx?.result)?.TransactionResult ?? tx?.result?.engine_result ?? "-";
+  const txJson = getTxJson(tx?.result);
+  const amount = getPaymentAmountLabel(txJson?.Amount);
+  return `
+    <div class="credential-ledger-summary">
+      <article>
+        <span>Payment status</span>
+        <strong><em class="credential-status-dot ${tx?.validated ? "accepted" : "failed"}"></em>${tx?.validated ? "Validated" : "Not validated"}</strong>
+      </article>
+      <article>
+        <span>Amount</span>
+        <strong>${escapeHtml(amount)}</strong>
+      </article>
+      <article>
+        <span>Result</span>
+        <strong>${escapeHtml(result)}</strong>
+      </article>
+    </div>
+  `;
+}
+
+async function openPaymentDetail(donationId: string): Promise<void> {
+  const donation = currentDonations.find((item) => item.id === donationId || item.dbId === donationId);
+  if (!donation?.txHash) return;
+
+  document.querySelectorAll(".credential-detail-modal, .payment-detail-modal").forEach((modal) => modal.remove());
+  let tx: XrplTxLookupResult | null = null;
+  try {
+    tx = (await fetchTxStatus(donation.txHash)) as XrplTxLookupResult;
+  } catch (error) {
+    tx = {
+      hash: donation.txHash,
+      validated: false,
+      explorerUrl: getTestnetExplorerLink(donation.txHash),
+      error: error instanceof Error ? error.message : "Payment transaction lookup failed",
+    };
+  }
+
+  const txJson = getTxJson(tx.result);
+  const meta = getTxMeta(tx.result);
+  const memos = parseTxMemos(txJson);
+  const amount = getPaymentAmountLabel(txJson?.Amount);
+  const deliveredAmount = getPaymentAmountLabel(meta?.delivered_amount ?? meta?.DeliveredAmount);
+  const feeXrp = txJson?.Fee ? `${formatAssetAmount(Number(txJson.Fee) / 1_000_000)} XRP` : "-";
+  const assetIssuer = typeof txJson?.Amount === "object" ? txJson.Amount.issuer : undefined;
+  const verificationKey = donation.receiptId ?? donation.evidenceHash ?? donation.txHash ?? donation.id;
+  const verifyLink = `./verify.html?id=${encodeURIComponent(verificationKey)}`;
+
+  const modal = document.createElement("div");
+  modal.className = "modal-backdrop payment-detail-modal";
+  modal.innerHTML = `
+    <article class="modal-panel credential-detail-panel" role="dialog" aria-modal="true" aria-labelledby="payment-detail-title">
+      <div class="modal-head">
+        <div>
+          <p class="modal-kicker">XRPL Payment Transaction</p>
+          <h3 id="payment-detail-title">${escapeHtml(shortHash(donation.txHash))}</h3>
+          <p>${escapeHtml(tx.validated ? "Payment validated" : "Payment not validated")} · ${escapeHtml(formatDate(donation.donatedAt))}</p>
+        </div>
+        <button class="modal-close payment-detail-close" type="button" aria-label="Close">&times;</button>
+      </div>
+      ${renderPaymentLedgerSummary(tx)}
+      <div class="credential-detail-grid">
+        ${renderCredentialDetailRow("Transaction Type", txJson?.TransactionType)}
+        ${renderCredentialDetailRow("TX Hash", donation.txHash, tx.explorerUrl)}
+        ${renderCredentialDetailRow("Result", meta?.TransactionResult ?? tx.result?.engine_result)}
+        ${renderCredentialDetailRow("Sender", txJson?.Account)}
+        ${renderCredentialDetailRow("Destination", txJson?.Destination)}
+        ${renderCredentialDetailRow("Amount", amount)}
+        ${renderCredentialDetailRow("Delivered Amount", deliveredAmount)}
+        ${renderCredentialDetailRow("Asset Issuer", assetIssuer)}
+        ${renderCredentialDetailRow("Fee", feeXrp)}
+        ${renderCredentialDetailRow("Ledger Index", tx.result?.ledger_index ?? txJson?.ledger_index)}
+        ${renderCredentialDetailRow("Close Time", tx.result?.close_time_iso)}
+        ${renderCredentialDetailRow("Receipt ID", donation.receiptId)}
+        ${renderCredentialDetailRow("Evidence Hash", donation.evidenceHash)}
+        ${renderCredentialDetailRow("Compliance Hash", donation.complianceHash)}
+        ${renderCredentialDetailRow("Memo", memos.length > 0 ? memos.join(" | ") : "-")}
+      </div>
+      <div class="modal-actions">
+        <a class="primary-btn" href="${escapeHtml(tx.explorerUrl)}" target="_blank" rel="noreferrer">Open XRPL Explorer</a>
+        <a class="ghost-btn" href="${escapeHtml(verifyLink)}" target="_blank" rel="noreferrer">Open verification page</a>
+      </div>
+      ${tx.error ? `<p class="tax-disclaimer mt-12">Payment lookup: ${escapeHtml(tx.error)}</p>` : ""}
+    </article>
+  `;
+  document.body.appendChild(modal);
+  modal.querySelector<HTMLButtonElement>(".payment-detail-close")?.focus();
+}
+
 async function openCredentialDetail(donationId: string): Promise<void> {
   const donation = currentDonations.find((item) => item.id === donationId || item.dbId === donationId);
   if (!donation) return;
@@ -759,6 +941,7 @@ async function openCredentialDetail(donationId: string): Promise<void> {
       </div>
       <div class="modal-actions">
         <a class="primary-btn" href="${escapeHtml(verifyLink)}" target="_blank" rel="noreferrer">Open verification page</a>
+        ${donation.txHash ? `<button class="ghost-btn payment-detail-btn" type="button" data-donation-id="${escapeHtml(donation.id)}">Open Payment detail</button>` : ""}
         ${acceptLink ? `<a class="ghost-btn" href="${escapeHtml(acceptLink)}" target="_blank" rel="noreferrer">Open Credential TX</a>` : ""}
       </div>
       ${credential?.error ? `<p class="tax-disclaimer mt-12">Ledger lookup: ${escapeHtml(credential.error)}</p>` : ""}
@@ -770,8 +953,13 @@ async function openCredentialDetail(donationId: string): Promise<void> {
 
 function closeCredentialDetail(event: Event): void {
   const target = event.target as HTMLElement | null;
-  if (target?.classList.contains("credential-detail-modal") || target?.closest(".credential-detail-close")) {
-    document.querySelector(".credential-detail-modal")?.remove();
+  if (
+    target?.classList.contains("credential-detail-modal") ||
+    target?.closest(".credential-detail-close") ||
+    target?.classList.contains("payment-detail-modal") ||
+    target?.closest(".payment-detail-close")
+  ) {
+    document.querySelectorAll(".credential-detail-modal, .payment-detail-modal").forEach((modal) => modal.remove());
   }
 }
 
@@ -807,8 +995,13 @@ function renderTable(): void {
   if (!tableEl) return;
   const rows = currentDonations
     .map((donation) => {
-      const txLink = donation.txHash
-        ? `<a class="text-link" href="https://testnet.xrpl.org/transactions/${donation.txHash}" target="_blank" rel="noreferrer">${donation.txHash}</a>`
+      const txCell = donation.txHash
+        ? `
+          <div class="tx-cell-actions">
+            <a class="text-link" href="${escapeHtml(getTestnetExplorerLink(donation.txHash))}" target="_blank" rel="noreferrer">${escapeHtml(shortHash(donation.txHash))}</a>
+            <button class="inline-link-btn payment-detail-btn" type="button" data-donation-id="${escapeHtml(donation.id)}">상세보기</button>
+          </div>
+        `
         : "-";
       const proofStatus =
         donation.proofMintStatus === "credential_accepted"
@@ -826,7 +1019,7 @@ function renderTable(): void {
           <td>${donation.asset ? `${donation.amountAsset ?? "-"} ${donation.asset}<br /><span class="trust">${formatKrwPlain(donation.amountKrw)}</span>` : formatKrw(donation.amountKrw)}</td>
           <td>${stepToKorean(donation.settlementStatus)} / ${donation.validationStatus ?? "-"}</td>
           <td>${proofStatus}</td>
-          <td>${txLink}</td>
+          <td>${txCell}</td>
           <td>
             <button class="btn btn-secondary receipt-request-btn" type="button" data-receipt-id="${donation.id}" ${donation.txHash ? "" : "disabled"}>
               ${proofStatus === "Pending" ? "대기" : "검증 보기"}

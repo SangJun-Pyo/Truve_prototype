@@ -60,7 +60,11 @@
           <article class="portfolio-card impact-card">
             <div class="portfolio-card-head">
               <h2>Impact Analysis</h2>
-              <span class="portfolio-pill">Monthly</span>
+              <div id="impact-period-control" class="period-segmented" aria-label="Impact analysis period">
+                <button type="button" data-period="day">Day</button>
+                <button type="button" data-period="week">Week</button>
+                <button class="active" type="button" data-period="month">Month</button>
+              </div>
             </div>
             <div class="impact-headline">
               <strong id="impact-main-number">0 KRW</strong>

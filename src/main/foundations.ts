@@ -238,6 +238,8 @@ interface CampaignEvent {
   tags: string[];
   reportLabel: string;
   visual: string;
+  imageSrc: string;
+  imageAlt: string;
 }
 
 const CAMPAIGN_STORAGE_KEY = "truve_selected_campaign_v1";
@@ -259,6 +261,8 @@ const campaignEvents: CampaignEvent[] = [
     tags: ["식수위생", "모금중", "굿네이버스"],
     reportLabel: "제안서",
     visual: "water",
+    imageSrc: "/campaigns/chad-water.webp",
+    imageAlt: "식수 펌프에서 물을 사용하는 아이들",
   },
   {
     id: "gn-ethiopia-school-2026",
@@ -275,6 +279,8 @@ const campaignEvents: CampaignEvent[] = [
     tags: ["교육", "모금중", "학교건축"],
     reportLabel: "제안서",
     visual: "school",
+    imageSrc: "/campaigns/ethiopia-school.webp",
+    imageAlt: "굿네이버스 교육 지원을 받는 교실의 아이들",
   },
   {
     id: "gn-rwanda-school-report-2025",
@@ -291,6 +297,8 @@ const campaignEvents: CampaignEvent[] = [
     tags: ["교육", "결과보고", "학교건축"],
     reportLabel: "결과보고서",
     visual: "school",
+    imageSrc: "/campaigns/rwanda-school.webp",
+    imageAlt: "르완다 학교 앞에 선 학생들",
   },
   {
     id: "gn-malawi-water-report-2024",
@@ -307,6 +315,8 @@ const campaignEvents: CampaignEvent[] = [
     tags: ["식수위생", "결과보고", "굿네이버스"],
     reportLabel: "결과보고서",
     visual: "water",
+    imageSrc: "/campaigns/malawi-water.webp",
+    imageAlt: "말라위 식수 펌프에서 물을 마시는 아이",
   },
 ];
 
@@ -477,6 +487,7 @@ function renderCampaignEventCard(campaign: CampaignEvent): string {
   return `
     <article class="card explore-card campaign-card" data-campaign-card-id="${campaign.id}">
       <div class="campaign-visual campaign-visual-${campaign.visual}">
+        <img src="${campaign.imageSrc}" alt="${campaign.imageAlt}" loading="lazy" />
         <span>${campaign.reportLabel}</span>
       </div>
       <div class="card-content">

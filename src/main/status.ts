@@ -1,5 +1,6 @@
 import { createRepositories } from "../api/provider";
 import { API_BASE } from "../services/apiBase";
+import { clearAuthSession, getAuthSession, sessionDisplayName } from "../services/auth";
 import { fetchDbDonations, patchDbDonation, upsertDbUser } from "../services/db";
 import { fetchTxStatus } from "../services/xrpl";
 import {
@@ -31,6 +32,14 @@ const connectBtnEl = document.getElementById("status-xaman-connect-btn") as HTML
 const disconnectBtnEl = document.getElementById("status-xaman-disconnect-btn") as HTMLButtonElement | null;
 const refreshBtnEl = document.getElementById("status-refresh-btn") as HTMLButtonElement | null;
 const qrWrapEl = document.getElementById("status-xaman-qr-wrap");
+const accountBadgeEl = document.getElementById("status-account-badge");
+const accountAvatarEl = document.getElementById("status-account-avatar");
+const accountNameEl = document.getElementById("status-account-name");
+const accountEmailEl = document.getElementById("status-account-email");
+const accountRoleEl = document.getElementById("status-account-role");
+const accountLoginLinkEl = document.getElementById("status-account-login-link");
+const accountLogoutBtnEl = document.getElementById("status-account-logout-btn") as HTMLButtonElement | null;
+const accountDisconnectBtnEl = document.getElementById("status-account-disconnect-btn") as HTMLButtonElement | null;
 
 const taxDonorTypeEl = document.getElementById("status-tax-donor-type") as HTMLSelectElement | null;
 const taxIncomeRangeEl = document.getElementById("status-tax-income-range") as HTMLSelectElement | null;
@@ -76,6 +85,39 @@ const ASSET_KRW_RATES: Record<"XRP" | "RLUSD" | "USDC", number> = {
   RLUSD: 1400,
   USDC: 1400,
 };
+
+function renderAccountState(): void {
+  const session = getAuthSession();
+  if (!accountBadgeEl || !accountNameEl || !accountEmailEl || !accountRoleEl || !accountAvatarEl) return;
+
+  if (!session) {
+    accountBadgeEl.textContent = "LOGIN REQUIRED";
+    accountBadgeEl.className = "status-badge error";
+    accountAvatarEl.textContent = "T";
+    accountAvatarEl.innerHTML = "T";
+    accountNameEl.textContent = "로그인이 필요합니다";
+    accountEmailEl.textContent = "Google 계정으로 로그인하면 기부 전 확인 이름을 자동으로 연결할 수 있습니다.";
+    accountRoleEl.textContent = "-";
+    accountLoginLinkEl?.classList.remove("hidden");
+    accountLogoutBtnEl?.classList.add("hidden");
+    accountDisconnectBtnEl?.classList.add("hidden");
+    return;
+  }
+
+  accountBadgeEl.textContent = session.role === "operator" ? "OPERATOR" : "USER";
+  accountBadgeEl.className = "status-badge success";
+  if (session.picture) {
+    accountAvatarEl.innerHTML = `<img src="${session.picture}" alt="" />`;
+  } else {
+    accountAvatarEl.textContent = sessionDisplayName(session).slice(0, 1);
+  }
+  accountNameEl.textContent = sessionDisplayName(session);
+  accountEmailEl.textContent = session.email;
+  accountRoleEl.textContent = session.role === "operator" ? "운영자" : "일반 유저";
+  accountLoginLinkEl?.classList.add("hidden");
+  accountLogoutBtnEl?.classList.remove("hidden");
+  accountDisconnectBtnEl?.classList.remove("hidden");
+}
 
 interface AssetDistribution {
   amount: number;
@@ -618,6 +660,17 @@ async function calculateTaxSimulation(): Promise<void> {
 function bindEvents(): void {
   if (eventsBound) return;
   eventsBound = true;
+  accountLogoutBtnEl?.addEventListener("click", () => {
+    clearAuthSession();
+    renderAccountState();
+    window.location.reload();
+  });
+  accountDisconnectBtnEl?.addEventListener("click", () => {
+    const confirmed = window.confirm("이 브라우저에서 Google 계정 연결을 해제할까요? 기부 기록과 온체인 Credential은 삭제되지 않습니다.");
+    if (!confirmed) return;
+    clearAuthSession();
+    window.location.href = "./auth.html";
+  });
   taxDonorTypeEl?.addEventListener("change", () => {
     renderTaxFormState();
     resetTaxResult();
@@ -1182,6 +1235,7 @@ async function init(): Promise<void> {
   totalDonatedForTax = currentDonations.reduce((sum, item) => sum + item.amountKrw, 0);
   renderTaxFormState();
   resetTaxResult();
+  renderAccountState();
   renderSummary(profile?.displayName ?? "Demo donor", profile?.tier ?? "seed", dbDonations.length);
   renderTimeline();
   renderTable();

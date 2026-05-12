@@ -47,6 +47,16 @@ if (googleClientId && !showDevAuth) {
   devActionsEl?.classList.add("hidden");
 }
 
+function updateLoginReadyState(): void {
+  const ready = Boolean(agreeEl?.checked);
+  loginSlotEl?.classList.toggle("auth-login-disabled", !ready);
+  if (!ready) {
+    loginSlotEl?.setAttribute("aria-disabled", "true");
+  } else {
+    loginSlotEl?.removeAttribute("aria-disabled");
+  }
+}
+
 function nextUrl(): string {
   const params = new URLSearchParams(window.location.search);
   return params.get("next") || "./status.html";
@@ -138,10 +148,12 @@ logoutBtnEl?.addEventListener("click", () => {
 });
 
 agreeEl?.addEventListener("change", () => {
+  updateLoginReadyState();
   if (agreeEl.checked) setStatus("확인되었습니다. Google 계정으로 계속 진행할 수 있습니다.", "success");
 });
 
 window.addEventListener("load", () => {
+  updateLoginReadyState();
   initGoogleLogin();
   window.setTimeout(initGoogleLogin, 600);
 });

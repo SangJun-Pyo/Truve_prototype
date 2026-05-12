@@ -33,14 +33,14 @@ if (accountPanelEl) {
       </section>
       <section class="auth-help-grid">
         <article>
-          <h3>비밀번호 찾기</h3>
-          <p>Truve는 Google 로그인만 사용하므로 별도 비밀번호를 저장하지 않습니다. 계정 복구는 Google에서 진행합니다.</p>
-          <a class="ghost-btn" href="https://accounts.google.com/signin/recovery" target="_blank" rel="noreferrer">Google 계정 복구</a>
+          <h3>기부 현황에서 관리</h3>
+          <p>내 기부 현황 페이지에서 Google 계정, Xaman 지갑, Evidence, Credential 상태를 한 번에 확인할 수 있습니다.</p>
+          <a class="ghost-btn" href="./status.html#account-card">기부 현황으로 이동</a>
         </article>
         <article>
-          <h3>비밀번호 수정</h3>
-          <p>비밀번호 변경과 2단계 인증 설정은 Google 계정 보안 페이지에서 관리합니다.</p>
-          <a class="ghost-btn" href="https://myaccount.google.com/security" target="_blank" rel="noreferrer">Google 보안 설정</a>
+          <h3>계정 연결 해제</h3>
+          <p>이 브라우저에서 Google 계정 연결을 해제합니다. 기부 기록과 온체인 Credential은 삭제되지 않습니다.</p>
+          <button id="disconnect-account-btn" class="ghost-btn" type="button">계정 연결 해제</button>
         </article>
       </section>
       <div class="auth-actions">
@@ -50,6 +50,12 @@ if (accountPanelEl) {
     `;
 
     document.getElementById("logout-btn")?.addEventListener("click", () => {
+      clearAuthSession();
+      window.location.href = "./auth.html";
+    });
+    document.getElementById("disconnect-account-btn")?.addEventListener("click", () => {
+      const confirmed = window.confirm("이 브라우저에서 Google 계정 연결을 해제할까요? 기부 기록과 온체인 Credential은 삭제되지 않습니다.");
+      if (!confirmed) return;
       clearAuthSession();
       window.location.href = "./auth.html";
     });

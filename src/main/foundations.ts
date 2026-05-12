@@ -19,6 +19,7 @@ import {
 import { issueDonationCredential } from "../services/credentials";
 import { upsertLocalDonation, type LocalDonationRecord } from "../services/donations";
 import { API_BASE } from "../services/apiBase";
+import { getAuthSession } from "../services/auth";
 import { clearWalletSession, getWalletSession, setWalletSession } from "../services/wallet";
 import { createPaymentPayload, createSignInPayload, waitForPayloadResolution } from "../services/xaman";
 import {
@@ -843,7 +844,16 @@ function updatePreflightState(): void {
   if (preflightConfirmBtnEl) preflightConfirmBtnEl.disabled = !isPreflightComplete();
 }
 
+function prefillPreflightFromAuth(): void {
+  const session = getAuthSession();
+  if (!session || !preflightRealNameEl) return;
+  if (!preflightRealNameEl.value.trim()) {
+    preflightRealNameEl.value = session.name;
+  }
+}
+
 function openPreflightModal(): void {
+  prefillPreflightFromAuth();
   preflightModalEl?.classList.remove("hidden");
   updatePreflightState();
   preflightRealNameEl?.focus();

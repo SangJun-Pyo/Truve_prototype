@@ -1471,6 +1471,12 @@ body::before {
   min-height: 44px;
 }
 
+.google-login-slot.auth-login-disabled {
+  opacity: 0.48;
+  pointer-events: none;
+  filter: grayscale(1);
+}
+
 .google-fallback-btn {
   min-height: 48px;
   border: 1px solid rgba(203, 213, 225, 0.95);
@@ -1579,6 +1585,36 @@ body::before {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.account-avatar-sm {
+  width: 48px;
+  height: 48px;
+  font-size: 18px;
+}
+
+.account-inline-profile {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+}
+
+.account-inline-profile strong {
+  display: block;
+  color: var(--text-primary);
+  font-size: 17px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.account-inline-profile p {
+  margin: 4px 0 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
 }
 
 .auth-help-grid {

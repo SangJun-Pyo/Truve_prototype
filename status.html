@@ -58,6 +58,29 @@
             <div id="status-xaman-qr-wrap" class="xaman-qr-wrap"></div>
           </article>
 
+          <article id="account-card" class="portfolio-card account-sync-card">
+            <div class="portfolio-card-head">
+              <div>
+                <h2>내 정보</h2>
+                <p>Google 계정과 Truve 이용 권한을 확인합니다.</p>
+              </div>
+              <span id="status-account-badge" class="status-badge error">LOGIN REQUIRED</span>
+            </div>
+            <div class="account-inline-profile">
+              <div id="status-account-avatar" class="account-avatar account-avatar-sm" aria-hidden="true">T</div>
+              <div>
+                <strong id="status-account-name">로그인이 필요합니다</strong>
+                <p id="status-account-email">Google 계정으로 로그인하면 기부 전 확인 이름을 자동으로 연결할 수 있습니다.</p>
+              </div>
+            </div>
+            <div class="portfolio-meta-row"><span>권한</span><strong id="status-account-role">-</strong></div>
+            <div class="portfolio-button-row">
+              <a id="status-account-login-link" class="ghost-btn" href="./auth.html?next=./status.html%23account-card">Google 로그인</a>
+              <button id="status-account-logout-btn" class="ghost-btn hidden" type="button">로그아웃</button>
+              <button id="status-account-disconnect-btn" class="ghost-btn hidden" type="button">계정 연결 해제</button>
+            </div>
+          </article>
+
           <article class="portfolio-card">
             <div class="portfolio-card-head">
               <h2>Recent Evidence</h2>

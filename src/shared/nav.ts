@@ -23,7 +23,7 @@ export function renderTopNav(activeTabId: string): string {
     return `<a class="${activeClass}" href="${tab.href}">${tab.label}</a>`;
   }).join("");
   const authClass = activeTabId === "auth" || activeTabId === "account" ? "tab-link auth-nav-link is-active" : "tab-link auth-nav-link";
-  const authHref = session ? "./account.html" : "./auth.html";
+  const authHref = session ? "./status.html#account-card" : "./auth.html";
   const authLabel = session ? "내 정보" : "로그인";
 
   return `

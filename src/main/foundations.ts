@@ -3,6 +3,7 @@ import type { DonationBundle, Foundation } from "../api";
 import { createRepositories } from "../api/provider";
 import { renderBundleCard } from "../components/bundleCard";
 import { categoryToKorean, renderFoundationCard } from "../components/explorerCard";
+import { getCampaignDetailHref } from "../data/campaignDetails";
 import { saveDbDonation, upsertDbUser, type DonationCredentialMeta } from "../services/db";
 import {
   addFoundationToCart,
@@ -122,7 +123,7 @@ document.querySelector<HTMLElement>(".donation-console .tax-card")?.remove();
 
 let foundations: Foundation[] = [];
 let bundles: DonationBundle[] = [];
-let activeTab: "foundation" | "bundle" | "event" = "foundation";
+let activeTab: "foundation" | "bundle" | "event" = window.location.hash === "#campaigns" ? "event" : "foundation";
 let foundationPage = 1;
 let lastDonationRecord: LocalDonationRecord | null = null;
 let donationDestination = {
@@ -471,6 +472,7 @@ function renderCampaignEventCard(campaign: CampaignEvent): string {
   const progress = getCampaignProgress(campaign);
   const statusLabel = campaign.status === "fundraising" ? "모금중" : "결과보고 공개";
   const selected = getSelectedCampaignId() === campaign.id;
+  const detailHref = getCampaignDetailHref(campaign.id);
 
   return `
     <article class="card explore-card campaign-card" data-campaign-card-id="${campaign.id}">
@@ -507,7 +509,8 @@ function renderCampaignEventCard(campaign: CampaignEvent): string {
           <span>${campaign.evidence}</span>
         </div>
         <div class="card-footer">
-          <div class="campaign-tags">${campaign.tags.map((tag) => `<span>${tag}</span>`).join("")}</div>
+            <div class="campaign-tags">${campaign.tags.map((tag) => `<span>${tag}</span>`).join("")}</div>
+            <a class="secondary-link-button" href="./${detailHref}">상세보기</a>
           <button class="add-btn add-campaign-btn ${selected ? "is-added" : ""}" data-campaign-id="${campaign.id}" data-foundation-id="${campaign.foundationId}" type="button" aria-label="캠페인 기부 담기">
             ${
               selected

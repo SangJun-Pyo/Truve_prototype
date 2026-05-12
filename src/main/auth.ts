@@ -1,5 +1,6 @@
 import { renderTopNav } from "../shared/nav";
 import {
+  clearAuthSession,
   createDemoGoogleSession,
   createDemoOperatorSession,
   decodeGoogleCredential,
@@ -32,8 +33,10 @@ if (navRoot) navRoot.innerHTML = renderTopNav("auth");
 
 const loginSlotEl = document.getElementById("google-login-slot");
 const devActionsEl = document.getElementById("auth-dev-actions");
+const sessionActionsEl = document.getElementById("auth-session-actions");
 const demoLoginBtnEl = document.getElementById("google-demo-login-btn") as HTMLButtonElement | null;
 const demoOperatorLoginBtnEl = document.getElementById("google-demo-operator-login-btn") as HTMLButtonElement | null;
+const logoutBtnEl = document.getElementById("auth-logout-btn") as HTMLButtonElement | null;
 const agreeEl = document.getElementById("auth-terms-agree") as HTMLInputElement | null;
 const statusEl = document.getElementById("auth-status");
 const existingSession = getAuthSession();
@@ -72,6 +75,9 @@ function completeLogin(session: TruveAuthSession): void {
 
 function initGoogleLogin(): void {
   if (existingSession) {
+    loginSlotEl?.classList.add("hidden");
+    devActionsEl?.classList.add("hidden");
+    sessionActionsEl?.classList.remove("hidden");
     setStatus(`${existingSession.name} 계정으로 이미 로그인되어 있습니다.`, "success");
     return;
   }
@@ -124,6 +130,11 @@ demoLoginBtnEl?.addEventListener("click", () => {
 
 demoOperatorLoginBtnEl?.addEventListener("click", () => {
   completeLogin(createDemoOperatorSession());
+});
+
+logoutBtnEl?.addEventListener("click", () => {
+  clearAuthSession();
+  window.location.href = "./auth.html";
 });
 
 agreeEl?.addEventListener("change", () => {

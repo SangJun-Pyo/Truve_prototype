@@ -1,4 +1,4 @@
-import { isOperatorSession } from "../services/auth";
+import { getAuthSession, isOperatorSession } from "../services/auth";
 
 type Tab = {
   id: string;
@@ -16,12 +16,15 @@ const TABS: Tab[] = [
 ];
 
 export function renderTopNav(activeTabId: string): string {
+  const session = getAuthSession();
   const visibleTabs = TABS.filter((tab) => tab.id !== "admin" || isOperatorSession());
   const links = visibleTabs.map((tab) => {
     const activeClass = tab.id === activeTabId ? "tab-link is-active" : "tab-link";
     return `<a class="${activeClass}" href="${tab.href}">${tab.label}</a>`;
   }).join("");
   const authClass = activeTabId === "auth" || activeTabId === "account" ? "tab-link auth-nav-link is-active" : "tab-link auth-nav-link";
+  const authHref = session ? "./account.html" : "./auth.html";
+  const authLabel = session ? "내 정보" : "로그인";
 
   return `
     <header class="app-header glass-nav">
@@ -38,7 +41,7 @@ export function renderTopNav(activeTabId: string): string {
       <p class="sub-copy">XRPL Donation Credential infrastructure</p>
       <nav class="tab-nav" aria-label="Main Navigation">
         ${links}
-        <a class="${authClass}" href="./auth.html">로그인</a>
+        <a class="${authClass}" href="${authHref}">${authLabel}</a>
       </nav>
     </header>
   `;

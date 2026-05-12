@@ -63,6 +63,13 @@ let totalDonatedForTax = 0;
 let currentDonations: LocalDonationRecord[] = [];
 let eventsBound = false;
 let impactPeriod: "day" | "week" | "month" = "month";
+let timelinePage = 1;
+let credentialPage = 1;
+let tablePage = 1;
+
+const TIMELINE_PAGE_SIZE = 4;
+const CREDENTIAL_PAGE_SIZE = 3;
+const TABLE_PAGE_SIZE = 8;
 
 const ASSET_KRW_RATES: Record<"XRP" | "RLUSD" | "USDC", number> = {
   XRP: 1000,
@@ -74,6 +81,8 @@ interface AssetDistribution {
   amount: number;
   krw: number;
 }
+
+type StatusPageTarget = "timeline" | "credentials" | "table";
 
 interface TaxSimulationResult {
   estimated_deduction_min: number;
@@ -127,6 +136,38 @@ function getDisplayAssetAmount(donation: LocalDonationRecord): number {
     return donation.amountAsset;
   }
   return donation.amountKrw / ASSET_KRW_RATES[donation.asset];
+}
+
+function getAssetTotals(donations: LocalDonationRecord[]): Record<string, AssetDistribution> {
+  return donations.reduce<Record<string, AssetDistribution>>((totals, item) => {
+    const asset = item.asset ?? "KRW";
+    const current = totals[asset] ?? { amount: 0, krw: 0 };
+    totals[asset] = {
+      amount: current.amount + getDisplayAssetAmount(item),
+      krw: current.krw + item.amountKrw,
+    };
+    return totals;
+  }, {});
+}
+
+function formatAssetBreakdown(assetTotals: Record<string, AssetDistribution>): string {
+  const entries = Object.entries(assetTotals)
+    .filter(([asset, totals]) => asset !== "KRW" && totals.amount > 0)
+    .sort(([assetA], [assetB]) => assetA.localeCompare(assetB));
+  if (entries.length === 0) return "자산 수량 정보가 있는 기부 기록이 없습니다.";
+  return entries.map(([asset, totals]) => `${formatAssetAmount(totals.amount)} ${asset}`).join(" · ");
+}
+
+function renderAmountSubtext(anchor: Element | null, id: string, text: string): void {
+  if (!anchor) return;
+  let node = document.getElementById(id);
+  if (!node) {
+    node = document.createElement("span");
+    node.id = id;
+    node.className = "asset-subtotal";
+    anchor.insertAdjacentElement("afterend", node);
+  }
+  node.textContent = text;
 }
 
 function shortHash(value?: string): string {
@@ -242,6 +283,43 @@ function getImpactBuckets(period: typeof impactPeriod): Array<{ label: string; a
   });
 
   return buckets;
+}
+
+function clampPage(page: number, totalItems: number, pageSize: number): number {
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  return Math.min(Math.max(1, page), totalPages);
+}
+
+function renderStatusPagination(target: StatusPageTarget, currentPage: number, totalItems: number, pageSize: number): string {
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  if (totalPages <= 1) return "";
+  const buttons = Array.from({ length: totalPages }, (_, index) => {
+    const page = index + 1;
+    return `<button class="${page === currentPage ? "is-active" : ""}" type="button" data-status-page-target="${target}" data-page="${page}">${page}</button>`;
+  }).join("");
+  return `
+    <nav class="status-pagination" aria-label="${target} pagination">
+      <button type="button" data-status-page-target="${target}" data-page="${currentPage - 1}" ${currentPage <= 1 ? "disabled" : ""}>‹</button>
+      ${buttons}
+      <button type="button" data-status-page-target="${target}" data-page="${currentPage + 1}" ${currentPage >= totalPages ? "disabled" : ""}>›</button>
+    </nav>
+  `;
+}
+
+function setStatusPage(target: StatusPageTarget, page: number): void {
+  if (target === "timeline") {
+    timelinePage = clampPage(page, currentDonations.length, TIMELINE_PAGE_SIZE);
+    renderTimeline();
+    return;
+  }
+  if (target === "credentials") {
+    const credentialCount = currentDonations.filter((donation) => Boolean(donation.txHash || donation.evidenceHash)).length;
+    credentialPage = clampPage(page, credentialCount, CREDENTIAL_PAGE_SIZE);
+    renderCredentialList();
+    return;
+  }
+  tablePage = clampPage(page, currentDonations.length, TABLE_PAGE_SIZE);
+  renderTable();
 }
 
 async function lookupCredentialOnLedger(donation: LocalDonationRecord): Promise<CredentialLookupResult | null> {
@@ -563,6 +641,12 @@ function bindEvents(): void {
     const button = (event.target as HTMLElement | null)?.closest<HTMLButtonElement>(".payment-detail-btn");
     if (button?.dataset.donationId) void openPaymentDetail(button.dataset.donationId);
   });
+  document.addEventListener("click", (event) => {
+    const button = (event.target as HTMLElement | null)?.closest<HTMLButtonElement>("button[data-status-page-target]");
+    const target = button?.dataset.statusPageTarget as StatusPageTarget | undefined;
+    const page = Number(button?.dataset.page ?? 1);
+    if (target) setStatusPage(target, page);
+  });
   document.addEventListener("click", closeCredentialDetail);
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") document.querySelector(".credential-detail-modal, .payment-detail-modal")?.remove();
@@ -641,17 +725,10 @@ function renderSummary(profileName: string, tier: string, walletDbCount: number)
   const total = currentDonations.reduce((sum, item) => sum + item.amountKrw, 0);
   const onchainCount = currentDonations.filter((item) => Boolean(item.txHash)).length;
   const evidenceReadyCount = currentDonations.filter((item) => Boolean(item.txHash || item.evidenceHash)).length;
-  const assetTotals = currentDonations.reduce<Record<string, AssetDistribution>>((totals, item) => {
-    const asset = item.asset ?? "KRW";
-    const current = totals[asset] ?? { amount: 0, krw: 0 };
-    totals[asset] = {
-      amount: current.amount + getDisplayAssetAmount(item),
-      krw: current.krw + item.amountKrw,
-    };
-    return totals;
-  }, {});
+  const assetTotals = getAssetTotals(currentDonations);
 
   if (portfolioTotalAmountEl) portfolioTotalAmountEl.textContent = formatKrwPlain(total);
+  renderAmountSubtext(portfolioTotalAmountEl, "portfolio-total-assets", formatAssetBreakdown(assetTotals));
 
   if (summaryEl) {
     summaryEl.innerHTML = `
@@ -689,6 +766,11 @@ function renderImpactChart(): void {
   const growthPct = previous > 0 ? Math.round(((latest - previous) / previous) * 100) : latest > 0 ? 100 : 0;
 
   if (impactMainNumberEl) impactMainNumberEl.textContent = formatKrwPlain(periodTotal);
+  const periodDonations = currentDonations.filter((donation) => {
+    const donatedAt = new Date(donation.donatedAt);
+    return buckets.some((bucket) => donatedAt >= bucket.start && donatedAt < bucket.end);
+  });
+  renderAmountSubtext(impactMainNumberEl, "impact-asset-total", formatAssetBreakdown(getAssetTotals(periodDonations)));
   if (impactGrowthBadgeEl) {
     const sign = growthPct > 0 ? "+" : "";
     const arrow = growthPct >= 0 ? "↑" : "↓";
@@ -748,13 +830,17 @@ function renderTokenDistribution(assetTotals: Record<string, AssetDistribution>)
 
 function renderCredentialList(): void {
   if (!credentialListEl) return;
-  const credentials = currentDonations.filter((donation) => Boolean(donation.txHash || donation.evidenceHash)).slice(0, 3);
+  const allCredentials = currentDonations.filter((donation) => Boolean(donation.txHash || donation.evidenceHash));
+  credentialPage = clampPage(credentialPage, allCredentials.length, CREDENTIAL_PAGE_SIZE);
+  const start = (credentialPage - 1) * CREDENTIAL_PAGE_SIZE;
+  const credentials = allCredentials.slice(start, start + CREDENTIAL_PAGE_SIZE);
   if (credentials.length === 0) {
     credentialListEl.innerHTML = `<p class="muted-text">Evidence가 준비되면 Credential 상태가 여기에 표시됩니다.</p>`;
     return;
   }
 
-  credentialListEl.innerHTML = credentials
+  credentialListEl.innerHTML =
+    credentials
     .map((donation) => {
       const status = donation.credentialStatus ?? (donation.txHash ? "evidence_ready" : "pending");
       const statusClass =
@@ -770,7 +856,8 @@ function renderCredentialList(): void {
         </button>
       `;
     })
-    .join("");
+      .join("") +
+    renderStatusPagination("credentials", credentialPage, allCredentials.length, CREDENTIAL_PAGE_SIZE);
 }
 
 function renderCredentialDetailRow(label: string, value?: string | number | null, link?: string): string {
@@ -965,16 +1052,19 @@ function closeCredentialDetail(event: Event): void {
 
 function renderTimeline(): void {
   if (!timelineEl) return;
-  const items = currentDonations.slice(0, 4);
+  timelinePage = clampPage(timelinePage, currentDonations.length, TIMELINE_PAGE_SIZE);
+  const start = (timelinePage - 1) * TIMELINE_PAGE_SIZE;
+  const items = currentDonations.slice(start, start + TIMELINE_PAGE_SIZE);
   if (items.length === 0) {
     timelineEl.innerHTML = `<div class="empty-state">아직 기부 기록이 없습니다.</div>`;
     return;
   }
 
-  timelineEl.innerHTML = items
+  timelineEl.innerHTML =
+    items
     .map((donation) => {
       const amount = donation.asset
-        ? `${formatAssetAmount(donation.amountAsset ?? 0)} ${donation.asset}`
+        ? `${formatAssetAmount(getDisplayAssetAmount(donation))} ${donation.asset}`
         : formatKrwPlain(donation.amountKrw);
       const proof = donation.txHash ?? donation.evidenceHash;
       return `
@@ -988,12 +1078,16 @@ function renderTimeline(): void {
         </article>
       `;
     })
-    .join("");
+      .join("") +
+    renderStatusPagination("timeline", timelinePage, currentDonations.length, TIMELINE_PAGE_SIZE);
 }
 
 function renderTable(): void {
   if (!tableEl) return;
-  const rows = currentDonations
+  tablePage = clampPage(tablePage, currentDonations.length, TABLE_PAGE_SIZE);
+  const start = (tablePage - 1) * TABLE_PAGE_SIZE;
+  const pageItems = currentDonations.slice(start, start + TABLE_PAGE_SIZE);
+  const rows = pageItems
     .map((donation) => {
       const txCell = donation.txHash
         ? `
@@ -1044,6 +1138,7 @@ function renderTable(): void {
       </thead>
       <tbody>${rows}</tbody>
     </table>
+    ${renderStatusPagination("table", tablePage, currentDonations.length, TABLE_PAGE_SIZE)}
   `;
   tableEl.querySelectorAll<HTMLButtonElement>(".receipt-request-btn").forEach((button) => {
     button.addEventListener("click", () => {
@@ -1077,6 +1172,13 @@ async function init(): Promise<void> {
   }
 
   await syncCredentialStatuses();
+  timelinePage = clampPage(timelinePage, currentDonations.length, TIMELINE_PAGE_SIZE);
+  credentialPage = clampPage(
+    credentialPage,
+    currentDonations.filter((donation) => Boolean(donation.txHash || donation.evidenceHash)).length,
+    CREDENTIAL_PAGE_SIZE,
+  );
+  tablePage = clampPage(tablePage, currentDonations.length, TABLE_PAGE_SIZE);
   totalDonatedForTax = currentDonations.reduce((sum, item) => sum + item.amountKrw, 0);
   renderTaxFormState();
   resetTaxResult();

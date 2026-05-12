@@ -1361,27 +1361,42 @@ body::before {
 
 .auth-hero {
   max-width: 760px;
-  margin-bottom: 28px;
+  margin: 38px 0 28px;
 }
 
 .auth-hero h1 {
-  margin: 6px 0 14px;
-  color: var(--text-primary);
-  font-size: clamp(38px, 5vw, 62px);
-  font-weight: 900;
-  letter-spacing: -0.045em;
-  line-height: 1.08;
+  max-width: 820px;
+  margin: 0;
+  color: #111827;
+  font-size: 42px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.1;
   word-break: keep-all;
   overflow-wrap: anywhere;
 }
 
 .auth-hero p {
+  max-width: 760px;
+  margin: 10px 0 0;
   color: var(--text-secondary);
   font-size: 16px;
-  font-weight: 600;
-  line-height: 1.7;
+  font-weight: 500;
+  line-height: 1.65;
   word-break: keep-all;
   overflow-wrap: anywhere;
+}
+
+.auth-hero .summary-kicker {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 0 0 10px;
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .auth-layout {
@@ -3299,8 +3314,13 @@ input::placeholder {
 
 .policy-document h1 {
   margin: 0;
-  font-size: clamp(34px, 5vw, 58px);
-  line-height: 1.05;
+  color: #111827;
+  font-size: 42px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.1;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 .policy-document h2 {
@@ -5884,7 +5904,9 @@ input::placeholder {
   }
 
   .page-header h1,
-  .portfolio-header h1 {
+  .portfolio-header h1,
+  .auth-hero h1,
+  .policy-document h1 {
     font-size: clamp(30px, 10vw, 38px);
     line-height: 1.12;
     word-break: keep-all;

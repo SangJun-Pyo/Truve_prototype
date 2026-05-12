@@ -11,7 +11,11 @@ export function categoryToKorean(category: Foundation["category"]): string {
   return map[category];
 }
 
-function getCoverImage(category: Foundation["category"]): string {
+function getCardVisual(foundation: Foundation): string {
+  if (foundation.name.includes("굿네이버스")) {
+    return "./partners/goodneighbors-logo.jpg";
+  }
+
   const map: Record<Foundation["category"], string> = {
     climate: "climate",
     education: "education",
@@ -19,15 +23,15 @@ function getCoverImage(category: Foundation["category"]): string {
     animal: "animal",
     humanitarian: "humanitarian",
   };
-  return map[category];
+  return `./foundation-covers/${map[foundation.category]}.svg`;
 }
 
 export function renderFoundationCard(foundation: Foundation, alreadyInCart: boolean): string {
-  const coverImage = getCoverImage(foundation.category);
+  const visualSrc = getCardVisual(foundation);
 
   return `
     <article class="card explore-card" data-card-id="${foundation.id}">
-      <div class="card-visual" style="background-image: url('./foundation-covers/${coverImage}.svg')"></div>
+      <div class="card-visual" style="background-image: url('${visualSrc}')"></div>
       <div class="card-content">
         <div class="card-header">
           <span class="card-tag">${categoryToKorean(foundation.category)}</span>

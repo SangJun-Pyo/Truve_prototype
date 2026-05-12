@@ -50,7 +50,7 @@ function renderFoundationListItem(foundation: Foundation): string {
           <em>${foundation.trustMetrics.proofCoveragePct}%</em>
         </div>
         <div>
-          <p class="summary-kicker">${escapeHtml(categoryToKorean(foundation.category))} 쨌 ${escapeHtml(foundation.region)}</p>
+          <p class="summary-kicker">${escapeHtml(categoryToKorean(foundation.category))} · ${escapeHtml(foundation.region)}</p>
           <h2>${escapeHtml(foundation.name)}</h2>
           <p class="foundation-card-desc">${escapeHtml(foundation.description)}</p>
         </div>
@@ -58,12 +58,12 @@ function renderFoundationListItem(foundation: Foundation): string {
       </div>
       <div class="foundation-list-side">
         <div class="foundation-card-proof">
-          <span>?섎졊 ?먯궛</span>
-          <strong>RLUSD 쨌 USDC</strong>
-          <span>吏媛?/span>
+          <span>결제/지갑</span>
+          <strong>RLUSD · USDC</strong>
+          <span>주소</span>
           <strong>${escapeHtml(shortWallet(foundation.walletAddress))}</strong>
         </div>
-        <a class="primary-link-button" href="./foundation-detail.html?id=${encodeURIComponent(foundation.id)}">?곸꽭 蹂닿린</a>
+        <a class="primary-link-button" href="./foundation-detail.html?id=${encodeURIComponent(foundation.id)}">재단 소개 보기</a>
       </div>
     </article>
   `;
@@ -122,14 +122,14 @@ export function initFoundationInfoPage(): void {
 
     const pages = Array.from({ length: totalPages }, (_, index) => index + 1);
     paginationEl.innerHTML = `
-      <button type="button" data-page="${Math.max(1, currentPage - 1)}" ${currentPage === 1 ? "disabled" : ""} aria-label="?댁쟾 ?섏씠吏">??/button>
+      <button type="button" data-page="${Math.max(1, currentPage - 1)}" ${currentPage === 1 ? "disabled" : ""} aria-label="이전 페이지">‹</button>
       ${pages
         .map(
           (page) =>
-            `<button type="button" data-page="${page}" class="${page === currentPage ? "is-active" : ""}" aria-label="${page}?섏씠吏">${page}</button>`,
+            `<button type="button" data-page="${page}" class="${page === currentPage ? "is-active" : ""}" aria-label="${page}페이지">${page}</button>`,
         )
         .join("")}
-      <button type="button" data-page="${Math.min(totalPages, currentPage + 1)}" ${currentPage === totalPages ? "disabled" : ""} aria-label="?ㅼ쓬 ?섏씠吏">??/button>
+      <button type="button" data-page="${Math.min(totalPages, currentPage + 1)}" ${currentPage === totalPages ? "disabled" : ""} aria-label="다음 페이지">›</button>
     `;
   }
 
@@ -142,11 +142,11 @@ export function initFoundationInfoPage(): void {
     const pageItems = filtered.slice(start, start + PAGE_SIZE);
 
     if (countEl) {
-      countEl.textContent = `${filtered.length.toLocaleString("ko-KR")}怨?`;
+      countEl.textContent = `${filtered.length.toLocaleString("ko-KR")}개`;
     }
 
     if (filtered.length === 0) {
-      listEl.innerHTML = `<div class="empty-state">議곌굔??留욌뒗 ?щ떒???놁뒿?덈떎.</div>`;
+      listEl.innerHTML = `<div class="empty-state">조건에 맞는 재단이 없습니다.</div>`;
       renderPagination(0);
       return;
     }
@@ -182,3 +182,4 @@ export function initFoundationInfoPage(): void {
 
   void init();
 }
+

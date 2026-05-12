@@ -261,7 +261,7 @@ const campaignEvents: CampaignEvent[] = [
     tags: ["식수위생", "모금중", "굿네이버스"],
     reportLabel: "제안서",
     visual: "water",
-    imageSrc: "/partners/goodneighbors-logo.jpg",
+    imageSrc: "/campaigns/chad-water.webp",
     imageAlt: "식수 펌프에서 물을 사용하는 아이들",
   },
   {
@@ -279,7 +279,7 @@ const campaignEvents: CampaignEvent[] = [
     tags: ["교육", "모금중", "학교건축"],
     reportLabel: "제안서",
     visual: "school",
-    imageSrc: "/partners/goodneighbors-logo.jpg",
+    imageSrc: "/campaigns/ethiopia-school.webp",
     imageAlt: "굿네이버스 교육 지원을 받는 교실의 아이들",
   },
   {
@@ -297,7 +297,7 @@ const campaignEvents: CampaignEvent[] = [
     tags: ["교육", "결과보고", "학교건축"],
     reportLabel: "결과보고서",
     visual: "school",
-    imageSrc: "/partners/goodneighbors-logo.jpg",
+    imageSrc: "/campaigns/rwanda-school.webp",
     imageAlt: "르완다 학교 앞에 선 학생들",
   },
   {
@@ -315,7 +315,7 @@ const campaignEvents: CampaignEvent[] = [
     tags: ["식수위생", "결과보고", "굿네이버스"],
     reportLabel: "결과보고서",
     visual: "water",
-    imageSrc: "/partners/goodneighbors-logo.jpg",
+    imageSrc: "/campaigns/malawi-water.webp",
     imageAlt: "말라위 식수 펌프에서 물을 마시는 아이",
   },
 ];

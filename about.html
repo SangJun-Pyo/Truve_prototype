@@ -124,7 +124,7 @@
       <section class="about-dark-grid">
         <article class="about-glass-card problem">
           <p class="about-section-kicker">Problem</p>
-          <h3>Problem</h3>
+          <h3>Broken Rails</h3>
           <p>
             현재 가상자산 기부 시장은 수요가 없는 것이 아니라, 기부자·재단·세무 검증자 사이의 운영 레일이 없는 상태입니다.
             거래 해시, 기준가, 환전 내역, 재단 승인 상태를 수작업으로 검토해야 합니다.
@@ -132,28 +132,55 @@
         </article>
         <article class="about-glass-card solution">
           <p class="about-section-kicker">Solution</p>
-          <h3>Solution</h3>
+          <h3>Unified Infrastructure</h3>
           <p>
             Truve는 기부자에게 쉬운 기부 경험을, 재단에게 가상자산 기부 관리 인프라를, 세무법인과 기업에게 검증 가능한
-            증빙 레이어를 제공합니다.
+            증빙 레이어를 하나의 연결된 시스템으로 제공합니다.
           </p>
         </article>
-        <article class="about-glass-card">
-          <p class="about-section-kicker">XRPL</p>
-          <h3>Why XRPL</h3>
-          <ul>
-            <li>Payment: 기부자에서 재단으로 직접 송금</li>
-            <li>Memo: receipt_id, evidence_hash 기록</li>
-            <li>TrustLine: 재단 수령 자산 관리</li>
-            <li>XLS-70 Credential: 발급·보유·검증</li>
+        <article class="about-glass-card about-xrpl-card">
+          <div class="about-xrpl-intro">
+            <p class="about-section-kicker">XRPL Core</p>
+            <h3>Why XRPL</h3>
+            <p>빠르고 저렴한 수수료, 네이티브 TrustLine, 그리고 강력한 표준.</p>
+          </div>
+          <ul class="about-xrpl-list">
+            <li>
+              <span>01</span>
+              <div>
+                <strong>Payment</strong>
+                <p>기부자에서 재단으로 중간자 없이 직접 송금</p>
+              </div>
+            </li>
+            <li>
+              <span>02</span>
+              <div>
+                <strong>Memo Field</strong>
+                <p>트랜잭션에 receipt_id, evidence_hash 영구 기록</p>
+              </div>
+            </li>
+            <li>
+              <span>03</span>
+              <div>
+                <strong>TrustLine</strong>
+                <p>재단이 수령할 자산(RLUSD/USDC)을 안전하게 관리</p>
+              </div>
+            </li>
+            <li class="is-accent">
+              <span>04</span>
+              <div>
+                <strong>XLS-70 Credential</strong>
+                <p>표준 규격에 맞춘 기부 증명 발급·보유·검증</p>
+              </div>
+            </li>
           </ul>
         </article>
       </section>
 
-      <section class="about-dark-section">
-        <div>
-          <p class="about-section-kicker">XRPL Credential</p>
-          <h2>기부 기록을<br />검증 가능한 Donation Credential로 바꿉니다.</h2>
+      <section class="about-dark-section about-architecture-section">
+        <div class="about-architecture-copy">
+          <p class="about-architecture-pill">Architecture</p>
+          <h2>기부 기록을<br /><span>검증 가능한 Credential</span>로 바꿉니다.</h2>
           <p>
             기부금은 Truve를 거치지 않고 재단에 직접 전달됩니다. Truve는 해당 거래를 기반으로 Evidence Package를 생성하고,
             재단은 이를 XRPL XLS-70 Donation Credential로 발급합니다. 즉 Truve는 돈을 움직이는 플랫폼이 아니라, 기부가 끝까지
@@ -161,15 +188,15 @@
           </p>
         </div>
         <div class="about-role-grid-dark">
-          <div><strong>재단</strong><span>Credential 발급자</span></div>
-          <div><strong>기부자</strong><span>Credential 보유자</span></div>
-          <div><strong>세무법인·감사인</strong><span>Credential 검증자</span></div>
-          <div><strong>Truve</strong><span>기부·증빙·검증 인프라</span></div>
+          <div><i class="about-role-icon issuer"></i><strong>재단</strong><span>Credential 발급자</span></div>
+          <div><i class="about-role-icon holder"></i><strong>기부자</strong><span>Credential 보유자</span></div>
+          <div><i class="about-role-icon verifier"></i><strong>세무법인·감사인</strong><span>Credential 검증자</span></div>
+          <div><i class="about-role-icon truve"></i><strong>Truve</strong><span>기부·증빙·검증 인프라</span></div>
         </div>
       </section>
 
       <section class="about-dark-section about-business-section">
-        <div>
+        <div class="about-business-head">
           <p class="about-section-kicker">Business Model</p>
           <h2>기부금 수수료가 아니라 B2B 인프라 구독입니다.</h2>
         </div>

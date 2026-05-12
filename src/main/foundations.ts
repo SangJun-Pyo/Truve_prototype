@@ -123,7 +123,7 @@ document.querySelector<HTMLElement>(".donation-console .tax-card")?.remove();
 
 let foundations: Foundation[] = [];
 let bundles: DonationBundle[] = [];
-let activeTab: "foundation" | "bundle" | "event" = window.location.hash === "#campaigns" ? "event" : "foundation";
+let activeTab: "foundation" | "bundle" | "event" = window.location.hash === "#foundations" ? "foundation" : window.location.hash === "#curations" ? "bundle" : "event";
 let foundationPage = 1;
 let lastDonationRecord: LocalDonationRecord | null = null;
 let donationDestination = {

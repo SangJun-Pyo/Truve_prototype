@@ -339,6 +339,17 @@ function getImpactDisplayTotal(buckets: ReturnType<typeof getImpactBuckets>): nu
   return buckets.reduce((sum, bucket) => sum + bucket.amount, 0);
 }
 
+function getImpactGrowthPct(amounts: number): number | null;
+function getImpactGrowthPct(amounts: number[]): number | null;
+function getImpactGrowthPct(amounts: number | number[]): number | null {
+  const values = Array.isArray(amounts) ? amounts.filter((amount) => amount > 0) : [amounts].filter((amount) => amount > 0);
+  if (values.length < 2) return null;
+  const latest = values[values.length - 1] ?? 0;
+  const previous = values[values.length - 2] ?? 0;
+  if (previous <= 0) return null;
+  return Math.round(((latest - previous) / previous) * 100);
+}
+
 function clampPage(page: number, totalItems: number, pageSize: number): number {
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   return Math.min(Math.max(1, page), totalPages);
@@ -816,9 +827,7 @@ function renderImpactChart(): void {
   const amounts = buckets.map((bucket) => bucket.amount);
   const max = Math.max(...amounts, 1);
   const displayTotal = getImpactDisplayTotal(buckets);
-  const latest = amounts[amounts.length - 1] ?? 0;
-  const previous = amounts[amounts.length - 2] ?? 0;
-  const growthPct = previous > 0 ? Math.round(((latest - previous) / previous) * 100) : latest > 0 ? 100 : 0;
+  const growthPct = getImpactGrowthPct(amounts);
 
   if (impactMainNumberEl) impactMainNumberEl.textContent = formatKrwPlain(displayTotal);
   if (impactGrowthBadgeEl) {
@@ -826,6 +835,8 @@ function renderImpactChart(): void {
       impactGrowthBadgeEl.textContent = "TOTAL";
     } else if (impactPeriod === "ytd") {
       impactGrowthBadgeEl.textContent = "YTD";
+    } else if (growthPct === null) {
+      impactGrowthBadgeEl.textContent = "최근 기부";
     } else {
       const sign = growthPct > 0 ? "+" : "";
       const arrow = growthPct >= 0 ? "↑" : "↓";

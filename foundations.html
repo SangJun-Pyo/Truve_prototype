@@ -23,7 +23,7 @@
 
       <header class="page-header">
         <h1>기부하기</h1>
-        <p class="subtitle">국세청 공개 데이터 기반 재단과 추천 기부 포트폴리오를 고르고, 비율·자산·증빙까지 한 화면에서 준비하세요.</p>
+        <p class="subtitle">국세청 공개 데이터 기반 재단과 캠페인·큐레이션을 고르고, 비율·자산·증빙까지 한 화면에서 준비하세요.</p>
       </header>
 
       <div class="donation-workspace">
@@ -39,9 +39,9 @@
               </label>
             </div>
             <div class="tabs">
-              <button id="tab-foundation" class="tab-btn active" type="button">단일 재단</button>
+              <button id="tab-event" class="tab-btn active" type="button">캠페인</button>
+              <button id="tab-foundation" class="tab-btn" type="button">단일 재단</button>
               <button id="tab-bundle" class="tab-btn" type="button">큐레이션</button>
-              <button id="tab-event" class="tab-btn" type="button">캠페인</button>
             </div>
           </section>
 
@@ -61,10 +61,10 @@
             </label>
           </section>
 
-          <div id="foundations-grid" class="grid foundation-grid"></div>
-          <nav id="foundations-pagination" class="foundation-pagination" aria-label="Foundation list pagination"></nav>
+          <div id="events-grid" class="grid foundation-grid"></div>
+          <div id="foundations-grid" class="grid foundation-grid hidden"></div>
+          <nav id="foundations-pagination" class="foundation-pagination hidden" aria-label="Foundation list pagination"></nav>
           <div id="bundles-grid" class="grid foundation-grid hidden"></div>
-          <div id="events-grid" class="grid foundation-grid hidden"></div>
         </section>
 
         <aside class="donation-console" aria-label="기부 실행 패널">

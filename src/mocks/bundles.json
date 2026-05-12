@@ -1,7 +1,7 @@
 [
   {
     "id": "bdl-balanced-impact",
-    "name": "균형 기부 포트폴리오",
+    "name": "균형 기부",
     "summary": "교육, 구호, 지역 돌봄을 균형 있게 담은 추천 묶음입니다.",
     "theme": "balanced",
     "allocations": [
@@ -13,7 +13,7 @@
   },
   {
     "id": "bdl-health-recovery",
-    "name": "의료 회복 포트폴리오",
+    "name": "의료 회복",
     "summary": "의료 지원과 취약계층 회복을 중심으로 구성한 추천 묶음입니다.",
     "theme": "health",
     "allocations": [
@@ -24,7 +24,7 @@
   },
   {
     "id": "bdl-emergency-relief",
-    "name": "긴급 구호 포트폴리오",
+    "name": "긴급 구호",
     "summary": "재난, 긴급구호, 취약지역 지원에 초점을 둔 추천 묶음입니다.",
     "theme": "relief",
     "allocations": [
@@ -35,8 +35,8 @@
   },
   {
     "id": "bdl-local-care",
-    "name": "지역 돌봄 포트폴리오",
-    "summary": "지역 사회 돌봄과 아동·복지 분야를 묶은 추천 포트폴리오입니다.",
+    "name": "지역 돌봄",
+    "summary": "지역 사회 돌봄과 아동·복지 분야를 묶은 추천 큐레이션입니다.",
     "theme": "local-care",
     "allocations": [
       { "foundationId": "fnd-2aaedf20bf", "ratioPct": 25 },

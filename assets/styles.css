@@ -4896,15 +4896,24 @@ input::placeholder {
 .impact-headline {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  align-items: center;
-  margin-bottom: 16px;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 34px;
 }
 
 .impact-headline strong {
   color: #111827;
   font-size: 28px;
   font-weight: 500;
+}
+
+.impact-headline > div:first-child {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  min-width: 220px;
 }
 
 .portfolio-success-pill {
@@ -4941,7 +4950,7 @@ input::placeholder {
   display: flex;
   gap: 12px;
   width: min(420px, 100%);
-  margin-bottom: 34px;
+  margin-left: auto;
 }
 
 .impact-actions .portfolio-primary-btn,

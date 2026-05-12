@@ -1,6 +1,10 @@
 node_modules/
 # dist/ 는 Railway 배포용으로 커밋 (Railway Node 22.11에서 Vite 빌드 불가)
 dev-server.log
+dev-*.log
+*.err.log
+tax-api-smoke.log
+design-*.html
 .env
 .env.local
 .env.*.local

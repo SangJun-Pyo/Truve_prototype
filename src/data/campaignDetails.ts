@@ -310,7 +310,9 @@ export function getCampaignDetailById(id: string | null): CampaignDetail | null 
 }
 
 export function getCampaignDetailByPage(page: string): CampaignDetail | null {
-  const normalized = page.split("/").pop() ?? page;
+  const pathname = page.split("?")[0].split("#")[0];
+  const raw = pathname.split("/").filter(Boolean).pop() ?? pathname;
+  const normalized = raw.endsWith(".html") ? raw : `${raw}.html`;
   return campaignDetails.find((campaign) => campaign.page === normalized) ?? null;
 }
 

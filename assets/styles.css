@@ -2905,6 +2905,18 @@ input::placeholder {
   min-height: 100%;
 }
 
+#events-grid.foundation-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+#events-grid .campaign-card .card-title {
+  min-height: auto;
+  font-size: 18px;
+  line-height: 1.35;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
 .campaign-visual {
   display: flex;
   align-items: flex-end;
@@ -2949,6 +2961,7 @@ input::placeholder {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .campaign-region {
@@ -2961,11 +2974,15 @@ input::placeholder {
   overflow-wrap: anywhere;
 }
 
+.campaign-card-topline .campaign-region {
+  flex: 1 1 120px;
+}
+
 .campaign-summary {
   margin: 0;
   color: var(--text-secondary);
-  font-size: 13px;
-  line-height: 1.55;
+  font-size: 14px;
+  line-height: 1.65;
   word-break: keep-all;
   overflow-wrap: anywhere;
 }
@@ -3005,6 +3022,7 @@ input::placeholder {
 }
 
 .campaign-progress-head strong {
+  flex: 1 1 140px;
   min-width: 0;
   color: var(--text-secondary);
   font-size: 11px;
@@ -3043,6 +3061,7 @@ input::placeholder {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  flex: 1 1 220px;
   min-width: 0;
 }
 
@@ -6630,6 +6649,10 @@ input::placeholder {
 
   .campaign-detail-switcher,
   .campaign-detail-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  #events-grid.foundation-grid {
     grid-template-columns: 1fr;
   }
 
